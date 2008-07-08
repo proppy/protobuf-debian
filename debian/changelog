@@ -1,0 +1,6 @@
+protobuf (2.0.0~b-1) unstable; urgency=low
+
+  * Initial release (Closes: #489842)
+
+ -- Iustin Pop <iusty@k1024.org>  Tue, 08 Jul 2008 20:03:51 +0200
+

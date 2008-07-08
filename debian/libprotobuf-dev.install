@@ -1,0 +1,3 @@
+usr/lib/libprotobuf*.so
+usr/lib/libprotoc*.so
+usr/include
