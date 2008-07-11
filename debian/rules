@@ -44,6 +44,10 @@ build-indep-stamp: configure-stamp build-arch-stamp
 
 	# Add here commands to compile the indep part of the package.
 	#$(MAKE) doc
+
+	# build manpage
+	xmlto man debian/protoc.xml
+
 	cd python && \
 		for pyv in $(PYVERS); do \
 			python$$pyv setup.py build ; \
@@ -58,6 +62,9 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	[ ! -f Makefile ] || $(MAKE) distclean
+
+	# remove the built manpage
+	rm -f protoc.1
 
 	dh_clean
 
