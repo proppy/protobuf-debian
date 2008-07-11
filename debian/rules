@@ -66,6 +66,10 @@ clean:
 	# remove the built manpage
 	rm -f protoc.1
 
+	cd python && \
+		python setup.py clean --all ;\
+		rm -rf protobuf.egg-info
+
 	dh_clean
 
 install: install-indep install-arch
