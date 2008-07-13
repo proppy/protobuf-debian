@@ -1,0 +1,13 @@
+Although the original source contains Java bindings, they are not
+packaged as a Debian package.
+
+This is because the build system for them uses maven, which needs
+either all dependencies already on the system and the system configured
+to find them or alternatively (and the default mode) internet access for
+downloading them.
+
+The protobuf sources also seems to have some issues with the different
+JDKs available in Debian (I can't make it build with any due to either
+complaints about the javac or errors in the code).
+
+Any help towards packaging the Java bindings is very welcome.
