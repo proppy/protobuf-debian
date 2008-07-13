@@ -30,7 +30,7 @@ Description: protocol buffer C++ library
 Package: libprotobuf-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf0
 Description: protocol buffer C++ library (development headers)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data – similar to XML, but smaller, faster, and
