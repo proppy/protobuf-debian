@@ -101,8 +101,11 @@ install-indep:
 	# python bindings
 	cd python && \
 		for pyv in $(PYVERS); do \
-			python$$pyv setup.py install --root=$(CURDIR)/debian/protobuf-python ; \
-		done
+			python$$pyv setup.py install --no-compile \
+				--root=$(CURDIR)/debian/protobuf-python ; \
+		done ; \
+		find $(CURDIR)/debian/protobuf-python -name 'protobuf-*-nspkg.pth' -print0 | \
+			xargs -r0 rm -f
 
 	dh_install -i
 
