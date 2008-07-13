@@ -70,6 +70,7 @@ Package: protobuf-python
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}
 Provides: ${python:Provides}
+Recommends: protobuf-compiler
 Description: Python bindings for protocol buffers
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data – similar to XML, but smaller, faster, and
