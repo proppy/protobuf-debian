@@ -115,9 +115,6 @@ install-indep:
 
 	dh_install -i
 
-	# java bindings
-	dh_link -plibprotobuf-java usr/share/java/protobuf-java-2.0.0beta.jar usr/share/java/protobuf.jar
-
 
 install-arch:
 	dh_testdir
