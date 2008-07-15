@@ -2,7 +2,7 @@ Source: protobuf
 Section: devel
 Priority: extra
 Maintainer: Iustin Pop <iusty@k1024.org>
-Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto
+Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto, default-jdk, ant
 Build-Depends-Indep: python-support (>= 0.6)
 Standards-Version: 3.8.0
 Homepage: http://code.google.com/p/protobuf/
@@ -87,3 +87,23 @@ Description: Python bindings for protocol buffers
  need the protoc tool (in the protobuf-compiler package) to compile your
  definition to Python classes, and then the modules in this package will allow
  you to use those classes in your programs.
+
+Package: libprotobuf-java
+Architecture: all
+Depends:
+Recommends: protobuf-compiler
+Description: Java bindings for protocol buffers
+ Protocol buffers are a flexible, efficient, automated mechanism for
+ serializing structured data – similar to XML, but smaller, faster, and
+ simpler. You define how you want your data to be structured once, then you can
+ use special generated source code to easily write and read your structured
+ data to and from a variety of data streams and using a variety of languages.
+ You can even update your data structure without breaking deployed programs
+ that are compiled against the "old" format.
+ .
+ Google uses Protocol Buffers for almost all of its internal RPC protocols and
+ file formats.
+ .
+ This package contains the Java bindings for the protocol buffers. You will
+ need the protoc tool (in the protobuf-compiler package) to compile your
+ definition to Java classes, and then the modules in this package will allow

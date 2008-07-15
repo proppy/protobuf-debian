@@ -57,17 +57,20 @@ build-arch-stamp: configure-stamp
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp build-arch-stamp
 
-	# Add here commands to compile the indep part of the package.
-	#$(MAKE) doc
-
 	# build manpage
 	xmlto man debian/protoc.xml
 
+	#python bindings
 	cd python && \
 		for pyv in $(PYVERS); do \
 			python$$pyv setup.py build ; \
 			python$$pyv setup.py test ; \
 		done
+
+	#java bindings
+	#this code mimics mvn package. This should be changed when maven is supported by debian.
+	ant -f debian/build.xml jar
+
 	touch $@
 
 clean:
@@ -84,6 +87,9 @@ clean:
 	cd python && \
 		python setup.py clean --all ;\
 		rm -rf protobuf.egg-info
+
+	# remove java builds
+	ant -f debian/build.xml clean
 
 	dh_clean
 
@@ -108,6 +114,10 @@ install-indep:
 			xargs -r0 rm -f
 
 	dh_install -i
+
+	# java bindings
+	dh_link -plibprotobuf-java usr/share/java/protobuf-java-2.0.0beta.jar usr/share/java/protobuf.jar
+
 
 install-arch:
 	dh_testdir
