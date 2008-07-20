@@ -67,7 +67,7 @@ Description: compiler for protocol buffer definition files
  translating from .proto files (containing the definitions) to the language
  binding for the supported languages.
 
-Package: protobuf-python
+Package: python-protobuf
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}
 Provides: ${python:Provides}
