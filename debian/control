@@ -91,7 +91,7 @@ Description: Python bindings for protocol buffers
 
 Package: libprotobuf-java
 Architecture: all
-Depends:
+Depends: java6-runtime | java5-runtime | java-runtime
 Recommends: protobuf-compiler
 Description: Java bindings for protocol buffers
  Protocol buffers are a flexible, efficient, automated mechanism for
