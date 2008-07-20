@@ -2,7 +2,8 @@ Source: protobuf
 Section: devel
 Priority: extra
 Maintainer: Iustin Pop <iusty@k1024.org>
-Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto, default-jdk, ant
+Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto,
+    ant, openjdk-6-jdk | sun-java6-jdk | sun-java5-jdk
 Build-Depends-Indep: python-support (>= 0.6)
 Standards-Version: 3.8.0
 Homepage: http://code.google.com/p/protobuf/
