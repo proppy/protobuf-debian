@@ -16,8 +16,6 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
-PYVERS := $(shell pyversions -vr)
-
 # DEB_BUILD_OPTIONS handling - is this really needed since dpkg-dev 1.14.17?
 # note that the strip option is handled directly by dh_strip
 CFLAGS = -Wall -g
@@ -63,10 +61,8 @@ build-indep-stamp: configure-stamp build-arch-stamp
 
 	#python bindings
 	cd python && \
-		for pyv in $(PYVERS); do \
-			python$$pyv setup.py build ; \
-			python$$pyv setup.py test ; \
-		done
+		python setup.py build ; \
+		python setup.py test
 
 	#java bindings
 	#this code mimics mvn package. This should be changed when maven is supported by debian.
@@ -107,10 +103,8 @@ install-indep:
 
 	# python bindings
 	cd python && \
-		for pyv in $(PYVERS); do \
-			python$$pyv setup.py install --no-compile \
-				--root=$(CURDIR)/debian/python-protobuf ; \
-		done ; \
+		python setup.py install --no-compile \
+			--root=$(CURDIR)/debian/python-protobuf ; \
 		find $(CURDIR)/debian/python-protobuf -name 'protobuf-*-nspkg.pth' -print0 | \
 			xargs -r0 rm -f
 
