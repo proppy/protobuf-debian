@@ -30,8 +30,8 @@ Description: protocol buffer C++ library
  the protocol buffer compiler
 
 Package: libprotobuf-dev
-Section: libdevel
 Architecture: any
+Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf0
 Description: protocol buffer C++ library (development headers)
  Protocol buffers are a flexible, efficient, automated mechanism for
@@ -69,6 +69,7 @@ Description: compiler for protocol buffer definition files
 
 Package: python-protobuf
 Architecture: all
+Section: python
 Depends: ${python:Depends}, ${misc:Depends}
 Provides: ${python:Provides}
 Recommends: protobuf-compiler
