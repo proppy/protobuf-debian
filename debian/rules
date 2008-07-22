@@ -52,13 +52,14 @@ build-arch-stamp: configure-stamp
 
 	# Add here commands to compile the arch part of the package.
 	$(MAKE)
+
+	# build the protoc manpage
+	xmlto man debian/protoc.xml
+
 	touch $@
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp build-arch-stamp
-
-	# build manpage
-	xmlto man debian/protoc.xml
 
 	#python bindings
 	cd python && \
