@@ -100,10 +100,6 @@ install-indep:
 	dh_clean -k -i
 	dh_installdirs -i
 
-	# Add here commands to install the indep part of the package into
-	# debian/<package>-doc.
-	#INSTALLDOC#
-
 	# python bindings
 	cd python && \
 		python setup.py install --no-compile \
@@ -130,6 +126,7 @@ install-arch:
 	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
 	ln -s libprotobuf0 $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
 
+
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
 # in another 'make' thread.
@@ -139,16 +136,6 @@ binary-common:
 	dh_installchangelogs CHANGES.txt
 	dh_installdocs
 	dh_installexamples
-#	dh_installmenu
-#	dh_installdebconf
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
 	dh_installman
 	dh_link
 	dh_strip
