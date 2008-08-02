@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Iustin Pop <iusty@k1024.org>
 Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto,
-    ant, openjdk-6-jdk | sun-java6-jdk | sun-java5-jdk
+    ant, openjdk-6-jdk
 Build-Depends-Indep: python-support (>= 0.6)
 Standards-Version: 3.8.0
 Homepage: http://code.google.com/p/protobuf/
@@ -92,7 +92,6 @@ Description: Python bindings for protocol buffers
 
 Package: libprotobuf-java
 Architecture: all
-Depends: java6-runtime | java5-runtime | java-runtime
 Recommends: protobuf-compiler
 Description: Java bindings for protocol buffers
  Protocol buffers are a flexible, efficient, automated mechanism for
@@ -109,3 +108,4 @@ Description: Java bindings for protocol buffers
  This package contains the Java bindings for the protocol buffers. You will
  need the protoc tool (in the protobuf-compiler package) to compile your
  definition to Java classes, and then the modules in this package will allow
+ you to use those classes in your programs.

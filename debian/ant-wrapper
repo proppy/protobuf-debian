@@ -1,16 +1,9 @@
 #!/bin/sh
 
-BASE_NAME="/usr/lib/jvm/java"
+JAVA_HOME="/usr/lib/jvm/java-6-openjdk"
 
-for JAVA_IMPL in 6-openjdk 6-sun 1.5.0-sun; do
-    if [ -d "${BASE_NAME}-${JAVA_IMPL}" ]; then
-        JAVA_HOME="${BASE_NAME}-${JAVA_IMPL}"
-        break
-    fi
-done
-
-if [ -z "$JAVA_HOME" ]; then
-    echo "Can't find a supported JDK" 1>&2
+if [ ! -d "$JAVA_HOME" ]; then
+    echo "Can't find java-6-openjdk, please check the build-depends" 1>&2
     exit 1
 fi
 
