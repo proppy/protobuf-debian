@@ -1,3 +1,14 @@
+protobuf (2.0.0~b-2) unstable; urgency=low
+
+  * Mark the different license for some of the files, and fix the long
+    description (it contained UTF-8 chars), both thanks to Vincent Bernat
+    <bernat@debian.org>
+  * Cleanup debian/rules (removed commented out debhelper lines)
+  * Improve the java build process, as suggested by Matthew Johnson
+    <mjj29@debian.org>
+
+ -- Iustin Pop <iusty@k1024.org>  Sat, 02 Aug 2008 14:12:59 +0200
+
 protobuf (2.0.0~b-1) unstable; urgency=low
 
   * Initial release (Closes: #489842)
