@@ -9,7 +9,6 @@ Standards-Version: 3.8.0
 Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
-DM-Upload-Allowed: yes
 
 Package: libprotobuf0
 Architecture: any

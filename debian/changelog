@@ -1,3 +1,9 @@
+protobuf (2.0.0~b-3) unstable; urgency=low
+
+  * Remove DM-Upload-Allowed for sponsoring
+
+ -- Iustin Pop <iusty@k1024.org>  Sun, 03 Aug 2008 11:01:44 +0200
+
 protobuf (2.0.0~b-2) unstable; urgency=low
 
   * Mark the different license for some of the files, and fix the long
