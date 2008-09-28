@@ -97,7 +97,7 @@ if __name__ == '__main__':
     generate_proto("../src/google/protobuf/descriptor.proto")
 
   setup(name = 'protobuf',
-        version = '2.0.0beta',
+        version = '2.0.1',
         packages = [ 'google' ],
         namespace_packages = [ 'google' ],
         test_suite = 'setup.MakeTestSuite',
@@ -108,6 +108,7 @@ if __name__ == '__main__':
           'google.protobuf.internal.input_stream',
           'google.protobuf.internal.message_listener',
           'google.protobuf.internal.output_stream',
+          'google.protobuf.internal.type_checkers',
           'google.protobuf.internal.wire_format',
           'google.protobuf.descriptor',
           'google.protobuf.descriptor_pb2',
@@ -115,7 +116,7 @@ if __name__ == '__main__':
           'google.protobuf.reflection',
           'google.protobuf.service',
           'google.protobuf.service_reflection',
-          'google.protobuf.text_format'],
+          'google.protobuf.text_format' ],
         url = 'http://code.google.com/p/protobuf/',
         maintainer = maintainer_email,
         maintainer_email = 'protobuf@googlegroups.com',

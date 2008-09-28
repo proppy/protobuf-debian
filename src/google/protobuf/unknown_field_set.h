@@ -43,7 +43,7 @@ class UnknownField;                 // below
 // to be updated every time a new field is added to the message definition.
 //
 // To get the UnknownFieldSet attached to any message, call
-// Message::Reflection::GetUnknownFields().
+// Reflection::GetUnknownFields().
 //
 // This class is necessarily tied to the protocol buffer wire format, unlike
 // the Reflection interface which is independent of any serialization scheme.
@@ -76,6 +76,17 @@ class LIBPROTOBUF_EXPORT UnknownFieldSet {
   // Add a field by field number.  If the field number already exists, returns
   // the existing UnknownField.
   UnknownField* AddField(int number);
+
+  // Parsing helpers -------------------------------------------------
+  // These work exactly like the similarly-named methods of Message.
+
+  bool MergeFromCodedStream(io::CodedInputStream* input);
+  bool ParseFromCodedStream(io::CodedInputStream* input);
+  bool ParseFromZeroCopyStream(io::ZeroCopyInputStream* input);
+  bool ParseFromArray(const void* data, int size);
+  inline bool ParseFromString(const string& data) {
+    return ParseFromArray(data.data(), data.size());
+  }
 
  private:
   // "Active" fields are ones which have been added since the last time Clear()

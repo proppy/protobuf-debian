@@ -25,7 +25,7 @@
 #define GOOGLE_PROTOBUF_TEXT_FORMAT_H__
 
 #include <string>
-#include <google/protobuf/message.h>  // Message, Message::Reflection
+#include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
 namespace google {
@@ -45,8 +45,19 @@ class LIBPROTOBUF_EXPORT TextFormat {
   // Outputs a textual representation of the given message to the given
   // output stream.
   static bool Print(const Message& message, io::ZeroCopyOutputStream* output);
+
+  // Print the fields in an UnknownFieldSet.  They are printed by tag number
+  // only.  Embedded messages are heuristically identified by attempting to
+  // parse them.
+  static bool PrintUnknownFields(const UnknownFieldSet& unknown_fields,
+                                 io::ZeroCopyOutputStream* output);
+
   // Like Print(), but outputs directly to a string.
   static bool PrintToString(const Message& message, string* output);
+
+  // Like PrintUnknownFields(), but outputs directly to a string.
+  static bool PrintUnknownFieldsToString(const UnknownFieldSet& unknown_fields,
+                                         string* output);
 
   // Outputs a textual representation of the value of the field supplied on
   // the message supplied. For non-repeated fields, an index of -1 must
@@ -113,24 +124,26 @@ class LIBPROTOBUF_EXPORT TextFormat {
 
   // Internal Print method, used for writing to the OutputStream via
   // the TextGenerator class.
-  static void Print(const Descriptor* descriptor,
-                    const Message::Reflection* message,
+  static void Print(const Message& message,
                     TextGenerator& generator);
 
   // Print a single field.
-  static void PrintField(const FieldDescriptor* field,
-                         const Message::Reflection* message,
+  static void PrintField(const Message& message,
+                         const Reflection* reflection,
+                         const FieldDescriptor* field,
                          TextGenerator& generator);
 
   // Outputs a textual representation of the value of the field supplied on
   // the message supplied or the default value if not set.
-  static void PrintFieldValue(const Message::Reflection* reflection,
+  static void PrintFieldValue(const Message& message,
+                              const Reflection* reflection,
                               const FieldDescriptor* field,
                               int index,
                               TextGenerator& generator);
 
   // Print the fields in an UnknownFieldSet.  They are printed by tag number
-  // only.
+  // only.  Embedded messages are heuristically identified by attempting to
+  // parse them.
   static void PrintUnknownFields(const UnknownFieldSet& unknown_fields,
                                  TextGenerator& generator);
 
