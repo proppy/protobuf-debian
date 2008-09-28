@@ -1,3 +1,9 @@
+protobuf (2.0.1-1) unstable; urgency=low
+
+  * New Upstream Version (Closes: #499925)
+
+ -- Iustin Pop <iusty@k1024.org>  Sun, 28 Sep 2008 18:14:16 +0200
+
 protobuf (2.0.0~b-3) unstable; urgency=low
 
   * Remove DM-Upload-Allowed for sponsoring
