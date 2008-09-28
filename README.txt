@@ -2,16 +2,8 @@ Protocol Buffers - Google's data interchange format
 Copyright 2008 Google Inc.
 http://code.google.com/apis/protocolbuffers/
 
-BETA WARNING
-============
-
-This package is a beta.  This means that API may change in an
-incompatible way in the future.  It's unlikely that any big changes
-will be made, but we can make no promises.  Expect a non-beta release
-sometime in August 2008.
-
-C++ Installation
-================
+C++ Installation - Unix
+=======================
 
 To build and install the C++ Protocol Buffer runtime and the Protocol
 Buffer compiler (protoc) execute the following:
@@ -27,7 +19,19 @@ Proceed at your own risk.
 
 "make install" may require superuser privileges.
 
-For advanced usage information on configure and make, see INSTALL.
+For advanced usage information on configure and make, see INSTALL.txt.
+
+** Hint on insall location **
+
+  By default, the package will be installed to /usr/local.  However,
+  on many platforms, /usr/local/lib is not part of LD_LIBRARY_PATH.
+  You can add it, but it may be easier to just install to /usr
+  instead.  To do this, invoke configure as follows:
+
+    ./configure --prefix=/usr
+
+  If you already built the package with a different prefix, make sure
+  to run "make clean" before building again.
 
 ** Note for Solaris users **
 
@@ -38,6 +42,28 @@ For advanced usage information on configure and make, see INSTALL.
     ./configure LDFLAGS=-L$PWD/src/solaris
 
   See src/solaris/libstdc++.la for more info on this bug.
+
+C++ Installation - Windows
+==========================
+
+If you are using Micosoft Visual C++, see vsprojects/readme.txt.
+
+If you are using Cygwin or MinGW, follow the Unix installation
+instructions, above.
+
+Binary Compatibility Warning
+============================
+
+Due to the nature of C++, it is unlikely that any two versions of the
+Protocol Buffers C++ runtime libraries will have compatible ABIs.
+That is, if you linked an executable against an older version of
+libprotobuf, it is unlikely to work with a newer version without
+re-compiling.  This problem, when it occurs, will normally be detected
+immediately on startup of your app.  Still, you may want to consider
+using static linkage.  You can configure this package to install
+static libraries only using:
+
+  ./configure --disable-shared
 
 Java and Python Installation
 ============================

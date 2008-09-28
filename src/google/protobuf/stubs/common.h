@@ -65,24 +65,24 @@ namespace internal {
 
 // The current version, represented as a single integer to make comparison
 // easier:  major * 10^6 + minor * 10^3 + micro
-#define GOOGLE_PROTOBUF_VERSION 2000000
+#define GOOGLE_PROTOBUF_VERSION 2000001
 
 // The minimum library version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2000000
+#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2000001
 
 // The minimum header version which works with the current version of
 // the library.  This constant should only be used by protoc's C++ code
 // generator.
-static const int kMinHeaderVersionForLibrary = 2000000;
+static const int kMinHeaderVersionForLibrary = 2000001;
 
 // The minimum protoc version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2000000
+#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2000001
 
 // The minimum header version which works with the current version of
 // protoc.  This constant should only be used in VerifyVersion().
-static const int kMinHeaderVersionForProtoc = 2000000;
+static const int kMinHeaderVersionForProtoc = 2000001;
 
 // Verifies that the headers and libraries are compatible.  Use the macro
 // below to call this.
@@ -147,7 +147,7 @@ typedef uint64_t uint64;
 #endif
 
 static const int32 kint32max = 0x7FFFFFFF;
-static const int32 kint32min = -kint32min - 1;
+static const int32 kint32min = -kint32max - 1;
 static const int64 kint64max = GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF);
 static const int64 kint64min = -kint64max - 1;
 static const uint32 kuint32max = 0xFFFFFFFFu;

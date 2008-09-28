@@ -400,7 +400,15 @@ EXTRA_DIST = \
   solaris/libstdc++.la                                         \
   google/protobuf/testdata/golden_message                      \
   google/protobuf/testdata/text_format_unittest_data.txt       \
-  google/protobuf/testdata/text_format_unittest_extensions_data.txt
+  google/protobuf/testdata/text_format_unittest_extensions_data.txt  \
+  google/protobuf/package_info.h                               \
+  google/protobuf/io/package_info.h                            \
+  google/protobuf/compiler/package_info.h                      \
+  gtest/CHANGES                                                \
+  gtest/CONTRIBUTORS                                           \
+  gtest/COPYING                                                \
+  gtest/README                                                 \
+  gtest/gen_gtest_pred_impl.py
 
 protoc_outputs = \
   google/protobuf/unittest.pb.cc                               \
@@ -1743,7 +1751,7 @@ check-TESTS: $(TESTS)
 	else :; fi
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/google/protobuf $(distdir)/google/protobuf/compiler $(distdir)/google/protobuf/compiler/cpp $(distdir)/google/protobuf/compiler/java $(distdir)/google/protobuf/compiler/python $(distdir)/google/protobuf/io $(distdir)/google/protobuf/stubs $(distdir)/google/protobuf/testdata $(distdir)/solaris
+	$(mkdir_p) $(distdir)/google/protobuf $(distdir)/google/protobuf/compiler $(distdir)/google/protobuf/compiler/cpp $(distdir)/google/protobuf/compiler/java $(distdir)/google/protobuf/compiler/python $(distdir)/google/protobuf/io $(distdir)/google/protobuf/stubs $(distdir)/google/protobuf/testdata $(distdir)/gtest $(distdir)/solaris
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

@@ -159,7 +159,15 @@ EXTRA_DIST =                                                   \
   solaris/libstdc++.la                                         \
   google/protobuf/testdata/golden_message                      \
   google/protobuf/testdata/text_format_unittest_data.txt       \
-  google/protobuf/testdata/text_format_unittest_extensions_data.txt
+  google/protobuf/testdata/text_format_unittest_extensions_data.txt  \
+  google/protobuf/package_info.h                               \
+  google/protobuf/io/package_info.h                            \
+  google/protobuf/compiler/package_info.h                      \
+  gtest/CHANGES                                                \
+  gtest/CONTRIBUTORS                                           \
+  gtest/COPYING                                                \
+  gtest/README                                                 \
+  gtest/gen_gtest_pred_impl.py
 
 protoc_outputs =                                               \
   google/protobuf/unittest.pb.cc                               \
