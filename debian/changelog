@@ -1,3 +1,9 @@
+protobuf (2.0.1-2) unstable; urgency=low
+
+  * Fix a java packaging issue (symlink was created wrongly)
+
+ -- Iustin Pop <iusty@k1024.org>  Sat, 04 Oct 2008 17:05:01 +0200
+
 protobuf (2.0.1-1) unstable; urgency=low
 
   * New Upstream Version (Closes: #499925)
