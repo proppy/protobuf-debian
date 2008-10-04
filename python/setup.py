@@ -47,6 +47,11 @@ def generate_proto(source):
       sys.exit(-1)
 
 def MakeTestSuite():
+  # This is apparently needed on some systems to make sure that the tests
+  # work even if a previous version is already installed.
+  if 'google' in sys.modules:
+    del sys.modules['google']
+
   generate_proto("../src/google/protobuf/unittest.proto")
   generate_proto("../src/google/protobuf/unittest_import.proto")
   generate_proto("../src/google/protobuf/unittest_mset.proto")
@@ -97,7 +102,7 @@ if __name__ == '__main__':
     generate_proto("../src/google/protobuf/descriptor.proto")
 
   setup(name = 'protobuf',
-        version = '2.0.1',
+        version = '2.0.2',
         packages = [ 'google' ],
         namespace_packages = [ 'google' ],
         test_suite = 'setup.MakeTestSuite',
@@ -120,7 +125,7 @@ if __name__ == '__main__':
         url = 'http://code.google.com/p/protobuf/',
         maintainer = maintainer_email,
         maintainer_email = 'protobuf@googlegroups.com',
-        license = 'Apache License, Version 2.0',
+        license = 'New BSD License',
         description = 'Protocol Buffers',
         long_description =
           "Protocol Buffers are Google's data interchange format.",

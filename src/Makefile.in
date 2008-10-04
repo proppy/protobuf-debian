@@ -109,6 +109,7 @@ am_protobuf_test_OBJECTS = common_unittest.$(OBJEXT) \
 am__objects_1 = unittest.pb.$(OBJEXT) unittest_import.pb.$(OBJEXT) \
 	unittest_mset.pb.$(OBJEXT) unittest_optimize_for.pb.$(OBJEXT) \
 	unittest_embed_optimize_for.pb.$(OBJEXT) \
+	unittest_custom_options.pb.$(OBJEXT) \
 	cpp_test_bad_identifiers.pb.$(OBJEXT)
 nodist_protobuf_test_OBJECTS = $(am__objects_1)
 protobuf_test_OBJECTS = $(am_protobuf_test_OBJECTS) \
@@ -298,7 +299,7 @@ nobase_include_HEADERS = \
 
 lib_LTLIBRARIES = libprotobuf.la libprotoc.la
 libprotobuf_la_LIBADD = $(PTHREAD_LIBS)
-libprotobuf_la_LDFLAGS = -version-info 0:0:0
+libprotobuf_la_LDFLAGS = -version-info 2:0:0
 libprotobuf_la_SOURCES = \
   google/protobuf/stubs/common.cc                              \
   google/protobuf/stubs/hash.cc                                \
@@ -393,6 +394,7 @@ protoc_inputs = \
   google/protobuf/unittest_mset.proto                          \
   google/protobuf/unittest_optimize_for.proto                  \
   google/protobuf/unittest_embed_optimize_for.proto            \
+  google/protobuf/unittest_custom_options.proto                \
   google/protobuf/compiler/cpp/cpp_test_bad_identifiers.proto
 
 EXTRA_DIST = \
@@ -421,6 +423,8 @@ protoc_outputs = \
   google/protobuf/unittest_optimize_for.pb.h                   \
   google/protobuf/unittest_embed_optimize_for.pb.cc            \
   google/protobuf/unittest_embed_optimize_for.pb.h             \
+  google/protobuf/unittest_custom_options.pb.cc                \
+  google/protobuf/unittest_custom_options.pb.h                 \
   google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc  \
   google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.h
 
@@ -489,9 +493,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/Makefile
+	  $(AUTOMAKE) --gnu  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -666,6 +670,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tokenizer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tokenizer_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unittest.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unittest_custom_options.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unittest_embed_optimize_for.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unittest_import.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unittest_mset.pb.Po@am__quote@
@@ -1552,6 +1557,20 @@ unittest_embed_optimize_for.pb.obj: google/protobuf/unittest_embed_optimize_for.
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_embed_optimize_for.pb.cc' object='unittest_embed_optimize_for.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o unittest_embed_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_embed_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_embed_optimize_for.pb.cc'; fi`
+
+unittest_custom_options.pb.o: google/protobuf/unittest_custom_options.pb.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT unittest_custom_options.pb.o -MD -MP -MF "$(DEPDIR)/unittest_custom_options.pb.Tpo" -c -o unittest_custom_options.pb.o `test -f 'google/protobuf/unittest_custom_options.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_custom_options.pb.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/unittest_custom_options.pb.Tpo" "$(DEPDIR)/unittest_custom_options.pb.Po"; else rm -f "$(DEPDIR)/unittest_custom_options.pb.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_custom_options.pb.cc' object='unittest_custom_options.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o unittest_custom_options.pb.o `test -f 'google/protobuf/unittest_custom_options.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_custom_options.pb.cc
+
+unittest_custom_options.pb.obj: google/protobuf/unittest_custom_options.pb.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT unittest_custom_options.pb.obj -MD -MP -MF "$(DEPDIR)/unittest_custom_options.pb.Tpo" -c -o unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/unittest_custom_options.pb.Tpo" "$(DEPDIR)/unittest_custom_options.pb.Po"; else rm -f "$(DEPDIR)/unittest_custom_options.pb.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_custom_options.pb.cc' object='unittest_custom_options.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`
 
 cpp_test_bad_identifiers.pb.o: google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cpp_test_bad_identifiers.pb.o -MD -MP -MF "$(DEPDIR)/cpp_test_bad_identifiers.pb.Tpo" -c -o cpp_test_bad_identifiers.pb.o `test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc; \
