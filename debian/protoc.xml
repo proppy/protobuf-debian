@@ -90,12 +90,12 @@ man(1), man(7), http://www.tldp.org/HOWTO/Man-Page/
         License can be found in
         <filename>/usr/share/common-licenses/GPL</filename>.</para>
     </legalnotice>
-    <date>2008-07-10</date>
+    <date>2008-10-04</date>
   </refentryinfo>
   <refmeta>
     <refentrytitle>&dhpackage;</refentrytitle>
     <manvolnum>&dhsection;</manvolnum>
-    <refmiscinfo class="version">2.0.0beta</refmiscinfo>
+    <refmiscinfo class="version">2.0.2</refmiscinfo>
   </refmeta>
   <refnamediv>
     <refname>&dhpackage;</refname>
