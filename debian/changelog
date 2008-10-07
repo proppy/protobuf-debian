@@ -1,12 +1,12 @@
 protobuf (2.0.2-1) unstable; urgency=low
 
-  * New Upstream Version
+  * New Upstream Version (Closes: #501349)
 
- -- Iustin Pop <iusty@k1024.org>  Sat, 04 Oct 2008 17:59:38 +0200
+ -- Iustin Pop <iusty@k1024.org>  Tue, 07 Oct 2008 21:51:47 +0200
 
 protobuf (2.0.1-2) unstable; urgency=low
 
-  * Fix a java packaging issue (symlink was created wrongly)
+  * Fix the java .jar symlink (Closes: #501490)
 
  -- Iustin Pop <iusty@k1024.org>  Sat, 04 Oct 2008 17:05:01 +0200
 
@@ -38,4 +38,3 @@ protobuf (2.0.0~b-1) unstable; urgency=low
   * Initial release (Closes: #489842)
 
  -- Iustin Pop <iusty@k1024.org>  Tue, 08 Jul 2008 20:03:51 +0200
-
