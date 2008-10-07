@@ -124,7 +124,7 @@ install-arch:
 
 	# convert doc dir to symlink for the dev package
 	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
-	ln -s libprotobuf0 $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
+	ln -s libprotobuf2 $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
 
 
 # Must not depend on anything. This is to be called by
