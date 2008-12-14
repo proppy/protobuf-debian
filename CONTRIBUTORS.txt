@@ -49,3 +49,7 @@ Non-Google patch contributors:
       text format.
   Brian Atkinson <nairb774@gmail.com>
     * Added @Override annotation to generated Java code where appropriate.
+  Vincent Choinière <Choiniere.Vincent@hydro.qc.ca>
+    * Tru64 support.
+  Monty Taylor <monty.taylor@gmail.com>
+    * Solaris 10 + Sun Studio fix.

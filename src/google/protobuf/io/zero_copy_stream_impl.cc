@@ -42,6 +42,8 @@
 #endif
 #include <errno.h>
 #include <iostream>
+#include <algorithm>
+
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/stl_util-inl.h>
@@ -218,7 +220,8 @@ int CopyingInputStream::Skip(int count) {
   char junk[4096];
   int skipped = 0;
   while (skipped < count) {
-    int bytes = Read(junk, min(count, implicit_cast<int>(sizeof(junk))));
+    int bytes = Read(junk, min(count - skipped,
+                               implicit_cast<int>(sizeof(junk))));
     if (bytes <= 0) {
       // EOF or read error.
       return skipped;
@@ -757,7 +760,7 @@ LimitingInputStream::~LimitingInputStream() {
 }
 
 bool LimitingInputStream::Next(const void** data, int* size) {
-  if (limit_ < 0) return false;
+  if (limit_ <= 0) return false;
   if (!input_->Next(data, size)) return false;
 
   limit_ -= *size;

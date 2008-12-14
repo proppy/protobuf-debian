@@ -76,238 +76,353 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 void protobuf_BuildDesc_google_2fprotobuf_2fdescriptor_2eproto_AssignGlobalDescriptors(const ::google::protobuf::FileDescriptor* file) {
   FileDescriptorSet_descriptor_ = file->message_type(0);
   FileDescriptorSet::default_instance_ = new FileDescriptorSet();
+  static const int FileDescriptorSet_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorSet, file_),
+  };
   FileDescriptorSet_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       FileDescriptorSet_descriptor_,
       FileDescriptorSet::default_instance_,
-      FileDescriptorSet::_offsets_,
+      FileDescriptorSet_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorSet, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorSet, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(FileDescriptorSet));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FileDescriptorSet_descriptor_, FileDescriptorSet::default_instance_);
   FileDescriptorProto_descriptor_ = file->message_type(1);
   FileDescriptorProto::default_instance_ = new FileDescriptorProto();
+  static const int FileDescriptorProto_offsets_[8] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, package_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, dependency_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, message_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, enum_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, service_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, extension_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, options_),
+  };
   FileDescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       FileDescriptorProto_descriptor_,
       FileDescriptorProto::default_instance_,
-      FileDescriptorProto::_offsets_,
+      FileDescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(FileDescriptorProto));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FileDescriptorProto_descriptor_, FileDescriptorProto::default_instance_);
   DescriptorProto_descriptor_ = file->message_type(2);
   DescriptorProto::default_instance_ = new DescriptorProto();
+  static const int DescriptorProto_offsets_[7] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, field_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, extension_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, nested_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, enum_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, extension_range_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, options_),
+  };
   DescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       DescriptorProto_descriptor_,
       DescriptorProto::default_instance_,
-      DescriptorProto::_offsets_,
+      DescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(DescriptorProto));
   DescriptorProto_ExtensionRange_descriptor_ = DescriptorProto_descriptor_->nested_type(0);
   DescriptorProto_ExtensionRange::default_instance_ = new DescriptorProto_ExtensionRange();
+  static const int DescriptorProto_ExtensionRange_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto_ExtensionRange, start_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto_ExtensionRange, end_),
+  };
   DescriptorProto_ExtensionRange_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       DescriptorProto_ExtensionRange_descriptor_,
       DescriptorProto_ExtensionRange::default_instance_,
-      DescriptorProto_ExtensionRange::_offsets_,
+      DescriptorProto_ExtensionRange_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto_ExtensionRange, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto_ExtensionRange, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(DescriptorProto_ExtensionRange));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DescriptorProto_ExtensionRange_descriptor_, DescriptorProto_ExtensionRange::default_instance_);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DescriptorProto_descriptor_, DescriptorProto::default_instance_);
   FieldDescriptorProto_descriptor_ = file->message_type(3);
   FieldDescriptorProto::default_instance_ = new FieldDescriptorProto();
+  static const int FieldDescriptorProto_offsets_[8] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, number_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, label_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, type_name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, extendee_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, default_value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, options_),
+  };
   FieldDescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       FieldDescriptorProto_descriptor_,
       FieldDescriptorProto::default_instance_,
-      FieldDescriptorProto::_offsets_,
+      FieldDescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(FieldDescriptorProto));
   FieldDescriptorProto_Type_descriptor_ = FieldDescriptorProto_descriptor_->enum_type(0);
   FieldDescriptorProto_Label_descriptor_ = FieldDescriptorProto_descriptor_->enum_type(1);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FieldDescriptorProto_descriptor_, FieldDescriptorProto::default_instance_);
   EnumDescriptorProto_descriptor_ = file->message_type(4);
   EnumDescriptorProto::default_instance_ = new EnumDescriptorProto();
+  static const int EnumDescriptorProto_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, options_),
+  };
   EnumDescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       EnumDescriptorProto_descriptor_,
       EnumDescriptorProto::default_instance_,
-      EnumDescriptorProto::_offsets_,
+      EnumDescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(EnumDescriptorProto));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     EnumDescriptorProto_descriptor_, EnumDescriptorProto::default_instance_);
   EnumValueDescriptorProto_descriptor_ = file->message_type(5);
   EnumValueDescriptorProto::default_instance_ = new EnumValueDescriptorProto();
+  static const int EnumValueDescriptorProto_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, number_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, options_),
+  };
   EnumValueDescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       EnumValueDescriptorProto_descriptor_,
       EnumValueDescriptorProto::default_instance_,
-      EnumValueDescriptorProto::_offsets_,
+      EnumValueDescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(EnumValueDescriptorProto));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     EnumValueDescriptorProto_descriptor_, EnumValueDescriptorProto::default_instance_);
   ServiceDescriptorProto_descriptor_ = file->message_type(6);
   ServiceDescriptorProto::default_instance_ = new ServiceDescriptorProto();
+  static const int ServiceDescriptorProto_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, method_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, options_),
+  };
   ServiceDescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       ServiceDescriptorProto_descriptor_,
       ServiceDescriptorProto::default_instance_,
-      ServiceDescriptorProto::_offsets_,
+      ServiceDescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(ServiceDescriptorProto));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ServiceDescriptorProto_descriptor_, ServiceDescriptorProto::default_instance_);
   MethodDescriptorProto_descriptor_ = file->message_type(7);
   MethodDescriptorProto::default_instance_ = new MethodDescriptorProto();
+  static const int MethodDescriptorProto_offsets_[4] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, input_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, output_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, options_),
+  };
   MethodDescriptorProto_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       MethodDescriptorProto_descriptor_,
       MethodDescriptorProto::default_instance_,
-      MethodDescriptorProto::_offsets_,
+      MethodDescriptorProto_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(MethodDescriptorProto));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     MethodDescriptorProto_descriptor_, MethodDescriptorProto::default_instance_);
   FileOptions_descriptor_ = file->message_type(8);
   FileOptions::default_instance_ = new FileOptions();
+  static const int FileOptions_offsets_[5] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, java_package_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, java_outer_classname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, java_multiple_files_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, optimize_for_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, uninterpreted_option_),
+  };
   FileOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       FileOptions_descriptor_,
       FileOptions::default_instance_,
-      FileOptions::_offsets_,
+      FileOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(FileOptions));
   FileOptions_OptimizeMode_descriptor_ = FileOptions_descriptor_->enum_type(0);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FileOptions_descriptor_, FileOptions::default_instance_);
   MessageOptions_descriptor_ = file->message_type(9);
   MessageOptions::default_instance_ = new MessageOptions();
+  static const int MessageOptions_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, message_set_wire_format_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, uninterpreted_option_),
+  };
   MessageOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       MessageOptions_descriptor_,
       MessageOptions::default_instance_,
-      MessageOptions::_offsets_,
+      MessageOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(MessageOptions));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     MessageOptions_descriptor_, MessageOptions::default_instance_);
   FieldOptions_descriptor_ = file->message_type(10);
   FieldOptions::default_instance_ = new FieldOptions();
+  static const int FieldOptions_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, ctype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, experimental_map_key_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, uninterpreted_option_),
+  };
   FieldOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       FieldOptions_descriptor_,
       FieldOptions::default_instance_,
-      FieldOptions::_offsets_,
+      FieldOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(FieldOptions));
   FieldOptions_CType_descriptor_ = FieldOptions_descriptor_->enum_type(0);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FieldOptions_descriptor_, FieldOptions::default_instance_);
   EnumOptions_descriptor_ = file->message_type(11);
   EnumOptions::default_instance_ = new EnumOptions();
+  static const int EnumOptions_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumOptions, uninterpreted_option_),
+  };
   EnumOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       EnumOptions_descriptor_,
       EnumOptions::default_instance_,
-      EnumOptions::_offsets_,
+      EnumOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(EnumOptions));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     EnumOptions_descriptor_, EnumOptions::default_instance_);
   EnumValueOptions_descriptor_ = file->message_type(12);
   EnumValueOptions::default_instance_ = new EnumValueOptions();
+  static const int EnumValueOptions_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueOptions, uninterpreted_option_),
+  };
   EnumValueOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       EnumValueOptions_descriptor_,
       EnumValueOptions::default_instance_,
-      EnumValueOptions::_offsets_,
+      EnumValueOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(EnumValueOptions));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     EnumValueOptions_descriptor_, EnumValueOptions::default_instance_);
   ServiceOptions_descriptor_ = file->message_type(13);
   ServiceOptions::default_instance_ = new ServiceOptions();
+  static const int ServiceOptions_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceOptions, uninterpreted_option_),
+  };
   ServiceOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       ServiceOptions_descriptor_,
       ServiceOptions::default_instance_,
-      ServiceOptions::_offsets_,
+      ServiceOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(ServiceOptions));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ServiceOptions_descriptor_, ServiceOptions::default_instance_);
   MethodOptions_descriptor_ = file->message_type(14);
   MethodOptions::default_instance_ = new MethodOptions();
+  static const int MethodOptions_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodOptions, uninterpreted_option_),
+  };
   MethodOptions_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       MethodOptions_descriptor_,
       MethodOptions::default_instance_,
-      MethodOptions::_offsets_,
+      MethodOptions_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodOptions, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodOptions, _unknown_fields_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodOptions, _extensions_),
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(MethodOptions));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     MethodOptions_descriptor_, MethodOptions::default_instance_);
   UninterpretedOption_descriptor_ = file->message_type(15);
   UninterpretedOption::default_instance_ = new UninterpretedOption();
+  static const int UninterpretedOption_offsets_[6] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, identifier_value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, positive_int_value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, negative_int_value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, double_value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, string_value_),
+  };
   UninterpretedOption_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       UninterpretedOption_descriptor_,
       UninterpretedOption::default_instance_,
-      UninterpretedOption::_offsets_,
+      UninterpretedOption_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(UninterpretedOption));
   UninterpretedOption_NamePart_descriptor_ = UninterpretedOption_descriptor_->nested_type(0);
   UninterpretedOption_NamePart::default_instance_ = new UninterpretedOption_NamePart();
+  static const int UninterpretedOption_NamePart_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption_NamePart, name_part_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption_NamePart, is_extension_),
+  };
   UninterpretedOption_NamePart_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
       UninterpretedOption_NamePart_descriptor_,
       UninterpretedOption_NamePart::default_instance_,
-      UninterpretedOption_NamePart::_offsets_,
+      UninterpretedOption_NamePart_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption_NamePart, _has_bits_[0]),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption_NamePart, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool());
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      sizeof(UninterpretedOption_NamePart));
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     UninterpretedOption_NamePart_descriptor_, UninterpretedOption_NamePart::default_instance_);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -441,10 +556,6 @@ struct StaticDescriptorInitializer_google_2fprotobuf_2fdescriptor_2eproto {
 
 // ===================================================================
 
-
-const int FileDescriptorSet::_offsets_[1] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorSet, file_),
-};
 
 FileDescriptorSet::FileDescriptorSet()
   : ::google::protobuf::Message(),
@@ -590,6 +701,15 @@ void FileDescriptorSet::CopyFrom(const FileDescriptorSet& from) {
   MergeFrom(from);
 }
 
+void FileDescriptorSet::Swap(FileDescriptorSet* other) {
+  if (other != this) {
+    file_.Swap(&other->file_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool FileDescriptorSet::IsInitialized() const {
   
   for (int i = 0; i < file_size(); i++) {
@@ -616,17 +736,6 @@ const ::std::string FileDescriptorProto::_default_package_;
 
 
 
-
-const int FileDescriptorProto::_offsets_[8] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, package_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, dependency_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, message_type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, enum_type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, service_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, extension_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileDescriptorProto, options_),
-};
 
 FileDescriptorProto::FileDescriptorProto()
   : ::google::protobuf::Message(),
@@ -999,6 +1108,22 @@ void FileDescriptorProto::CopyFrom(const FileDescriptorProto& from) {
   MergeFrom(from);
 }
 
+void FileDescriptorProto::Swap(FileDescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(package_, other->package_);
+    dependency_.Swap(&other->dependency_);
+    message_type_.Swap(&other->message_type_);
+    enum_type_.Swap(&other->enum_type_);
+    service_.Swap(&other->service_);
+    extension_.Swap(&other->extension_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool FileDescriptorProto::IsInitialized() const {
   
   for (int i = 0; i < message_type_size(); i++) {
@@ -1031,11 +1156,6 @@ const ::google::protobuf::Reflection* FileDescriptorProto::GetReflection() const
 // ===================================================================
 
 
-
-const int DescriptorProto_ExtensionRange::_offsets_[2] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto_ExtensionRange, start_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto_ExtensionRange, end_),
-};
 
 DescriptorProto_ExtensionRange::DescriptorProto_ExtensionRange()
   : ::google::protobuf::Message(),
@@ -1221,6 +1341,16 @@ void DescriptorProto_ExtensionRange::CopyFrom(const DescriptorProto_ExtensionRan
   MergeFrom(from);
 }
 
+void DescriptorProto_ExtensionRange::Swap(DescriptorProto_ExtensionRange* other) {
+  if (other != this) {
+    std::swap(start_, other->start_);
+    std::swap(end_, other->end_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool DescriptorProto_ExtensionRange::IsInitialized() const {
   
   return true;
@@ -1243,16 +1373,6 @@ const ::std::string DescriptorProto::_default_name_;
 
 
 
-
-const int DescriptorProto::_offsets_[7] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, field_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, extension_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, nested_type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, enum_type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, extension_range_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DescriptorProto, options_),
-};
 
 DescriptorProto::DescriptorProto()
   : ::google::protobuf::Message(),
@@ -1590,6 +1710,21 @@ void DescriptorProto::CopyFrom(const DescriptorProto& from) {
   MergeFrom(from);
 }
 
+void DescriptorProto::Swap(DescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    field_.Swap(&other->field_);
+    extension_.Swap(&other->extension_);
+    nested_type_.Swap(&other->nested_type_);
+    enum_type_.Swap(&other->enum_type_);
+    extension_range_.Swap(&other->extension_range_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool DescriptorProto::IsInitialized() const {
   
   for (int i = 0; i < field_size(); i++) {
@@ -1702,17 +1837,6 @@ const ::std::string FieldDescriptorProto::_default_name_;
 const ::std::string FieldDescriptorProto::_default_type_name_;
 const ::std::string FieldDescriptorProto::_default_extendee_;
 const ::std::string FieldDescriptorProto::_default_default_value_;
-
-const int FieldDescriptorProto::_offsets_[8] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, number_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, label_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, type_name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, extendee_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, default_value_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldDescriptorProto, options_),
-};
 
 FieldDescriptorProto::FieldDescriptorProto()
   : ::google::protobuf::Message(),
@@ -2115,6 +2239,22 @@ void FieldDescriptorProto::CopyFrom(const FieldDescriptorProto& from) {
   MergeFrom(from);
 }
 
+void FieldDescriptorProto::Swap(FieldDescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(number_, other->number_);
+    std::swap(label_, other->label_);
+    std::swap(type_, other->type_);
+    std::swap(type_name_, other->type_name_);
+    std::swap(extendee_, other->extendee_);
+    std::swap(default_value_, other->default_value_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool FieldDescriptorProto::IsInitialized() const {
   
   if (has_options()) {
@@ -2136,12 +2276,6 @@ const ::google::protobuf::Reflection* FieldDescriptorProto::GetReflection() cons
 
 const ::std::string EnumDescriptorProto::_default_name_;
 
-
-const int EnumDescriptorProto::_offsets_[3] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, value_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumDescriptorProto, options_),
-};
 
 EnumDescriptorProto::EnumDescriptorProto()
   : ::google::protobuf::Message(),
@@ -2363,6 +2497,17 @@ void EnumDescriptorProto::CopyFrom(const EnumDescriptorProto& from) {
   MergeFrom(from);
 }
 
+void EnumDescriptorProto::Swap(EnumDescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    value_.Swap(&other->value_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool EnumDescriptorProto::IsInitialized() const {
   
   for (int i = 0; i < value_size(); i++) {
@@ -2387,12 +2532,6 @@ const ::google::protobuf::Reflection* EnumDescriptorProto::GetReflection() const
 
 const ::std::string EnumValueDescriptorProto::_default_name_;
 
-
-const int EnumValueDescriptorProto::_offsets_[3] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, number_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueDescriptorProto, options_),
-};
 
 EnumValueDescriptorProto::EnumValueDescriptorProto()
   : ::google::protobuf::Message(),
@@ -2617,6 +2756,17 @@ void EnumValueDescriptorProto::CopyFrom(const EnumValueDescriptorProto& from) {
   MergeFrom(from);
 }
 
+void EnumValueDescriptorProto::Swap(EnumValueDescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(number_, other->number_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool EnumValueDescriptorProto::IsInitialized() const {
   
   if (has_options()) {
@@ -2638,12 +2788,6 @@ const ::google::protobuf::Reflection* EnumValueDescriptorProto::GetReflection() 
 
 const ::std::string ServiceDescriptorProto::_default_name_;
 
-
-const int ServiceDescriptorProto::_offsets_[3] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, method_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceDescriptorProto, options_),
-};
 
 ServiceDescriptorProto::ServiceDescriptorProto()
   : ::google::protobuf::Message(),
@@ -2865,6 +3009,17 @@ void ServiceDescriptorProto::CopyFrom(const ServiceDescriptorProto& from) {
   MergeFrom(from);
 }
 
+void ServiceDescriptorProto::Swap(ServiceDescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    method_.Swap(&other->method_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool ServiceDescriptorProto::IsInitialized() const {
   
   for (int i = 0; i < method_size(); i++) {
@@ -2890,13 +3045,6 @@ const ::google::protobuf::Reflection* ServiceDescriptorProto::GetReflection() co
 const ::std::string MethodDescriptorProto::_default_name_;
 const ::std::string MethodDescriptorProto::_default_input_type_;
 const ::std::string MethodDescriptorProto::_default_output_type_;
-
-const int MethodDescriptorProto::_offsets_[4] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, input_type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, output_type_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodDescriptorProto, options_),
-};
 
 MethodDescriptorProto::MethodDescriptorProto()
   : ::google::protobuf::Message(),
@@ -3161,6 +3309,18 @@ void MethodDescriptorProto::CopyFrom(const MethodDescriptorProto& from) {
   MergeFrom(from);
 }
 
+void MethodDescriptorProto::Swap(MethodDescriptorProto* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(input_type_, other->input_type_);
+    std::swap(output_type_, other->output_type_);
+    std::swap(options_, other->options_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool MethodDescriptorProto::IsInitialized() const {
   
   if (has_options()) {
@@ -3204,14 +3364,6 @@ const ::std::string FileOptions::_default_java_package_;
 const ::std::string FileOptions::_default_java_outer_classname_;
 
 
-
-const int FileOptions::_offsets_[5] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, java_package_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, java_outer_classname_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, java_multiple_files_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, optimize_for_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FileOptions, uninterpreted_option_),
-};
 
 FileOptions::FileOptions()
   : ::google::protobuf::Message(),
@@ -3517,6 +3669,20 @@ void FileOptions::CopyFrom(const FileOptions& from) {
   MergeFrom(from);
 }
 
+void FileOptions::Swap(FileOptions* other) {
+  if (other != this) {
+    std::swap(java_package_, other->java_package_);
+    std::swap(java_outer_classname_, other->java_outer_classname_);
+    std::swap(java_multiple_files_, other->java_multiple_files_);
+    std::swap(optimize_for_, other->optimize_for_);
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool FileOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -3538,11 +3704,6 @@ const ::google::protobuf::Reflection* FileOptions::GetReflection() const {
 // ===================================================================
 
 
-
-const int MessageOptions::_offsets_[2] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, message_set_wire_format_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageOptions, uninterpreted_option_),
-};
 
 MessageOptions::MessageOptions()
   : ::google::protobuf::Message(),
@@ -3741,6 +3902,17 @@ void MessageOptions::CopyFrom(const MessageOptions& from) {
   MergeFrom(from);
 }
 
+void MessageOptions::Swap(MessageOptions* other) {
+  if (other != this) {
+    std::swap(message_set_wire_format_, other->message_set_wire_format_);
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool MessageOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -3783,12 +3955,6 @@ const FieldOptions_CType FieldOptions::CType_MAX;
 #endif  // _MSC_VER
 
 const ::std::string FieldOptions::_default_experimental_map_key_;
-
-const int FieldOptions::_offsets_[3] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, ctype_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, experimental_map_key_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FieldOptions, uninterpreted_option_),
-};
 
 FieldOptions::FieldOptions()
   : ::google::protobuf::Message(),
@@ -4028,6 +4194,18 @@ void FieldOptions::CopyFrom(const FieldOptions& from) {
   MergeFrom(from);
 }
 
+void FieldOptions::Swap(FieldOptions* other) {
+  if (other != this) {
+    std::swap(ctype_, other->ctype_);
+    std::swap(experimental_map_key_, other->experimental_map_key_);
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool FieldOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -4048,10 +4226,6 @@ const ::google::protobuf::Reflection* FieldOptions::GetReflection() const {
 
 // ===================================================================
 
-
-const int EnumOptions::_offsets_[1] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumOptions, uninterpreted_option_),
-};
 
 EnumOptions::EnumOptions()
   : ::google::protobuf::Message(),
@@ -4215,6 +4389,16 @@ void EnumOptions::CopyFrom(const EnumOptions& from) {
   MergeFrom(from);
 }
 
+void EnumOptions::Swap(EnumOptions* other) {
+  if (other != this) {
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool EnumOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -4235,10 +4419,6 @@ const ::google::protobuf::Reflection* EnumOptions::GetReflection() const {
 
 // ===================================================================
 
-
-const int EnumValueOptions::_offsets_[1] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnumValueOptions, uninterpreted_option_),
-};
 
 EnumValueOptions::EnumValueOptions()
   : ::google::protobuf::Message(),
@@ -4402,6 +4582,16 @@ void EnumValueOptions::CopyFrom(const EnumValueOptions& from) {
   MergeFrom(from);
 }
 
+void EnumValueOptions::Swap(EnumValueOptions* other) {
+  if (other != this) {
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool EnumValueOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -4422,10 +4612,6 @@ const ::google::protobuf::Reflection* EnumValueOptions::GetReflection() const {
 
 // ===================================================================
 
-
-const int ServiceOptions::_offsets_[1] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceOptions, uninterpreted_option_),
-};
 
 ServiceOptions::ServiceOptions()
   : ::google::protobuf::Message(),
@@ -4589,6 +4775,16 @@ void ServiceOptions::CopyFrom(const ServiceOptions& from) {
   MergeFrom(from);
 }
 
+void ServiceOptions::Swap(ServiceOptions* other) {
+  if (other != this) {
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool ServiceOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -4609,10 +4805,6 @@ const ::google::protobuf::Reflection* ServiceOptions::GetReflection() const {
 
 // ===================================================================
 
-
-const int MethodOptions::_offsets_[1] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MethodOptions, uninterpreted_option_),
-};
 
 MethodOptions::MethodOptions()
   : ::google::protobuf::Message(),
@@ -4776,6 +4968,16 @@ void MethodOptions::CopyFrom(const MethodOptions& from) {
   MergeFrom(from);
 }
 
+void MethodOptions::Swap(MethodOptions* other) {
+  if (other != this) {
+    uninterpreted_option_.Swap(&other->uninterpreted_option_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+    _extensions_.Swap(&other->_extensions_);
+  }
+}
+
 bool MethodOptions::IsInitialized() const {
   
   for (int i = 0; i < uninterpreted_option_size(); i++) {
@@ -4797,11 +4999,6 @@ const ::google::protobuf::Reflection* MethodOptions::GetReflection() const {
 // ===================================================================
 
 const ::std::string UninterpretedOption_NamePart::_default_name_part_;
-
-const int UninterpretedOption_NamePart::_offsets_[2] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption_NamePart, name_part_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption_NamePart, is_extension_),
-};
 
 UninterpretedOption_NamePart::UninterpretedOption_NamePart()
   : ::google::protobuf::Message(),
@@ -4989,6 +5186,16 @@ void UninterpretedOption_NamePart::CopyFrom(const UninterpretedOption_NamePart& 
   MergeFrom(from);
 }
 
+void UninterpretedOption_NamePart::Swap(UninterpretedOption_NamePart* other) {
+  if (other != this) {
+    std::swap(name_part_, other->name_part_);
+    std::swap(is_extension_, other->is_extension_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
 bool UninterpretedOption_NamePart::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
   
@@ -5012,15 +5219,6 @@ const ::std::string UninterpretedOption::_default_identifier_value_;
 
 
 const ::std::string UninterpretedOption::_default_string_value_;
-const int UninterpretedOption::_offsets_[6] = {
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, name_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, identifier_value_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, positive_int_value_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, negative_int_value_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, double_value_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UninterpretedOption, string_value_),
-};
-
 UninterpretedOption::UninterpretedOption()
   : ::google::protobuf::Message(),
     _cached_size_(0),
@@ -5335,6 +5533,20 @@ void UninterpretedOption::CopyFrom(const UninterpretedOption& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
+}
+
+void UninterpretedOption::Swap(UninterpretedOption* other) {
+  if (other != this) {
+    name_.Swap(&other->name_);
+    std::swap(identifier_value_, other->identifier_value_);
+    std::swap(positive_int_value_, other->positive_int_value_);
+    std::swap(negative_int_value_, other->negative_int_value_);
+    std::swap(double_value_, other->double_value_);
+    std::swap(string_value_, other->string_value_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
 }
 
 bool UninterpretedOption::IsInitialized() const {

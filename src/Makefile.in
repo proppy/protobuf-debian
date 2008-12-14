@@ -40,12 +40,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = protoc$(EXEEXT)
-noinst_PROGRAMS = protobuf-test$(EXEEXT)
+check_PROGRAMS = protobuf-test$(EXEEXT)
 subdir = src
 DIST_COMMON = $(nobase_dist_proto_DATA) $(nobase_include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ac_system_extensions.m4 \
+	$(top_srcdir)/m4/acx_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/stl_hash.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -65,10 +68,11 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libprotobuf_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libprotobuf_la_OBJECTS = common.lo hash.lo map-util.lo \
-	stl_util-inl.lo substitute.lo strutil.lo descriptor.lo \
-	descriptor.pb.lo descriptor_database.lo dynamic_message.lo \
-	extension_set.lo generated_message_reflection.lo message.lo \
-	reflection_ops.lo repeated_field.lo service.lo text_format.lo \
+	stl_util-inl.lo substitute.lo strutil.lo structurally_valid.lo \
+	descriptor.lo descriptor.pb.lo descriptor_database.lo \
+	dynamic_message.lo extension_set.lo \
+	generated_message_reflection.lo message.lo reflection_ops.lo \
+	repeated_field.lo service.lo text_format.lo \
 	unknown_field_set.lo wire_format.lo coded_stream.lo printer.lo \
 	tokenizer.lo zero_copy_stream.lo zero_copy_stream_impl.lo \
 	importer.lo parser.lo
@@ -84,9 +88,10 @@ am_libprotoc_la_OBJECTS = code_generator.lo command_line_interface.lo \
 	java_primitive_field.lo java_service.lo python_generator.lo
 libprotoc_la_OBJECTS = $(am_libprotoc_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS)
 am_protobuf_test_OBJECTS = common_unittest.$(OBJEXT) \
 	strutil_unittest.$(OBJEXT) \
+	structurally_valid_unittest.$(OBJEXT) \
 	descriptor_database_unittest.$(OBJEXT) \
 	descriptor_unittest.$(OBJEXT) \
 	dynamic_message_unittest.$(OBJEXT) \
@@ -172,28 +177,35 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-ECHO = @ECHO@
+DSYMUTIL = @DSYMUTIL@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-F77 = @F77@
-FFLAGS = @FFLAGS@
+FGREP = @FGREP@
 GCC_FALSE = @GCC_FALSE@
 GCC_TRUE = @GCC_TRUE@
+GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -206,6 +218,7 @@ PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -213,7 +226,12 @@ VERSION = @VERSION@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_F77 = @ac_ct_F77@
+ac_ct_DSYMUTIL = @ac_ct_DSYMUTIL@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+ac_ct_LIPO = @ac_ct_LIPO@
+ac_ct_NMEDIT = @ac_ct_NMEDIT@
+ac_ct_OTOOL = @ac_ct_OTOOL@
+ac_ct_OTOOL64 = @ac_ct_OTOOL64@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 acx_pthread_config = @acx_pthread_config@
@@ -245,6 +263,7 @@ install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -299,7 +318,7 @@ nobase_include_HEADERS = \
 
 lib_LTLIBRARIES = libprotobuf.la libprotoc.la
 libprotobuf_la_LIBADD = $(PTHREAD_LIBS)
-libprotobuf_la_LDFLAGS = -version-info 2:0:0
+libprotobuf_la_LDFLAGS = -version-info 3:0:0
 libprotobuf_la_SOURCES = \
   google/protobuf/stubs/common.cc                              \
   google/protobuf/stubs/hash.cc                                \
@@ -312,6 +331,7 @@ libprotobuf_la_SOURCES = \
   google/protobuf/stubs/substitute.h                           \
   google/protobuf/stubs/strutil.cc                             \
   google/protobuf/stubs/strutil.h                              \
+  google/protobuf/stubs/structurally_valid.cc                  \
   google/protobuf/descriptor.cc                                \
   google/protobuf/descriptor.pb.cc                             \
   google/protobuf/descriptor_database.cc                       \
@@ -334,7 +354,7 @@ libprotobuf_la_SOURCES = \
   google/protobuf/compiler/parser.cc
 
 libprotoc_la_LIBADD = $(PTHREAD_LIBS) libprotobuf.la
-libprotoc_la_LDFLAGS = -version-info 0:0:0
+libprotoc_la_LDFLAGS = -version-info 3:0:0
 libprotoc_la_SOURCES = \
   google/protobuf/compiler/code_generator.cc                   \
   google/protobuf/compiler/command_line_interface.cc           \
@@ -433,6 +453,7 @@ protobuf_test_LDADD = $(PTHREAD_LIBS) libprotobuf.la libprotoc.la
 protobuf_test_SOURCES = \
   google/protobuf/stubs/common_unittest.cc                     \
   google/protobuf/stubs/strutil_unittest.cc                    \
+  google/protobuf/stubs/structurally_valid_unittest.cc         \
   google/protobuf/descriptor_database_unittest.cc              \
   google/protobuf/descriptor_unittest.cc                       \
   google/protobuf/dynamic_message_unittest.cc                  \
@@ -573,8 +594,8 @@ clean-binPROGRAMS:
 	  rm -f $$p $$f ; \
 	done
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; for p in $$list; do \
 	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
@@ -661,6 +682,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repeated_field_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/service.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stl_util-inl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/structurally_valid.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/structurally_valid_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strutil.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strutil_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substitute.Plo@am__quote@
@@ -745,6 +768,13 @@ strutil.lo: google/protobuf/stubs/strutil.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/strutil.cc' object='strutil.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o strutil.lo `test -f 'google/protobuf/stubs/strutil.cc' || echo '$(srcdir)/'`google/protobuf/stubs/strutil.cc
+
+structurally_valid.lo: google/protobuf/stubs/structurally_valid.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT structurally_valid.lo -MD -MP -MF "$(DEPDIR)/structurally_valid.Tpo" -c -o structurally_valid.lo `test -f 'google/protobuf/stubs/structurally_valid.cc' || echo '$(srcdir)/'`google/protobuf/stubs/structurally_valid.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/structurally_valid.Tpo" "$(DEPDIR)/structurally_valid.Plo"; else rm -f "$(DEPDIR)/structurally_valid.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/structurally_valid.cc' object='structurally_valid.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o structurally_valid.lo `test -f 'google/protobuf/stubs/structurally_valid.cc' || echo '$(srcdir)/'`google/protobuf/stubs/structurally_valid.cc
 
 descriptor.lo: google/protobuf/descriptor.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT descriptor.lo -MD -MP -MF "$(DEPDIR)/descriptor.Tpo" -c -o descriptor.lo `test -f 'google/protobuf/descriptor.cc' || echo '$(srcdir)/'`google/protobuf/descriptor.cc; \
@@ -1095,6 +1125,20 @@ strutil_unittest.obj: google/protobuf/stubs/strutil_unittest.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/strutil_unittest.cc' object='strutil_unittest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o strutil_unittest.obj `if test -f 'google/protobuf/stubs/strutil_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/stubs/strutil_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/stubs/strutil_unittest.cc'; fi`
+
+structurally_valid_unittest.o: google/protobuf/stubs/structurally_valid_unittest.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT structurally_valid_unittest.o -MD -MP -MF "$(DEPDIR)/structurally_valid_unittest.Tpo" -c -o structurally_valid_unittest.o `test -f 'google/protobuf/stubs/structurally_valid_unittest.cc' || echo '$(srcdir)/'`google/protobuf/stubs/structurally_valid_unittest.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/structurally_valid_unittest.Tpo" "$(DEPDIR)/structurally_valid_unittest.Po"; else rm -f "$(DEPDIR)/structurally_valid_unittest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/structurally_valid_unittest.cc' object='structurally_valid_unittest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o structurally_valid_unittest.o `test -f 'google/protobuf/stubs/structurally_valid_unittest.cc' || echo '$(srcdir)/'`google/protobuf/stubs/structurally_valid_unittest.cc
+
+structurally_valid_unittest.obj: google/protobuf/stubs/structurally_valid_unittest.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT structurally_valid_unittest.obj -MD -MP -MF "$(DEPDIR)/structurally_valid_unittest.Tpo" -c -o structurally_valid_unittest.obj `if test -f 'google/protobuf/stubs/structurally_valid_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/stubs/structurally_valid_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/stubs/structurally_valid_unittest.cc'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/structurally_valid_unittest.Tpo" "$(DEPDIR)/structurally_valid_unittest.Po"; else rm -f "$(DEPDIR)/structurally_valid_unittest.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/structurally_valid_unittest.cc' object='structurally_valid_unittest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o structurally_valid_unittest.obj `if test -f 'google/protobuf/stubs/structurally_valid_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/stubs/structurally_valid_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/stubs/structurally_valid_unittest.cc'; fi`
 
 descriptor_database_unittest.o: google/protobuf/descriptor_database_unittest.cc
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT descriptor_database_unittest.o -MD -MP -MF "$(DEPDIR)/descriptor_database_unittest.Tpo" -c -o descriptor_database_unittest.o `test -f 'google/protobuf/descriptor_database_unittest.cc' || echo '$(srcdir)/'`google/protobuf/descriptor_database_unittest.cc; \
@@ -1798,6 +1842,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
@@ -1838,8 +1883,8 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-local clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libLTLIBRARIES clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1891,8 +1936,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-nobase_includeHEADERS
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-local clean-noinstPROGRAMS ctags distclean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libLTLIBRARIES clean-libtool clean-local ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \

@@ -53,7 +53,7 @@
 namespace google {
 namespace protobuf {
 
-namespace {
+namespace GOOGLE_ANONYMOUS_NAMESPACE{
 
 // Some helpers to make assembling descriptors faster.
 DescriptorProto* AddMessage(FileDescriptorProto* file, const string& name) {
@@ -1323,7 +1323,7 @@ class MiscTest : public testing::Test {
     DescriptorProto* message = AddMessage(&file_proto, "TestMessage");
     FieldDescriptorProto* field =
       AddField(message, "foo", 1, FieldDescriptorProto::LABEL_OPTIONAL,
-               static_cast<FieldDescriptorProto::Type>(type));
+               static_cast<FieldDescriptorProto::Type>(static_cast<int>(type)));
 
     if (type == FieldDescriptor::TYPE_MESSAGE ||
         type == FieldDescriptor::TYPE_GROUP) {
@@ -1554,6 +1554,9 @@ TEST(CustomOptions, OptionLocations) {
             field->options().GetExtension(protobuf_unittest::field_opt2));
   EXPECT_EQ(-789,
             enm->options().GetExtension(protobuf_unittest::enum_opt1));
+  EXPECT_EQ(123,
+            enm->value(1)->options().GetExtension(
+              protobuf_unittest::enum_value_opt1));
   EXPECT_EQ(GOOGLE_LONGLONG(-9876543210),
             service->options().GetExtension(protobuf_unittest::service_opt1));
   EXPECT_EQ(protobuf_unittest::METHODOPT1_VAL2,
@@ -1658,6 +1661,61 @@ TEST(CustomOptions, ComplexExtensionOptions) {
   EXPECT_EQ(24, options->GetExtension(protobuf_unittest::complexopt6).xyzzy());
 }
 
+TEST(CustomOptions, OptionsFromOtherFile) {
+  // Test that to use a custom option, we only need to import the file
+  // defining the option; we do not also have to import descriptor.proto.
+  DescriptorPool pool;
+
+  FileDescriptorProto file_proto;
+  FileDescriptorProto::descriptor()->file()->CopyTo(&file_proto);
+  ASSERT_TRUE(pool.BuildFile(file_proto) != NULL);
+
+  protobuf_unittest::TestMessageWithCustomOptions::descriptor()
+    ->file()->CopyTo(&file_proto);
+  ASSERT_TRUE(pool.BuildFile(file_proto) != NULL);
+
+  ASSERT_TRUE(TextFormat::ParseFromString(
+    "name: \"custom_options_import.proto\" "
+    "package: \"protobuf_unittest\" "
+    "dependency: \"google/protobuf/unittest_custom_options.proto\" "
+    "options { "
+    "  uninterpreted_option { "
+    "    name { "
+    "      name_part: \"file_opt1\" "
+    "      is_extension: true "
+    "    } "
+    "    positive_int_value: 1234 "
+    "  } "
+    // Test a non-extension option too.  (At one point this failed due to a
+    // bug.)
+    "  uninterpreted_option { "
+    "    name { "
+    "      name_part: \"java_package\" "
+    "      is_extension: false "
+    "    } "
+    "    string_value: \"foo\" "
+    "  } "
+    // Test that enum-typed options still work too.  (At one point this also
+    // failed due to a bug.)
+    "  uninterpreted_option { "
+    "    name { "
+    "      name_part: \"optimize_for\" "
+    "      is_extension: false "
+    "    } "
+    "    identifier_value: \"SPEED\" "
+    "  } "
+    "}"
+    ,
+    &file_proto));
+
+  const FileDescriptor* file = pool.BuildFile(file_proto);
+  ASSERT_TRUE(file != NULL);
+  EXPECT_EQ(1234, file->options().GetExtension(protobuf_unittest::file_opt1));
+  EXPECT_TRUE(file->options().has_java_package());
+  EXPECT_EQ("foo", file->options().java_package());
+  EXPECT_TRUE(file->options().has_optimize_for());
+  EXPECT_EQ(FileOptions::SPEED, file->options().optimize_for());
+}
 
 
 // ===================================================================
