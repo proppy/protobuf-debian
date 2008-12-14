@@ -102,12 +102,13 @@ if __name__ == '__main__':
     generate_proto("../src/google/protobuf/descriptor.proto")
 
   setup(name = 'protobuf',
-        version = '2.0.2',
+        version = '2.0.3',
         packages = [ 'google' ],
         namespace_packages = [ 'google' ],
         test_suite = 'setup.MakeTestSuite',
         # Must list modules explicitly so that we don't install tests.
         py_modules = [
+          'google.protobuf.internal.containers',
           'google.protobuf.internal.decoder',
           'google.protobuf.internal.encoder',
           'google.protobuf.internal.input_stream',

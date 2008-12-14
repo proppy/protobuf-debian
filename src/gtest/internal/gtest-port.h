@@ -223,10 +223,10 @@
 //   struct Foo {
 //     Foo() { ... }
 //   } GTEST_ATTRIBUTE_UNUSED;
-#if defined(GTEST_OS_WINDOWS) || (defined(GTEST_OS_LINUX) && defined(SWIG))
-#define GTEST_ATTRIBUTE_UNUSED
-#else
+#ifdef __GNUC__
 #define GTEST_ATTRIBUTE_UNUSED __attribute__ ((unused))
+#else
+#define GTEST_ATTRIBUTE_UNUSED
 #endif  // GTEST_OS_WINDOWS || (GTEST_OS_LINUX && SWIG)
 
 // A macro to disallow the evil copy constructor and operator= functions
@@ -438,11 +438,11 @@ inline size_t GetThreadCount() { return 1; }
 
 // Defines tr1::is_pointer (only needed for Symbian).
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) || (defined (__DECCXX) && defined(__osf__))
 
-// Symbian does not have tr1::type_traits, so we define our own is_pointer
-// These are needed as the Nokia Symbian Compiler cannot decide between
-// const T& and const T* in a function template.
+// Symbian and HP C++ on Tru64 do not have tr1::type_traits, so we define
+// our own is_pointer.  These are needed as these compilers cannot decide
+// between const T& and const T* in a function template.
 
 template <bool bool_value>
 struct bool_constant {

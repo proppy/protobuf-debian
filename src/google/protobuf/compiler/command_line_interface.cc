@@ -32,6 +32,7 @@
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -92,7 +93,8 @@ static const char* kPathSeparator = ":";
 #endif
 
 // Returns true if the text looks like a Windows-style absolute path, starting
-// with a drive letter.  Example:  "C:\foo".
+// with a drive letter.  Example:  "C:\foo".  TODO(kenton):  Share this with
+// copy in importer.cc?
 static bool IsWindowsAbsolutePath(const string& text) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   return text.size() >= 3 && text[1] == ':' &&
@@ -476,7 +478,7 @@ bool CommandLineInterface::ParseArguments(int argc, const char* const argv[]) {
   }
   if (imports_in_descriptor_set_ && descriptor_set_name_.empty()) {
     cerr << "--include_imports only makes sense when combined with "
-            "--descriptor_set_name." << endl;
+            "--descriptor_set_out." << endl;
   }
 
   return true;

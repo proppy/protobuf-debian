@@ -55,7 +55,7 @@ nobase_include_HEADERS =                                       \
 lib_LTLIBRARIES = libprotobuf.la libprotoc.la
 
 libprotobuf_la_LIBADD = $(PTHREAD_LIBS)
-libprotobuf_la_LDFLAGS = -version-info 2:0:0
+libprotobuf_la_LDFLAGS = -version-info 3:0:0
 libprotobuf_la_SOURCES =                                       \
   google/protobuf/stubs/common.cc                              \
   google/protobuf/stubs/hash.cc                                \
@@ -68,6 +68,7 @@ libprotobuf_la_SOURCES =                                       \
   google/protobuf/stubs/substitute.h                           \
   google/protobuf/stubs/strutil.cc                             \
   google/protobuf/stubs/strutil.h                              \
+  google/protobuf/stubs/structurally_valid.cc                  \
   google/protobuf/descriptor.cc                                \
   google/protobuf/descriptor.pb.cc                             \
   google/protobuf/descriptor_database.cc                       \
@@ -90,7 +91,7 @@ libprotobuf_la_SOURCES =                                       \
   google/protobuf/compiler/parser.cc
 
 libprotoc_la_LIBADD = $(PTHREAD_LIBS) libprotobuf.la
-libprotoc_la_LDFLAGS = -version-info 0:0:0
+libprotoc_la_LDFLAGS = -version-info 3:0:0
 libprotoc_la_SOURCES =                                         \
   google/protobuf/compiler/code_generator.cc                   \
   google/protobuf/compiler/command_line_interface.cc           \
@@ -204,11 +205,12 @@ unittest_proto_middleman: protoc$(EXEEXT) $(protoc_inputs)
 
 $(protoc_outputs): unittest_proto_middleman
 
-noinst_PROGRAMS = protobuf-test
+check_PROGRAMS = protobuf-test
 protobuf_test_LDADD = $(PTHREAD_LIBS) libprotobuf.la libprotoc.la
 protobuf_test_SOURCES =                                        \
   google/protobuf/stubs/common_unittest.cc                     \
   google/protobuf/stubs/strutil_unittest.cc                    \
+  google/protobuf/stubs/structurally_valid_unittest.cc         \
   google/protobuf/descriptor_database_unittest.cc              \
   google/protobuf/descriptor_unittest.cc                       \
   google/protobuf/dynamic_message_unittest.cc                  \

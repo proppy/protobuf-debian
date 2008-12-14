@@ -40,7 +40,11 @@
 #include <cstddef>
 #include <string>
 #include <string.h>
-#ifndef _MSC_VER
+#if defined(__osf__)
+// Tru64 lacks stdint.h, but has inttypes.h which defines a superset of
+// what stdint.h would define.
+#include <inttypes.h>
+#elif !defined(_MSC_VER)
 #include <stdint.h>
 #endif
 
@@ -79,24 +83,24 @@ namespace internal {
 
 // The current version, represented as a single integer to make comparison
 // easier:  major * 10^6 + minor * 10^3 + micro
-#define GOOGLE_PROTOBUF_VERSION 2000002
+#define GOOGLE_PROTOBUF_VERSION 2000003
 
 // The minimum library version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2000002
+#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2000003
 
 // The minimum header version which works with the current version of
 // the library.  This constant should only be used by protoc's C++ code
 // generator.
-static const int kMinHeaderVersionForLibrary = 2000002;
+static const int kMinHeaderVersionForLibrary = 2000003;
 
 // The minimum protoc version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2000002
+#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2000003
 
 // The minimum header version which works with the current version of
 // protoc.  This constant should only be used in VerifyVersion().
-static const int kMinHeaderVersionForProtoc = 2000002;
+static const int kMinHeaderVersionForProtoc = 2000003;
 
 // Verifies that the headers and libraries are compatible.  Use the macro
 // below to call this.
@@ -1066,6 +1070,12 @@ template<typename T> struct remove_pointer<T* const> { typedef T type; };
 template<typename T> struct remove_pointer<T* volatile> { typedef T type; };
 template<typename T> struct remove_pointer<T* const volatile> {
   typedef T type; };
+
+// ===================================================================
+
+// Checks if the buffer contains structurally-valid UTF-8.  Implemented in
+// structurally_valid.cc.
+bool IsStructurallyValidUTF8(const char* buf, int len);
 
 }  // namespace internal
 
