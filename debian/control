@@ -10,11 +10,11 @@ Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
 
-Package: libprotobuf2
+Package: libprotobuf3
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: libprotobuf0
-Replaces: libprotobuf0
+Conflicts: libprotobuf0, libprotobuf2
+Replaces: libprotobuf0, libprotobuf2
 Description: protocol buffer C++ library
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
@@ -33,7 +33,7 @@ Description: protocol buffer C++ library
 Package: libprotobuf-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf2
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf3
 Description: protocol buffer C++ library (development headers)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
@@ -51,7 +51,7 @@ Description: protocol buffer C++ library (development headers)
 
 Package: protobuf-compiler
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf2 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf3 (= ${binary:Version})
 Description: compiler for protocol buffer definition files
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
@@ -93,6 +93,7 @@ Description: Python bindings for protocol buffers
 
 Package: libprotobuf-java
 Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre | java5-runtime
 Recommends: protobuf-compiler
 Description: Java bindings for protocol buffers
  Protocol buffers are a flexible, efficient, automated mechanism for

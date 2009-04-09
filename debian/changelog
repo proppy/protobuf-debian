@@ -1,3 +1,12 @@
+protobuf (2.0.3-0.1) intrepid; urgency=low
+
+  * Non-maintainer upload
+  * New Upstream Version (Closes: #522470)
+  * Applied patch proposed in bug#503807 provided by
+    Torsten Werner <twerner@debian.org> (Closes: #503807)
+
+ -- Ehren Kret <ehren.kret@gmail.com>  Mon, 06 Apr 2009 22:01:30 -0700
+
 protobuf (2.0.2-1) unstable; urgency=low
 
   * New Upstream Version (Closes: #501349)

@@ -23,10 +23,11 @@
 
     <target name="compile" depends="generate">
         <mkdir dir="${classesdir}"/>
-        <javac srcdir="${generateddir}:${javasrcdir}/main/java" destdir="${classesdir}" />
+        <javac srcdir="${generateddir}:${javasrcdir}/main/java"
+               destdir="${classesdir}" source="1.5" target="1.5" />
     </target>
 
     <target name="jar" depends="compile">
-        <jar destfile="${targetdir}/protobuf-2.0.2.jar" basedir="${classesdir}" />
+        <jar destfile="${targetdir}/protobuf-2.0.3.jar" basedir="${classesdir}" />
     </target>
 </project>

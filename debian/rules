@@ -97,7 +97,7 @@ install: install-indep install-arch
 install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -i
+	dh_prep -i
 	dh_installdirs -i
 
 	# python bindings
@@ -113,7 +113,7 @@ install-indep:
 install-arch:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -s
+	dh_prep -s
 	dh_installdirs -s
 
 	# Add here commands to install the arch part of the package into
@@ -124,7 +124,7 @@ install-arch:
 
 	# convert doc dir to symlink for the dev package
 	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
-	ln -s libprotobuf2 $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
+	ln -s libprotobuf3 $(CURDIR)/debian/libprotobuf-dev/usr/share/doc/libprotobuf-dev
 
 
 # Must not depend on anything. This is to be called by
