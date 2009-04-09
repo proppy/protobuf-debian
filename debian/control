@@ -5,7 +5,7 @@ Maintainer: Iustin Pop <iusty@k1024.org>
 Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto,
     ant, openjdk-6-jdk
 Build-Depends-Indep: python-support (>= 0.6)
-Standards-Version: 3.8.0
+Standards-Version: 3.8.1
 Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
@@ -95,6 +95,7 @@ Package: libprotobuf-java
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre | java5-runtime
 Recommends: protobuf-compiler
+Section: java
 Description: Java bindings for protocol buffers
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and

@@ -52,7 +52,9 @@ build-arch-stamp: configure-stamp
 	$(MAKE)
 
 	# run the test suite
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	$(MAKE) check
+endif
 
 	# build the protoc manpage
 	xmlto man debian/protoc.xml

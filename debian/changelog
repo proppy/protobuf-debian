@@ -1,11 +1,19 @@
-protobuf (2.0.3-0.1) intrepid; urgency=low
+protobuf (2.0.3-1) unstable; urgency=low
 
-  * Non-maintainer upload
+  [ Ehren Kret ]
   * New Upstream Version (Closes: #522470)
   * Applied patch proposed in bug#503807 provided by
     Torsten Werner <twerner@debian.org> (Closes: #503807)
 
- -- Ehren Kret <ehren.kret@gmail.com>  Mon, 06 Apr 2009 22:01:30 -0700
+  [ Iustin Pop ]
+  * Policy version 3.8.1, added handling for the nocheck DEB_BUILD_OPTIONS flag
+  * Fix lintian warnings (copyright-with-old-dh-make-debian-copyright,
+    wrong-section-according-to-package-name)
+  * The new upstream version build successfully (and passes the
+    unittest) with gcc-snapshort, so marking bug#505411 as fixed
+    (Closes: #505411)
+
+ -- Iustin Pop <iusty@k1024.org>  Thu, 09 Apr 2009 15:01:36 +0200
 
 protobuf (2.0.2-1) unstable; urgency=low
 
