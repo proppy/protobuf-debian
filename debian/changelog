@@ -2,8 +2,11 @@ protobuf (2.0.3-2) unstable; urgency=low
 
   * Fix the binary-arch/binary-common interaction by only calling
     dh_pysupport when we are in arch-independent mode (DH_OPTIONS=-i)
+  * Remove the extraneous conflicts/replace with libprotobuf2/libprotobuf0
+    from libprotobuf3, as they share no files (and have different SONAMES)
+    (Closes: #523992)
 
- -- Iustin Pop <iusty@k1024.org>  Tue, 14 Apr 2009 07:57:26 +0200
+ -- Iustin Pop <iusty@k1024.org>  Tue, 14 Apr 2009 09:35:39 +0200
 
 protobuf (2.0.3-1) unstable; urgency=low
 

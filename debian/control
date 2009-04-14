@@ -13,8 +13,6 @@ Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
 Package: libprotobuf3
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Conflicts: libprotobuf0, libprotobuf2
-Replaces: libprotobuf0, libprotobuf2
 Description: protocol buffer C++ library
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
