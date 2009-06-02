@@ -43,7 +43,7 @@ configure-stamp:
 
 
 #Architecture
-build: build-arch build-indep
+build: build-arch
 
 build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp
@@ -62,7 +62,7 @@ endif
 	touch $@
 
 build-indep: build-indep-stamp
-build-indep-stamp: configure-stamp build-arch-stamp
+build-indep-stamp: build-arch-stamp
 
 	# python bindings
 	cd python && python setup.py build
@@ -98,7 +98,7 @@ clean:
 	dh_clean
 
 install: install-indep install-arch
-install-indep:
+install-indep: build-indep
 	dh_testdir
 	dh_testroot
 	dh_prep -i
@@ -114,7 +114,7 @@ install-indep:
 	dh_install -i
 
 
-install-arch:
+install-arch: build-arch
 	dh_testdir
 	dh_testroot
 	dh_prep -s
@@ -156,11 +156,11 @@ endif
 	dh_builddeb
 
 # Build architecture independant packages using the common target.
-binary-indep: build-indep install-indep
+binary-indep: install-indep
 	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
 
 # Build architecture dependant packages using the common target.
-binary-arch: build-arch install-arch
+binary-arch: install-arch
 	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
 
 binary: binary-arch binary-indep

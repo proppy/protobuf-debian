@@ -1,3 +1,16 @@
+protobuf (2.0.3-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Medium urgency for RC bugfix.
+  * Fix building of test suites on ia64: use __clone2() instead of clone(),
+    which doesn't exist there (closes: #530606).  Patch by Sune Vuorela.
+  * Only build the java and python bindings when building the arch:all
+    packages.  Move openjdk to Build-Depends-Indep.  This should allow
+    building on hppa, which doesn't have openjdk.  Based on a patch by Sune
+    Vuorela (but any bugs are mine).
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 02 Jun 2009 14:45:32 +0200
+
 protobuf (2.0.3-2) unstable; urgency=low
 
   * Fix the binary-arch/binary-common interaction by only calling
