@@ -1,3 +1,14 @@
+protobuf (2.0.3-2.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix FTBFS from -2.1: don't fail when we can't clean up the java build,
+    such as when openjdk isn't installed.
+  * Disable parallel builds, because libtool is made of fail (if binary-arch
+    and build-indep run concurrently, we relink a library while it's being
+    used; that doesn't work so well).
+
+ -- Julien Cristau <jcristau@debian.org>  Tue, 02 Jun 2009 16:19:00 +0200
+
 protobuf (2.0.3-2.1) unstable; urgency=medium
 
   * Non-maintainer upload.
