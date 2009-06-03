@@ -93,7 +93,7 @@ class LIBPROTOBUF_EXPORT WireFormat {
   // a parameter to this procedure.
   //
   // These return false iff the underlying stream returns a write error.
-  static bool SerializeWithCachedSizes(
+  static void SerializeWithCachedSizes(
       const Message& message,
       int size, io::CodedOutputStream* output);
 
@@ -119,14 +119,30 @@ class LIBPROTOBUF_EXPORT WireFormat {
                           UnknownFieldSet* unknown_fields);
 
   // Write the contents of an UnknownFieldSet to the output.
-  static bool SerializeUnknownFields(const UnknownFieldSet& unknown_fields,
+  static void SerializeUnknownFields(const UnknownFieldSet& unknown_fields,
                                      io::CodedOutputStream* output);
+  // Same as above, except writing directly to the provided buffer.
+  // Requires that the buffer have sufficient capacity for
+  // ComputeUnknownFieldsSize(unknown_fields).
+  //
+  // Returns a pointer past the last written byte.
+  static uint8* SerializeUnknownFieldsToArray(
+      const UnknownFieldSet& unknown_fields,
+      uint8* target);
 
   // Same thing except for messages that have the message_set_wire_format
   // option.
-  static bool SerializeUnknownMessageSetItems(
+  static void SerializeUnknownMessageSetItems(
       const UnknownFieldSet& unknown_fields,
       io::CodedOutputStream* output);
+  // Same as above, except writing directly to the provided buffer.
+  // Requires that the buffer have sufficient capacity for
+  // ComputeUnknownMessageSetItemsSize(unknown_fields).
+  //
+  // Returns a pointer past the last written byte.
+  static uint8* SerializeUnknownMessageSetItemsToArray(
+      const UnknownFieldSet& unknown_fields,
+      uint8* target);
 
   // Compute the size of the UnknownFieldSet on the wire.
   static int ComputeUnknownFieldsSize(const UnknownFieldSet& unknown_fields);
@@ -163,13 +179,20 @@ class LIBPROTOBUF_EXPORT WireFormat {
   static inline WireType WireTypeForFieldType(FieldDescriptor::Type type) {
     return kWireTypeForFieldType[type];
   }
+  // This is different from WireTypeForFieldType(field->type()) in the case of
+  // packed repeated fields.
+  static inline WireType WireTypeForField(const FieldDescriptor* field);
 
   // Number of bits in a tag which identify the wire type.
   static const int kTagTypeBits = 3;
   // Mask for those bits.
   static const uint32 kTagTypeMask = (1 << kTagTypeBits) - 1;
 
-  // Helper functions for encoding and decoding tags.  (Inlined below.)
+  // Helper functions for encoding and decoding tags.  (Inlined below and in
+  // _inl.h)
+  //
+  // This is different from MakeTag(field->number(), field->type()) in the case
+  // of packed repeated fields.
   static uint32 MakeTag(const FieldDescriptor* field);
   static uint32 MakeTag(int field_number, WireType type);
   static WireType GetTagWireType(uint32 tag);
@@ -203,7 +226,7 @@ class LIBPROTOBUF_EXPORT WireFormat {
       io::CodedInputStream* input);
 
   // Serialize a single field.
-  static bool SerializeFieldWithCachedSizes(
+  static void SerializeFieldWithCachedSizes(
       const FieldDescriptor* field,        // Cannot be NULL
       const Message& message,
       io::CodedOutputStream* output);
@@ -258,46 +281,141 @@ class LIBPROTOBUF_EXPORT WireFormat {
   template<typename MessageType>
   static inline bool ReadMessageNoVirtual(input, MessageType* value);
 
-  // Write a tag.  The Write*() functions automatically include the tag, so
-  // normally there's no need to call this.
-  static inline bool WriteTag(field_number, WireType type, output) INL;
+  // Write a tag.  The Write*() functions typically include the tag, so
+  // normally there's no need to call this unless using the Write*NoTag()
+  // variants.
+  static inline void WriteTag(field_number, WireType type, output) INL;
+
+  // Write fields, without tags.
+  static inline void WriteInt32NoTag   (int32 value, output) INL;
+  static inline void WriteInt64NoTag   (int64 value, output) INL;
+  static inline void WriteUInt32NoTag  (uint32 value, output) INL;
+  static inline void WriteUInt64NoTag  (uint64 value, output) INL;
+  static inline void WriteSInt32NoTag  (int32 value, output) INL;
+  static inline void WriteSInt64NoTag  (int64 value, output) INL;
+  static inline void WriteFixed32NoTag (uint32 value, output) INL;
+  static inline void WriteFixed64NoTag (uint64 value, output) INL;
+  static inline void WriteSFixed32NoTag(int32 value, output) INL;
+  static inline void WriteSFixed64NoTag(int64 value, output) INL;
+  static inline void WriteFloatNoTag   (float value, output) INL;
+  static inline void WriteDoubleNoTag  (double value, output) INL;
+  static inline void WriteBoolNoTag    (bool value, output) INL;
+  static inline void WriteEnumNoTag    (int value, output) INL;
 
   // Write fields, including tags.
-  static inline bool WriteInt32   (field_number,  int32 value, output) INL;
-  static inline bool WriteInt64   (field_number,  int64 value, output) INL;
-  static inline bool WriteUInt32  (field_number, uint32 value, output) INL;
-  static inline bool WriteUInt64  (field_number, uint64 value, output) INL;
-  static inline bool WriteSInt32  (field_number,  int32 value, output) INL;
-  static inline bool WriteSInt64  (field_number,  int64 value, output) INL;
-  static inline bool WriteFixed32 (field_number, uint32 value, output) INL;
-  static inline bool WriteFixed64 (field_number, uint64 value, output) INL;
-  static inline bool WriteSFixed32(field_number,  int32 value, output) INL;
-  static inline bool WriteSFixed64(field_number,  int64 value, output) INL;
-  static inline bool WriteFloat   (field_number,  float value, output) INL;
-  static inline bool WriteDouble  (field_number, double value, output) INL;
-  static inline bool WriteBool    (field_number,   bool value, output) INL;
-  static inline bool WriteEnum    (field_number,    int value, output) INL;
+  static inline void WriteInt32   (field_number,  int32 value, output) INL;
+  static inline void WriteInt64   (field_number,  int64 value, output) INL;
+  static inline void WriteUInt32  (field_number, uint32 value, output) INL;
+  static inline void WriteUInt64  (field_number, uint64 value, output) INL;
+  static inline void WriteSInt32  (field_number,  int32 value, output) INL;
+  static inline void WriteSInt64  (field_number,  int64 value, output) INL;
+  static inline void WriteFixed32 (field_number, uint32 value, output) INL;
+  static inline void WriteFixed64 (field_number, uint64 value, output) INL;
+  static inline void WriteSFixed32(field_number,  int32 value, output) INL;
+  static inline void WriteSFixed64(field_number,  int64 value, output) INL;
+  static inline void WriteFloat   (field_number,  float value, output) INL;
+  static inline void WriteDouble  (field_number, double value, output) INL;
+  static inline void WriteBool    (field_number,   bool value, output) INL;
+  static inline void WriteEnum    (field_number,    int value, output) INL;
 
-  static inline bool WriteString(field_number, const string& value, output) INL;
-  static inline bool WriteBytes (field_number, const string& value, output) INL;
+  static inline void WriteString(field_number, const string& value, output) INL;
+  static inline void WriteBytes (field_number, const string& value, output) INL;
 
-  static inline bool WriteGroup(field_number, const Message& value, output) INL;
-  static inline bool WriteMessage(
+  static inline void WriteGroup(field_number, const Message& value, output) INL;
+  static inline void WriteMessage(
     field_number, const Message& value, output) INL;
 
   // Like above, but de-virtualize the call to SerializeWithCachedSizes().  The
   // pointer must point at an instance of MessageType, *not* a subclass (or
   // the subclass must not override SerializeWithCachedSizes()).
   template<typename MessageType>
-  static inline bool WriteGroupNoVirtual(
+  static inline void WriteGroupNoVirtual(
     field_number, const MessageType& value, output) INL;
   template<typename MessageType>
-  static inline bool WriteMessageNoVirtual(
+  static inline void WriteMessageNoVirtual(
     field_number, const MessageType& value, output) INL;
+
+#undef output
+#define output uint8* target
+
+  // Like above, but use only *ToArray methods of CodedOutputStream.
+  static inline uint8* WriteTagToArray(field_number, WireType type, output) INL;
+
+  // Write fields, without tags.
+  static inline uint8* WriteInt32NoTagToArray   (int32 value, output) INL;
+  static inline uint8* WriteInt64NoTagToArray   (int64 value, output) INL;
+  static inline uint8* WriteUInt32NoTagToArray  (uint32 value, output) INL;
+  static inline uint8* WriteUInt64NoTagToArray  (uint64 value, output) INL;
+  static inline uint8* WriteSInt32NoTagToArray  (int32 value, output) INL;
+  static inline uint8* WriteSInt64NoTagToArray  (int64 value, output) INL;
+  static inline uint8* WriteFixed32NoTagToArray (uint32 value, output) INL;
+  static inline uint8* WriteFixed64NoTagToArray (uint64 value, output) INL;
+  static inline uint8* WriteSFixed32NoTagToArray(int32 value, output) INL;
+  static inline uint8* WriteSFixed64NoTagToArray(int64 value, output) INL;
+  static inline uint8* WriteFloatNoTagToArray   (float value, output) INL;
+  static inline uint8* WriteDoubleNoTagToArray  (double value, output) INL;
+  static inline uint8* WriteBoolNoTagToArray    (bool value, output) INL;
+  static inline uint8* WriteEnumNoTagToArray    (int value, output) INL;
+
+  // Write fields, including tags.
+  static inline uint8* WriteInt32ToArray(
+    field_number, int32 value, output) INL;
+  static inline uint8* WriteInt64ToArray(
+    field_number, int64 value, output) INL;
+  static inline uint8* WriteUInt32ToArray(
+    field_number, uint32 value, output) INL;
+  static inline uint8* WriteUInt64ToArray(
+    field_number, uint64 value, output) INL;
+  static inline uint8* WriteSInt32ToArray(
+    field_number, int32 value, output) INL;
+  static inline uint8* WriteSInt64ToArray(
+    field_number, int64 value, output) INL;
+  static inline uint8* WriteFixed32ToArray(
+    field_number, uint32 value, output) INL;
+  static inline uint8* WriteFixed64ToArray(
+    field_number, uint64 value, output) INL;
+  static inline uint8* WriteSFixed32ToArray(
+    field_number, int32 value, output) INL;
+  static inline uint8* WriteSFixed64ToArray(
+    field_number, int64 value, output) INL;
+  static inline uint8* WriteFloatToArray(
+    field_number, float value, output) INL;
+  static inline uint8* WriteDoubleToArray(
+    field_number, double value, output) INL;
+  static inline uint8* WriteBoolToArray(
+    field_number, bool value, output) INL;
+  static inline uint8* WriteEnumToArray(
+    field_number, int value, output) INL;
+
+  static inline uint8* WriteStringToArray(
+    field_number, const string& value, output) INL;
+  static inline uint8* WriteBytesToArray(
+    field_number, const string& value, output) INL;
+
+  static inline uint8* WriteGroupToArray(
+      field_number, const Message& value, output) INL;
+  static inline uint8* WriteMessageToArray(
+      field_number, const Message& value, output) INL;
+
+  // Like above, but de-virtualize the call to SerializeWithCachedSizes().  The
+  // pointer must point at an instance of MessageType, *not* a subclass (or
+  // the subclass must not override SerializeWithCachedSizes()).
+  template<typename MessageType>
+  static inline uint8* WriteGroupNoVirtualToArray(
+    field_number, const MessageType& value, output) INL;
+  template<typename MessageType>
+  static inline uint8* WriteMessageNoVirtualToArray(
+    field_number, const MessageType& value, output) INL;
+
+#undef output
+#undef input
+#undef INL
 
   // Compute the byte size of a tag.  For groups, this includes both the start
   // and end tags.
   static inline int TagSize(field_number, FieldDescriptor::Type type);
+
+#undef field_number
 
   // Compute the byte size of a field.  The XxSize() functions do NOT include
   // the tag, so you must also call TagSize().  (This is because, for repeated
@@ -334,11 +452,6 @@ class LIBPROTOBUF_EXPORT WireFormat {
   template<typename MessageType>
   static inline int MessageSizeNoVirtual(const MessageType& value);
 
-#undef input
-#undef output
-#undef field_number
-#undef INL
-
  private:
   static const WireType kWireTypeForFieldType[];
 
@@ -347,12 +460,20 @@ class LIBPROTOBUF_EXPORT WireFormat {
   static bool ParseAndMergeMessageSetItem(
       io::CodedInputStream* input,
       Message* message);
-  static bool SerializeMessageSetItemWithCachedSizes(
+  static void SerializeMessageSetItemWithCachedSizes(
       const FieldDescriptor* field,
       const Message& message,
       io::CodedOutputStream* output);
   static int MessageSetItemByteSize(
       const FieldDescriptor* field,
+      const Message& message);
+
+  // Computes the byte size of a field, excluding tags. For packed fields, it
+  // only includes the size of the raw data, and not the size of the total
+  // length, but for other length-delimited types, the size of the length is
+  // included.
+  static int FieldDataOnlyByteSize(
+      const FieldDescriptor* field,        // Cannot be NULL
       const Message& message);
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(WireFormat);
@@ -367,10 +488,6 @@ class LIBPROTOBUF_EXPORT WireFormat {
 #define GOOGLE_PROTOBUF_WIRE_FORMAT_MAKE_TAG(FIELD_NUMBER, TYPE)             \
   static_cast<uint32>(                                              \
     ((FIELD_NUMBER) << ::google::protobuf::internal::WireFormat::kTagTypeBits) | (TYPE))
-
-inline uint32 WireFormat::MakeTag(const FieldDescriptor* field) {
-  return MakeTag(field->number(), WireTypeForFieldType(field->type()));
-}
 
 inline uint32 WireFormat::MakeTag(int field_number, WireType type) {
   return GOOGLE_PROTOBUF_WIRE_FORMAT_MAKE_TAG(field_number, type);

@@ -61,6 +61,8 @@ void SetStringVariables(const FieldDescriptor* descriptor,
   (*variables)["declared_type"] = DeclaredTypeMethodName(descriptor->type());
   (*variables)["tag_size"] = SimpleItoa(
     WireFormat::TagSize(descriptor->number(), descriptor->type()));
+  (*variables)["pointer_type"] =
+      descriptor->type() == FieldDescriptor::TYPE_BYTES ? "void" : "char";
 }
 
 }  // namespace
@@ -111,13 +113,8 @@ GenerateAccessorDeclarations(io::Printer* printer) const {
   printer->Print(variables_,
     "inline const ::std::string& $name$() const;\n"
     "inline void set_$name$(const ::std::string& value);\n"
-    "inline void set_$name$(const char* value);\n");
-  if (descriptor_->type() == FieldDescriptor::TYPE_BYTES) {
-    printer->Print(variables_,
-      "inline void set_$name$(const void* value, size_t size);\n");
-  }
-
-  printer->Print(variables_,
+    "inline void set_$name$(const char* value);\n"
+    "inline void set_$name$(const $pointer_type$* value, size_t size);\n"
     "inline ::std::string* mutable_$name$();\n");
 
   if (descriptor_->options().has_ctype()) {
@@ -146,20 +143,15 @@ GenerateInlineAccessorDefinitions(io::Printer* printer) const {
     "    $name$_ = new ::std::string;\n"
     "  }\n"
     "  $name$_->assign(value);\n"
-    "}\n");
-
-  if (descriptor_->type() == FieldDescriptor::TYPE_BYTES) {
-    printer->Print(variables_,
-      "inline void $classname$::set_$name$(const void* value, size_t size) {\n"
-      "  _set_bit($index$);\n"
-      "  if ($name$_ == &_default_$name$_) {\n"
-      "    $name$_ = new ::std::string;\n"
-      "  }\n"
-      "  $name$_->assign(reinterpret_cast<const char*>(value), size);\n"
-      "}\n");
-  }
-
-  printer->Print(variables_,
+    "}\n"
+    "inline "
+    "void $classname$::set_$name$(const $pointer_type$* value, size_t size) {\n"
+    "  _set_bit($index$);\n"
+    "  if ($name$_ == &_default_$name$_) {\n"
+    "    $name$_ = new ::std::string;\n"
+    "  }\n"
+    "  $name$_->assign(reinterpret_cast<const char*>(value), size);\n"
+    "}\n"
     "inline ::std::string* $classname$::mutable_$name$() {\n"
     "  _set_bit($index$);\n"
     "  if ($name$_ == &_default_$name$_) {\n");
@@ -180,10 +172,10 @@ void StringFieldGenerator::
 GenerateNonInlineAccessorDefinitions(io::Printer* printer) const {
   if (descriptor_->default_value_string().empty()) {
     printer->Print(variables_,
-      "const ::std::string $classname$::_default_$name$_;");
+      "const ::std::string $classname$::_default_$name$_;\n");
   } else {
     printer->Print(variables_,
-      "const ::std::string $classname$::_default_$name$_($default$);");
+      "const ::std::string $classname$::_default_$name$_($default$);\n");
   }
 }
 
@@ -213,9 +205,9 @@ GenerateSwappingCode(io::Printer* printer) const {
 }
 
 void StringFieldGenerator::
-GenerateInitializer(io::Printer* printer) const {
+GenerateConstructorCode(io::Printer* printer) const {
   printer->Print(variables_,
-    ",\n$name$_(const_cast< ::std::string*>(&_default_$name$_))");
+    "$name$_ = const_cast< ::std::string*>(&_default_$name$_);\n");
 }
 
 void StringFieldGenerator::
@@ -236,8 +228,15 @@ GenerateMergeFromCodedStream(io::Printer* printer) const {
 void StringFieldGenerator::
 GenerateSerializeWithCachedSizes(io::Printer* printer) const {
   printer->Print(variables_,
-    "DO_(::google::protobuf::internal::WireFormat::Write$declared_type$("
-      "$number$, this->$name$(), output));\n");
+    "::google::protobuf::internal::WireFormat::Write$declared_type$("
+      "$number$, this->$name$(), output);\n");
+}
+
+void StringFieldGenerator::
+GenerateSerializeWithCachedSizesToArray(io::Printer* printer) const {
+  printer->Print(variables_,
+    "target = ::google::protobuf::internal::WireFormat::Write$declared_type$ToArray("
+      "$number$, this->$name$(), target);\n");
 }
 
 void StringFieldGenerator::
@@ -281,15 +280,12 @@ GenerateAccessorDeclarations(io::Printer* printer) const {
     "inline ::std::string* mutable_$name$(int index);\n"
     "inline void set_$name$(int index, const ::std::string& value);\n"
     "inline void set_$name$(int index, const char* value);\n"
+    "inline "
+    "void set_$name$(int index, const $pointer_type$* value, size_t size);\n"
     "inline ::std::string* add_$name$();\n"
     "inline void add_$name$(const ::std::string& value);\n"
-    "inline void add_$name$(const char* value);\n");
-
-  if (descriptor_->type() == FieldDescriptor::TYPE_BYTES) {
-    printer->Print(variables_,
-      "inline void set_$name$(int index, const void* value, size_t size);\n"
-      "inline void add_$name$(const void* value, size_t size);\n");
-  }
+    "inline void add_$name$(const char* value);\n"
+    "inline void add_$name$(const $pointer_type$* value, size_t size);\n");
 
   if (descriptor_->options().has_ctype()) {
     printer->Outdent();
@@ -321,6 +317,12 @@ GenerateInlineAccessorDefinitions(io::Printer* printer) const {
     "inline void $classname$::set_$name$(int index, const char* value) {\n"
     "  $name$_.Mutable(index)->assign(value);\n"
     "}\n"
+    "inline void "
+    "$classname$::set_$name$"
+    "(int index, const $pointer_type$* value, size_t size) {\n"
+    "  $name$_.Mutable(index)->assign(\n"
+    "    reinterpret_cast<const char*>(value), size);\n"
+    "}\n"
     "inline ::std::string* $classname$::add_$name$() {\n"
     "  return $name$_.Add();\n"
     "}\n"
@@ -329,19 +331,11 @@ GenerateInlineAccessorDefinitions(io::Printer* printer) const {
     "}\n"
     "inline void $classname$::add_$name$(const char* value) {\n"
     "  $name$_.Add()->assign(value);\n"
+    "}\n"
+    "inline void "
+    "$classname$::add_$name$(const $pointer_type$* value, size_t size) {\n"
+    "  $name$_.Add()->assign(reinterpret_cast<const char*>(value), size);\n"
     "}\n");
-
-  if (descriptor_->type() == FieldDescriptor::TYPE_BYTES) {
-    printer->Print(variables_,
-      "inline void "
-      "$classname$::set_$name$(int index, const void* value, size_t size) {\n"
-      "  $name$_.Mutable(index)->assign(\n"
-      "    reinterpret_cast<const char*>(value), size);\n"
-      "}\n"
-      "inline void $classname$::add_$name$(const void* value, size_t size) {\n"
-      "  $name$_.Add()->assign(reinterpret_cast<const char*>(value), size);\n"
-      "}\n");
-  }
 }
 
 void RepeatedStringFieldGenerator::
@@ -360,7 +354,7 @@ GenerateSwappingCode(io::Printer* printer) const {
 }
 
 void RepeatedStringFieldGenerator::
-GenerateInitializer(io::Printer* printer) const {
+GenerateConstructorCode(io::Printer* printer) const {
   // Not needed for repeated fields.
 }
 
@@ -374,15 +368,27 @@ GenerateMergeFromCodedStream(io::Printer* printer) const {
 void RepeatedStringFieldGenerator::
 GenerateSerializeWithCachedSizes(io::Printer* printer) const {
   printer->Print(variables_,
-    "DO_(::google::protobuf::internal::WireFormat::Write$declared_type$("
-      "$number$, this->$name$(i), output));\n");
+    "for (int i = 0; i < this->$name$_size(); i++) {\n"
+    "  ::google::protobuf::internal::WireFormat::Write$declared_type$("
+        "$number$, this->$name$(i), output);\n"
+    "}\n");
+}
+
+void RepeatedStringFieldGenerator::
+GenerateSerializeWithCachedSizesToArray(io::Printer* printer) const {
+  printer->Print(variables_,
+    "for (int i = 0; i < this->$name$_size(); i++) {\n"
+    "  target = ::google::protobuf::internal::WireFormat::"
+        "Write$declared_type$ToArray("
+        "$number$, this->$name$(i), target);\n"
+    "}\n");
 }
 
 void RepeatedStringFieldGenerator::
 GenerateByteSize(io::Printer* printer) const {
   printer->Print(variables_,
-    "total_size += $tag_size$ * $name$_size();\n"
-    "for (int i = 0; i < $name$_size(); i++) {\n"
+    "total_size += $tag_size$ * this->$name$_size();\n"
+    "for (int i = 0; i < this->$name$_size(); i++) {\n"
     "  total_size += ::google::protobuf::internal::WireFormat::$declared_type$Size(\n"
     "    this->$name$(i));\n"
     "}\n");

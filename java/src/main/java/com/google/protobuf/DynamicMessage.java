@@ -211,6 +211,10 @@ public final class DynamicMessage extends AbstractMessage {
     return new Builder(type);
   }
 
+  public Builder toBuilder() {
+    return newBuilderForType().mergeFrom(this);
+  }
+
   /** Verifies that the field is a field of this message. */
   private void verifyContainingType(FieldDescriptor field) {
     if (field.getContainingType() != type) {
@@ -251,11 +255,13 @@ public final class DynamicMessage extends AbstractMessage {
       }
 
       fields.mergeFrom(other);
+      mergeUnknownFields(other.getUnknownFields());
       return this;
     }
 
     public DynamicMessage build() {
-      if (!isInitialized()) {
+      // If fields == null, we'll throw an appropriate exception later.
+      if (fields != null && !isInitialized()) {
         throw new UninitializedMessageException(
           new DynamicMessage(type, fields, unknownFields));
       }
@@ -277,6 +283,10 @@ public final class DynamicMessage extends AbstractMessage {
     }
 
     public DynamicMessage buildPartial() {
+      if (fields == null) {
+        throw new IllegalStateException(
+            "build() has already been called on this Builder.");
+      }
       fields.makeImmutable();
       DynamicMessage result =
         new DynamicMessage(type, fields, unknownFields);

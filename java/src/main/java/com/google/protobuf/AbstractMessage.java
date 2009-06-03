@@ -32,6 +32,7 @@ package com.google.protobuf;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
+import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -86,8 +87,25 @@ public abstract class AbstractMessage implements Message {
     for (Map.Entry<FieldDescriptor, Object> entry : getAllFields().entrySet()) {
       FieldDescriptor field = entry.getKey();
       if (field.isRepeated()) {
-        for (Object element : (List) entry.getValue()) {
-          output.writeField(field.getType(), field.getNumber(), element);
+        List valueList = (List) entry.getValue();
+        if (field.getOptions().getPacked()) {
+
+          output.writeTag(field.getNumber(),
+                          WireFormat.WIRETYPE_LENGTH_DELIMITED);
+          int dataSize = 0;
+          for (Object element : valueList) {
+            dataSize += CodedOutputStream.computeFieldSizeNoTag(
+                field.getType(), element);
+          }
+          output.writeRawVarint32(dataSize);
+
+          for (Object element : valueList) {
+            output.writeFieldNoTag(field.getType(), element);
+          }
+        } else {
+          for (Object element : valueList) {
+            output.writeField(field.getType(), field.getNumber(), element);
+          }
         }
       } else {
         output.writeField(field.getType(), field.getNumber(), entry.getValue());
@@ -135,6 +153,13 @@ public abstract class AbstractMessage implements Message {
     codedOutput.flush();
   }
 
+  public void writeDelimitedTo(OutputStream output) throws IOException {
+    CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
+    codedOutput.writeRawVarint32(getSerializedSize());
+    writeTo(codedOutput);
+    codedOutput.flush();
+  }
+
   private int memoizedSize = -1;
 
   public int getSerializedSize() {
@@ -145,9 +170,21 @@ public abstract class AbstractMessage implements Message {
     for (Map.Entry<FieldDescriptor, Object> entry : getAllFields().entrySet()) {
       FieldDescriptor field = entry.getKey();
       if (field.isRepeated()) {
-        for (Object element : (List) entry.getValue()) {
-          size += CodedOutputStream.computeFieldSize(
-            field.getType(), field.getNumber(), element);
+        List valueList = (List) entry.getValue();
+        if (field.getOptions().getPacked()) {
+          int dataSize = 0;
+          for (Object element : valueList) {
+            dataSize += CodedOutputStream.computeFieldSizeNoTag(
+                field.getType(), element);
+          }
+          size += dataSize;
+          size += CodedOutputStream.computeTagSize(field.getNumber());
+          size += CodedOutputStream.computeRawVarint32Size(dataSize);
+        } else {
+          for (Object element : valueList) {
+            size += CodedOutputStream.computeFieldSize(
+                field.getType(), field.getNumber(), element);
+          }
         }
       } else {
         size += CodedOutputStream.computeFieldSize(
@@ -165,7 +202,7 @@ public abstract class AbstractMessage implements Message {
     memoizedSize = size;
     return size;
   }
-  
+
   @Override
   public boolean equals(Object other) {
     if (other == this) {
@@ -178,14 +215,16 @@ public abstract class AbstractMessage implements Message {
     if (getDescriptorForType() != otherMessage.getDescriptorForType()) {
       return false;
     }
-    return getAllFields().equals(otherMessage.getAllFields());
+    return getAllFields().equals(otherMessage.getAllFields()) &&
+        getUnknownFields().equals(otherMessage.getUnknownFields());
   }
-  
+
   @Override
   public int hashCode() {
     int hash = 41;
     hash = (19 * hash) + getDescriptorForType().hashCode();
     hash = (53 * hash) + getAllFields().hashCode();
+    hash = (29 * hash) + getUnknownFields().hashCode();
     return hash;
   }
 
@@ -367,6 +406,52 @@ public abstract class AbstractMessage implements Message {
       mergeFrom(codedInput, extensionRegistry);
       codedInput.checkLastTagWas(0);
       return (BuilderType) this;
+    }
+
+    public BuilderType mergeDelimitedFrom(InputStream input,
+                                          ExtensionRegistry extensionRegistry)
+                                          throws IOException {
+      final int size = CodedInputStream.readRawVarint32(input);
+
+      // A stream which will not read more than |size| bytes.
+      InputStream limitedInput = new FilterInputStream(input) {
+        int limit = size;
+
+        @Override
+        public int available() throws IOException {
+          return Math.min(super.available(), limit);
+        }
+
+        @Override
+        public int read() throws IOException {
+          if (limit <= 0) return -1;
+          int result = super.read();
+          if (result >= 0) --limit;
+          return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+          if (limit <= 0) return -1;
+          len = Math.min(len, limit);
+          int result = super.read(b, off, len);
+          if (result >= 0) limit -= result;
+          return result;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+          long result = super.skip(Math.min(n, limit));
+          if (result >= 0) limit -= result;
+          return result;
+        }
+      };
+      return mergeFrom(limitedInput, extensionRegistry);
+    }
+
+    public BuilderType mergeDelimitedFrom(InputStream input)
+        throws IOException {
+      return mergeDelimitedFrom(input, ExtensionRegistry.getEmptyRegistry());
     }
   }
 }

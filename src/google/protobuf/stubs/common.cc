@@ -31,10 +31,12 @@
 // Author: kenton@google.com (Kenton Varda)
 
 #include <google/protobuf/stubs/common.h>
+#include <google/protobuf/stubs/once.h>
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/stubs/substitute.h>
 #include <stdio.h>
 #include <errno.h>
+#include <vector>
 
 #include "config.h"
 
@@ -113,7 +115,21 @@ void NullLogHandler(LogLevel level, const char* filename, int line,
 
 static LogHandler* log_handler_ = &DefaultLogHandler;
 static int log_silencer_count_ = 0;
-static Mutex log_silencer_count_mutex_;
+
+static Mutex* log_silencer_count_mutex_ = NULL;
+GOOGLE_PROTOBUF_DECLARE_ONCE(log_silencer_count_init_);
+
+void DeleteLogSilencerCount() {
+  delete log_silencer_count_mutex_;
+  log_silencer_count_mutex_ = NULL;
+}
+void InitLogSilencerCount() {
+  log_silencer_count_mutex_ = new Mutex;
+  OnShutdown(&DeleteLogSilencerCount);
+}
+void InitLogSilencerCountOnce() {
+  GoogleOnceInit(&log_silencer_count_init_, &InitLogSilencerCount);
+}
 
 static string SimpleCtoa(char c) { return string(1, c); }
 
@@ -129,6 +145,8 @@ DECLARE_STREAM_OPERATOR(const char*  , )
 DECLARE_STREAM_OPERATOR(char         , SimpleCtoa)
 DECLARE_STREAM_OPERATOR(int          , SimpleItoa)
 DECLARE_STREAM_OPERATOR(uint         , SimpleItoa)
+DECLARE_STREAM_OPERATOR(long         , SimpleItoa)
+DECLARE_STREAM_OPERATOR(unsigned long, SimpleItoa)
 DECLARE_STREAM_OPERATOR(double       , SimpleDtoa)
 #undef DECLARE_STREAM_OPERATOR
 
@@ -140,7 +158,8 @@ void LogMessage::Finish() {
   bool suppress = false;
 
   if (level_ != LOGLEVEL_FATAL) {
-    MutexLock lock(&internal::log_silencer_count_mutex_);
+    InitLogSilencerCountOnce();
+    MutexLock lock(log_silencer_count_mutex_);
     suppress = internal::log_silencer_count_ > 0;
   }
 
@@ -173,12 +192,14 @@ LogHandler* SetLogHandler(LogHandler* new_func) {
 }
 
 LogSilencer::LogSilencer() {
-  MutexLock lock(&internal::log_silencer_count_mutex_);
+  internal::InitLogSilencerCountOnce();
+  MutexLock lock(internal::log_silencer_count_mutex_);
   ++internal::log_silencer_count_;
 };
 
 LogSilencer::~LogSilencer() {
-  MutexLock lock(&internal::log_silencer_count_mutex_);
+  internal::InitLogSilencerCountOnce();
+  MutexLock lock(internal::log_silencer_count_mutex_);
   --internal::log_silencer_count_;
 };
 
@@ -270,6 +291,52 @@ void Mutex::AssertHeld() {
 }
 
 #endif
+
+// ===================================================================
+// Shutdown support.
+
+namespace internal {
+
+typedef void OnShutdownFunc();
+vector<void (*)()>* shutdown_functions = NULL;
+Mutex* shutdown_functions_mutex = NULL;
+GOOGLE_PROTOBUF_DECLARE_ONCE(shutdown_functions_init);
+
+void InitShutdownFunctions() {
+  shutdown_functions = new vector<void (*)()>;
+  shutdown_functions_mutex = new Mutex;
+}
+
+inline void InitShutdownFunctionsOnce() {
+  GoogleOnceInit(&shutdown_functions_init, &InitShutdownFunctions);
+}
+
+void OnShutdown(void (*func)()) {
+  InitShutdownFunctionsOnce();
+  MutexLock lock(shutdown_functions_mutex);
+  shutdown_functions->push_back(func);
+}
+
+}  // namespace internal
+
+void ShutdownProtobufLibrary() {
+  internal::InitShutdownFunctionsOnce();
+
+  // We don't need to lock shutdown_functions_mutex because it's up to the
+  // caller to make sure that no one is using the library before this is
+  // called.
+
+  // Make it safe to call this multiple times.
+  if (internal::shutdown_functions == NULL) return;
+
+  for (int i = 0; i < internal::shutdown_functions->size(); i++) {
+    internal::shutdown_functions->at(i)();
+  }
+  delete internal::shutdown_functions;
+  internal::shutdown_functions = NULL;
+  delete internal::shutdown_functions_mutex;
+  internal::shutdown_functions_mutex = NULL;
+}
 
 }  // namespace protobuf
 }  // namespace google

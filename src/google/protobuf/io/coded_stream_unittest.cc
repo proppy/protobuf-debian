@@ -77,6 +77,9 @@ namespace {
 // which failed will be printed.  The case type must be printable using
 // ostream::operator<<.
 
+// TODO(kenton):  gTest now supports "parameterized tests" which would be
+//   a better way to accomplish this.  Rewrite when time permits.
+
 #define TEST_1D(FIXTURE, NAME, CASES)                                      \
   class FIXTURE##_##NAME##_DD : public FIXTURE {                           \
    protected:                                                              \
@@ -265,8 +268,8 @@ TEST_2D(CodedStreamTest, WriteVarint32, kVarintCases, kBlockSizes) {
   {
     CodedOutputStream coded_output(&output);
 
-    EXPECT_TRUE(coded_output.WriteVarint32(
-      static_cast<uint32>(kVarintCases_case.value)));
+    coded_output.WriteVarint32(static_cast<uint32>(kVarintCases_case.value));
+    EXPECT_FALSE(coded_output.HadError());
 
     EXPECT_EQ(kVarintCases_case.size, coded_output.ByteCount());
   }
@@ -282,7 +285,8 @@ TEST_2D(CodedStreamTest, WriteVarint64, kVarintCases, kBlockSizes) {
   {
     CodedOutputStream coded_output(&output);
 
-    EXPECT_TRUE(coded_output.WriteVarint64(kVarintCases_case.value));
+    coded_output.WriteVarint64(kVarintCases_case.value);
+    EXPECT_FALSE(coded_output.HadError());
 
     EXPECT_EQ(kVarintCases_case.size, coded_output.ByteCount());
   }
@@ -307,8 +311,8 @@ TEST_2D(CodedStreamTest, WriteVarint32SignExtended,
   {
     CodedOutputStream coded_output(&output);
 
-    EXPECT_TRUE(coded_output.WriteVarint32SignExtended(
-      kSignExtendedVarintCases_case));
+    coded_output.WriteVarint32SignExtended(kSignExtendedVarintCases_case);
+    EXPECT_FALSE(coded_output.HadError());
 
     if (kSignExtendedVarintCases_case < 0) {
       EXPECT_EQ(10, coded_output.ByteCount());
@@ -499,7 +503,8 @@ TEST_2D(CodedStreamTest, WriteLittleEndian32, kFixed32Cases, kBlockSizes) {
   {
     CodedOutputStream coded_output(&output);
 
-    EXPECT_TRUE(coded_output.WriteLittleEndian32(kFixed32Cases_case.value));
+    coded_output.WriteLittleEndian32(kFixed32Cases_case.value);
+    EXPECT_FALSE(coded_output.HadError());
 
     EXPECT_EQ(sizeof(uint32), coded_output.ByteCount());
   }
@@ -514,7 +519,8 @@ TEST_2D(CodedStreamTest, WriteLittleEndian64, kFixed64Cases, kBlockSizes) {
   {
     CodedOutputStream coded_output(&output);
 
-    EXPECT_TRUE(coded_output.WriteLittleEndian64(kFixed64Cases_case.value));
+    coded_output.WriteLittleEndian64(kFixed64Cases_case.value);
+    EXPECT_FALSE(coded_output.HadError());
 
     EXPECT_EQ(sizeof(uint64), coded_output.ByteCount());
   }
@@ -549,7 +555,8 @@ TEST_1D(CodedStreamTest, WriteRaw, kBlockSizes) {
   {
     CodedOutputStream coded_output(&output);
 
-    EXPECT_TRUE(coded_output.WriteRaw(kRawBytes, sizeof(kRawBytes)));
+    coded_output.WriteRaw(kRawBytes, sizeof(kRawBytes));
+    EXPECT_FALSE(coded_output.HadError());
 
     EXPECT_EQ(sizeof(kRawBytes), coded_output.ByteCount());
   }
@@ -611,6 +618,73 @@ TEST_1D(CodedStreamTest, SkipInput, kBlockSizes) {
   }
 
   EXPECT_EQ(strlen(kSkipTestBytes), input.ByteCount());
+}
+
+// -------------------------------------------------------------------
+// GetDirectBufferPointer
+
+TEST_F(CodedStreamTest, GetDirectBufferPointerInput) {
+  ArrayInputStream input(buffer_, sizeof(buffer_), 8);
+  CodedInputStream coded_input(&input);
+
+  const void* ptr;
+  int size;
+
+  EXPECT_TRUE(coded_input.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_, ptr);
+  EXPECT_EQ(8, size);
+
+  // Peeking again should return the same pointer.
+  EXPECT_TRUE(coded_input.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_, ptr);
+  EXPECT_EQ(8, size);
+
+  // Skip forward in the same buffer then peek again.
+  EXPECT_TRUE(coded_input.Skip(3));
+  EXPECT_TRUE(coded_input.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_ + 3, ptr);
+  EXPECT_EQ(5, size);
+
+  // Skip to end of buffer and peek -- should get next buffer.
+  EXPECT_TRUE(coded_input.Skip(5));
+  EXPECT_TRUE(coded_input.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_ + 8, ptr);
+  EXPECT_EQ(8, size);
+}
+
+TEST_F(CodedStreamTest, GetDirectBufferPointerOutput) {
+  ArrayOutputStream output(buffer_, sizeof(buffer_), 8);
+  CodedOutputStream coded_output(&output);
+
+  void* ptr;
+  int size;
+
+  EXPECT_TRUE(coded_output.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_, ptr);
+  EXPECT_EQ(8, size);
+
+  // Peeking again should return the same pointer.
+  EXPECT_TRUE(coded_output.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_, ptr);
+  EXPECT_EQ(8, size);
+
+  // Skip forward in the same buffer then peek again.
+  EXPECT_TRUE(coded_output.Skip(3));
+  EXPECT_TRUE(coded_output.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_ + 3, ptr);
+  EXPECT_EQ(5, size);
+
+  // Skip to end of buffer and peek -- should get next buffer.
+  EXPECT_TRUE(coded_output.Skip(5));
+  EXPECT_TRUE(coded_output.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_ + 8, ptr);
+  EXPECT_EQ(8, size);
+
+  // Skip over multiple buffers.
+  EXPECT_TRUE(coded_output.Skip(22));
+  EXPECT_TRUE(coded_output.GetDirectBufferPointer(&ptr, &size));
+  EXPECT_EQ(buffer_ + 30, ptr);
+  EXPECT_EQ(2, size);
 }
 
 // -------------------------------------------------------------------

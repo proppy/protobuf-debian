@@ -11,12 +11,15 @@ from setuptools import setup
 from distutils.spawn import find_executable
 import sys
 import os
+import subprocess
 
 maintainer_email = "protobuf@googlegroups.com"
 
 # Find the Protocol Compiler.
 if os.path.exists("../src/protoc"):
   protoc = "../src/protoc"
+elif os.path.exists("../src/protoc.exe"):
+  protoc = "../src/protoc.exe"
 else:
   protoc = find_executable("protoc")
 
@@ -42,8 +45,8 @@ def generate_proto(source):
           "or install the binary package.\n")
       sys.exit(-1)
 
-    protoc_command = protoc + " -I../src -I. --python_out=. " + source
-    if os.system(protoc_command) != 0:
+    protoc_command = [ protoc, "-I../src", "-I.", "--python_out=.", source ]
+    if subprocess.call(protoc_command) != 0:
       sys.exit(-1)
 
 def MakeTestSuite():
@@ -102,7 +105,7 @@ if __name__ == '__main__':
     generate_proto("../src/google/protobuf/descriptor.proto")
 
   setup(name = 'protobuf',
-        version = '2.0.3',
+        version = '2.1.0',
         packages = [ 'google' ],
         namespace_packages = [ 'google' ],
         test_suite = 'setup.MakeTestSuite',

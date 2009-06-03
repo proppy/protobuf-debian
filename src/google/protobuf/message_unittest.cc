@@ -107,6 +107,19 @@ TEST(MessageTest, ParseFromFileDescriptor) {
   EXPECT_GE(close(file), 0);
 }
 
+TEST(MessageTest, ParsePackedFromFileDescriptor) {
+  string filename =
+      TestSourceDir() +
+      "/google/protobuf/testdata/golden_packed_fields_message";
+  int file = open(filename.c_str(), O_RDONLY | O_BINARY);
+
+  unittest::TestPackedTypes message;
+  EXPECT_TRUE(message.ParseFromFileDescriptor(file));
+  TestUtil::ExpectPackedFieldsSet(message);
+
+  EXPECT_GE(close(file), 0);
+}
+
 TEST(MessageTest, ParseHelpers) {
   // TODO(kenton):  Test more helpers?  They're all two-liners so it seems
   //   like a waste of time.
@@ -133,6 +146,25 @@ TEST(MessageTest, ParseHelpers) {
     EXPECT_TRUE(message.ParseFromIstream(&stream));
     EXPECT_TRUE(stream.eof());
     TestUtil::ExpectAllFieldsSet(message);
+  }
+
+  {
+    // Test ParseFromBoundedZeroCopyStream.
+    string data_with_junk(data);
+    data_with_junk.append("some junk on the end");
+    io::ArrayInputStream stream(data_with_junk.data(), data_with_junk.size());
+    protobuf_unittest::TestAllTypes message;
+    EXPECT_TRUE(message.ParseFromBoundedZeroCopyStream(&stream, data.size()));
+    TestUtil::ExpectAllFieldsSet(message);
+  }
+
+  {
+    // Test that ParseFromBoundedZeroCopyStream fails (but doesn't crash) if
+    // EOF is reached before the expected number of bytes.
+    io::ArrayInputStream stream(data.data(), data.size());
+    protobuf_unittest::TestAllTypes message;
+    EXPECT_FALSE(
+      message.ParseFromBoundedZeroCopyStream(&stream, data.size() + 1));
   }
 }
 
@@ -214,6 +246,36 @@ TEST(MessageTest, ParseFailsOnInvalidMessageEnd) {
 
   // The byte is an endgroup tag, but we aren't parsing a group.
   EXPECT_FALSE(message.ParseFromArray("\014", 1));
+}
+
+TEST(MessageTest, FieldConstantValues) {
+  unittest::TestRequired message;
+  EXPECT_EQ(protobuf_unittest::TestAllTypes_NestedMessage::kBbFieldNumber, 1);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kOptionalInt32FieldNumber, 1);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kOptionalgroupFieldNumber, 16);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kOptionalNestedMessageFieldNumber,
+    18);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kOptionalNestedEnumFieldNumber,
+    21);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kRepeatedInt32FieldNumber, 31);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kRepeatedgroupFieldNumber, 46);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kRepeatedNestedMessageFieldNumber,
+    48);
+  EXPECT_EQ(protobuf_unittest::TestAllTypes::kRepeatedNestedEnumFieldNumber,
+    51);
+}
+
+TEST(MessageTest, ExtensionConstantValues) {
+  EXPECT_EQ(protobuf_unittest::TestRequired::kSingleFieldNumber, 1000);
+  EXPECT_EQ(protobuf_unittest::TestRequired::kMultiFieldNumber, 1001);
+  EXPECT_EQ(protobuf_unittest::kOptionalInt32ExtensionFieldNumber, 1);
+  EXPECT_EQ(protobuf_unittest::kOptionalgroupExtensionFieldNumber, 16);
+  EXPECT_EQ(protobuf_unittest::kOptionalNestedMessageExtensionFieldNumber, 18);
+  EXPECT_EQ(protobuf_unittest::kOptionalNestedEnumExtensionFieldNumber, 21);
+  EXPECT_EQ(protobuf_unittest::kRepeatedInt32ExtensionFieldNumber, 31);
+  EXPECT_EQ(protobuf_unittest::kRepeatedgroupExtensionFieldNumber, 46);
+  EXPECT_EQ(protobuf_unittest::kRepeatedNestedMessageExtensionFieldNumber, 48);
+  EXPECT_EQ(protobuf_unittest::kRepeatedNestedEnumExtensionFieldNumber, 51);
 }
 
 TEST(MessageFactoryTest, GeneratedFactoryLookup) {

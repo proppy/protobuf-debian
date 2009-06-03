@@ -83,24 +83,24 @@ namespace internal {
 
 // The current version, represented as a single integer to make comparison
 // easier:  major * 10^6 + minor * 10^3 + micro
-#define GOOGLE_PROTOBUF_VERSION 2000003
+#define GOOGLE_PROTOBUF_VERSION 2001000
 
 // The minimum library version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2000003
+#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2001000
 
 // The minimum header version which works with the current version of
 // the library.  This constant should only be used by protoc's C++ code
 // generator.
-static const int kMinHeaderVersionForLibrary = 2000003;
+static const int kMinHeaderVersionForLibrary = 2001000;
 
 // The minimum protoc version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2000003
+#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2001000
 
 // The minimum header version which works with the current version of
 // protoc.  This constant should only be used in VerifyVersion().
-static const int kMinHeaderVersionForProtoc = 2000003;
+static const int kMinHeaderVersionForProtoc = 2001000;
 
 // Verifies that the headers and libraries are compatible.  Use the macro
 // below to call this.
@@ -586,6 +586,8 @@ class LIBPROTOBUF_EXPORT LogMessage {
   LogMessage& operator<<(char value);
   LogMessage& operator<<(int value);
   LogMessage& operator<<(uint value);
+  LogMessage& operator<<(long value);
+  LogMessage& operator<<(unsigned long value);
   LogMessage& operator<<(double value);
 
  private:
@@ -1039,6 +1041,10 @@ class LIBPROTOBUF_EXPORT MutexLock {
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(MutexLock);
 };
 
+// TODO(kenton):  Implement these?  Hard to implement portably.
+typedef MutexLock ReaderMutexLock;
+typedef MutexLock WriterMutexLock;
+
 // MutexLockMaybe is like MutexLock, but is a no-op when mu is NULL.
 class LIBPROTOBUF_EXPORT MutexLockMaybe {
  public:
@@ -1056,6 +1062,8 @@ class LIBPROTOBUF_EXPORT MutexLockMaybe {
 // but we don't want to stick "internal::" in front of them everywhere.
 using internal::Mutex;
 using internal::MutexLock;
+using internal::ReaderMutexLock;
+using internal::WriterMutexLock;
 using internal::MutexLockMaybe;
 
 // ===================================================================
@@ -1075,7 +1083,32 @@ template<typename T> struct remove_pointer<T* const volatile> {
 
 // Checks if the buffer contains structurally-valid UTF-8.  Implemented in
 // structurally_valid.cc.
-bool IsStructurallyValidUTF8(const char* buf, int len);
+LIBPROTOBUF_EXPORT bool IsStructurallyValidUTF8(const char* buf, int len);
+
+}  // namespace internal
+
+// ===================================================================
+// Shutdown support.
+
+// Shut down the entire protocol buffers library, deleting all static-duration
+// objects allocated by the library or by generated .pb.cc files.
+//
+// There are two reasons you might want to call this:
+// * You use a draconian definition of "memory leak" in which you expect
+//   every single malloc() to have a corresponding free(), even for objects
+//   which live until program exit.
+// * You are writing a dynamically-loaded library which needs to clean up
+//   after itself when the library is unloaded.
+//
+// It is safe to call this multiple times.  However, it is not safe to use
+// any other part of the protocol buffers library after
+// ShutdownProtobufLibrary() has been called.
+LIBPROTOBUF_EXPORT void ShutdownProtobufLibrary();
+
+namespace internal {
+
+// Register a function to be called when ShutdownProtocolBuffers() is called.
+LIBPROTOBUF_EXPORT void OnShutdown(void (*func)());
 
 }  // namespace internal
 
