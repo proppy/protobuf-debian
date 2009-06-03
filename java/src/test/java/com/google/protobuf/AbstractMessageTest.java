@@ -30,13 +30,14 @@
 
 package com.google.protobuf;
 
+import protobuf_unittest.UnittestOptimizeFor.TestOptimizedForSize;
 import protobuf_unittest.UnittestProto;
 import protobuf_unittest.UnittestProto.ForeignMessage;
-import protobuf_unittest.UnittestProto.TestAllTypes;
 import protobuf_unittest.UnittestProto.TestAllExtensions;
+import protobuf_unittest.UnittestProto.TestAllTypes;
+import protobuf_unittest.UnittestProto.TestPackedTypes;
 import protobuf_unittest.UnittestProto.TestRequired;
 import protobuf_unittest.UnittestProto.TestRequiredForeign;
-import protobuf_unittest.UnittestOptimizeFor.TestOptimizedForSize;
 
 import junit.framework.TestCase;
 
@@ -90,6 +91,9 @@ public class AbstractMessageTest extends TestCase {
     }
     public Builder newBuilderForType() {
       return new Builder(wrappedMessage.newBuilderForType());
+    }
+    public Builder toBuilder() {
+      return new Builder(wrappedMessage.toBuilder());
     }
 
     static class Builder extends AbstractMessage.Builder<Builder> {
@@ -215,6 +219,25 @@ public class AbstractMessageTest extends TestCase {
     TestUtil.assertAllFieldsSet((TestAllTypes) message.wrappedMessage);
   }
 
+  public void testPackedSerialization() throws Exception {
+    Message abstractMessage =
+        new AbstractMessageWrapper(TestUtil.getPackedSet());
+
+    TestUtil.assertPackedFieldsSet(
+      TestPackedTypes.parseFrom(abstractMessage.toByteString()));
+
+    assertEquals(TestUtil.getPackedSet().toByteString(),
+                 abstractMessage.toByteString());
+  }
+
+  public void testPackedParsing() throws Exception {
+    AbstractMessageWrapper.Builder builder =
+      new AbstractMessageWrapper.Builder(TestPackedTypes.newBuilder());
+    AbstractMessageWrapper message =
+      builder.mergeFrom(TestUtil.getPackedSet().toByteString()).build();
+    TestUtil.assertPackedFieldsSet((TestPackedTypes) message.wrappedMessage);
+  }
+
   public void testOptimizedForSize() throws Exception {
     // We're mostly only checking that this class was compiled successfully.
     TestOptimizedForSize message =
@@ -306,7 +329,7 @@ public class AbstractMessageTest extends TestCase {
   // -----------------------------------------------------------------
   // Tests for equals and hashCode
   
-  public void testEqualsAndHashCode() {
+  public void testEqualsAndHashCode() throws Exception {
     TestAllTypes a = TestUtil.getAllSet();
     TestAllTypes b = TestAllTypes.newBuilder().build();
     TestAllTypes c = TestAllTypes.newBuilder(b).addRepeatedString("x").build();
@@ -314,7 +337,7 @@ public class AbstractMessageTest extends TestCase {
     TestAllExtensions e = TestUtil.getAllExtensionsSet();
     TestAllExtensions f = TestAllExtensions.newBuilder(e)
         .addExtension(UnittestProto.repeatedInt32Extension, 999).build();
-      
+
     checkEqualsIsConsistent(a);
     checkEqualsIsConsistent(b);
     checkEqualsIsConsistent(c);
@@ -341,10 +364,25 @@ public class AbstractMessageTest extends TestCase {
     checkNotEqual(d, f);
 
     checkNotEqual(e, f);
+
+    // Deserializing into the TestEmptyMessage such that every field
+    // is an {@link UnknownFieldSet.Field}.
+    UnittestProto.TestEmptyMessage eUnknownFields =
+        UnittestProto.TestEmptyMessage.parseFrom(e.toByteArray());
+    UnittestProto.TestEmptyMessage fUnknownFields =
+        UnittestProto.TestEmptyMessage.parseFrom(f.toByteArray());
+    checkNotEqual(eUnknownFields, fUnknownFields);
+    checkEqualsIsConsistent(eUnknownFields);
+    checkEqualsIsConsistent(fUnknownFields);
+
+    // Subseqent reconstitutions should be identical
+    UnittestProto.TestEmptyMessage eUnknownFields2 =
+        UnittestProto.TestEmptyMessage.parseFrom(e.toByteArray());
+    checkEqualsIsConsistent(eUnknownFields, eUnknownFields2);
   }
   
   /**
-   * Asserts that the given protos are equal and have the same hash code.
+   * Asserts that the given proto has symetric equals and hashCode methods.
    */
   private void checkEqualsIsConsistent(Message message) {
     // Object should be equal to itself.
@@ -352,9 +390,16 @@ public class AbstractMessageTest extends TestCase {
     
     // Object should be equal to a dynamic copy of itself.
     DynamicMessage dynamic = DynamicMessage.newBuilder(message).build();
-    assertEquals(message, dynamic);
-    assertEquals(dynamic, message);
-    assertEquals(dynamic.hashCode(), message.hashCode());
+    checkEqualsIsConsistent(message, dynamic);
+  }
+
+  /**
+   * Asserts that the given protos are equal and have the same hash code.
+   */
+  private void checkEqualsIsConsistent(Message message1, Message message2) {
+    assertEquals(message1, message2);
+    assertEquals(message2, message1);
+    assertEquals(message2.hashCode(), message1.hashCode());
   }
 
   /**

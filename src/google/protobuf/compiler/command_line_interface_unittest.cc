@@ -539,6 +539,24 @@ TEST_F(CommandLineInterfaceTest, WindowsOutputPathAndParameter) {
   EXPECT_EQ("bar", generator->parameter_);
 }
 
+TEST_F(CommandLineInterfaceTest, TrailingBackslash) {
+  // Test that the directories can end in backslashes.  Some users claim this
+  // doesn't work on their system.
+
+  RegisterGenerator("test_generator", "--test_out",
+                    "output.test", "Test output.");
+
+  CreateTempFile("foo.proto",
+    "syntax = \"proto2\";\n"
+    "message Foo {}\n");
+
+  Run("protocol_compiler --test_out=$tmpdir\\ "
+      "--proto_path=$tmpdir\\ foo.proto");
+
+  ExpectNoErrors();
+  ExpectGenerated("test_generator", "", "foo.proto", "Foo", "output.test");
+}
+
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
 TEST_F(CommandLineInterfaceTest, PathLookup) {
@@ -1045,6 +1063,59 @@ TEST_F(CommandLineInterfaceTest, HelpText) {
   ExpectErrorSubstring("Test output.");
   ExpectErrorSubstring("--error_out=OUT_DIR");
   ExpectErrorSubstring("Test error output.");
+}
+
+TEST_F(CommandLineInterfaceTest, GccFormatErrors) {
+  // Test --error_format=gcc (which is the default, but we want to verify
+  // that it can be set explicitly).
+
+  RegisterGenerator("test_generator", "--test_out",
+                    "output.test", "Test output.");
+
+  CreateTempFile("foo.proto",
+    "syntax = \"proto2\";\n"
+    "badsyntax\n");
+
+  Run("protocol_compiler --test_out=$tmpdir "
+      "--proto_path=$tmpdir --error_format=gcc foo.proto");
+
+  ExpectErrorText(
+    "foo.proto:2:1: Expected top-level statement (e.g. \"message\").\n");
+}
+
+TEST_F(CommandLineInterfaceTest, MsvsFormatErrors) {
+  // Test --error_format=msvs
+
+  RegisterGenerator("test_generator", "--test_out",
+                    "output.test", "Test output.");
+
+  CreateTempFile("foo.proto",
+    "syntax = \"proto2\";\n"
+    "badsyntax\n");
+
+  Run("protocol_compiler --test_out=$tmpdir "
+      "--proto_path=$tmpdir --error_format=msvs foo.proto");
+
+  ExpectErrorText(
+    "foo.proto(2) : error in column=1: Expected top-level statement "
+      "(e.g. \"message\").\n");
+}
+
+TEST_F(CommandLineInterfaceTest, InvalidErrorFormat) {
+  // Test --error_format=msvs
+
+  RegisterGenerator("test_generator", "--test_out",
+                    "output.test", "Test output.");
+
+  CreateTempFile("foo.proto",
+    "syntax = \"proto2\";\n"
+    "badsyntax\n");
+
+  Run("protocol_compiler --test_out=$tmpdir "
+      "--proto_path=$tmpdir --error_format=invalid foo.proto");
+
+  ExpectErrorText(
+    "Unknown error format: invalid\n");
 }
 
 // -------------------------------------------------------------------

@@ -118,6 +118,24 @@
 #include <iosfwd>
 #endif
 
+#if defined(_WIN32) && defined(GetMessage)
+// windows.h defines GetMessage() as a macro.  Let's re-define it as an inline
+// function.  This is necessary because Reflection has a method called
+// GetMessage() which we don't want overridden.  The inline function should be
+// equivalent for C++ users.
+inline BOOL GetMessage_Win32(
+    LPMSG lpMsg, HWND hWnd,
+    UINT wMsgFilterMin, UINT wMsgFilterMax) {
+  return GetMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+}
+#undef GetMessage
+inline BOOL GetMessage(
+    LPMSG lpMsg, HWND hWnd,
+    UINT wMsgFilterMin, UINT wMsgFilterMax) {
+  return GetMessage_Win32(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+}
+#endif
+
 #include <google/protobuf/stubs/common.h>
 
 namespace google {
@@ -232,6 +250,14 @@ class LIBPROTOBUF_EXPORT Message {
   // Like ParseFromZeroCopyStream(), but accepts messages that are missing
   // required fields.
   bool ParsePartialFromZeroCopyStream(io::ZeroCopyInputStream* input);
+  // Read a protocol buffer from the given zero-copy input stream, expecting
+  // the message to be exactly "size" bytes long.  If successful, exactly
+  // this many bytes will have been consumed from the input.
+  bool ParseFromBoundedZeroCopyStream(io::ZeroCopyInputStream* input, int size);
+  // Like ParseFromBoundedZeroCopyStream(), but accepts messages that are
+  // missing required fields.
+  bool ParsePartialFromBoundedZeroCopyStream(io::ZeroCopyInputStream* input,
+                                             int size);
   // Parse a protocol buffer contained in a string.
   bool ParseFromString(const string& data);
   // Like ParseFromString(), but accepts messages that are missing
@@ -344,7 +370,12 @@ class LIBPROTOBUF_EXPORT Message {
   // Serializes the message without recomputing the size.  The message must
   // not have changed since the last call to ByteSize(); if it has, the results
   // are undefined.
-  virtual bool SerializeWithCachedSizes(io::CodedOutputStream* output) const;
+  virtual void SerializeWithCachedSizes(io::CodedOutputStream* output) const;
+
+  // Like SerializeWithCachedSizes, but writes directly to *target, returning
+  // a pointer to the byte immediately after the last byte written.  "target"
+  // must point at a byte array of at least ByteSize() bytes.
+  virtual uint8* SerializeWithCachedSizesToArray(uint8* target) const;
 
   // Returns the result of the last call to ByteSize().  An embedded message's
   // size is needed both to serialize it (because embedded messages are
@@ -705,8 +736,19 @@ class LIBPROTOBUF_EXPORT MessageFactory {
   // This factory is a singleton.  The caller must not delete the object.
   static MessageFactory* generated_factory();
 
-  // For internal use only:  Registers a message type at static initialization
-  // time, to be placed in generated_factory().
+  // For internal use only:  Registers a .proto file at static initialization
+  // time, to be placed in generated_factory.  The first time GetPrototype()
+  // is called with a descriptor from this file, |register_messages| will be
+  // called.  It must call InternalRegisterGeneratedMessage() (below) to
+  // register each message type in the file.  This strange mechanism is
+  // necessary because descriptors are built lazily, so we can't register
+  // types by their descriptor until we know that the descriptor exists.
+  static void InternalRegisterGeneratedFile(const char* filename,
+                                            void (*register_messages)());
+
+  // For internal use only:  Registers a message type.  Called only by the
+  // functions which are registered with InternalRegisterGeneratedFile(),
+  // above.
   static void InternalRegisterGeneratedMessage(const Descriptor* descriptor,
                                                const Message* prototype);
 

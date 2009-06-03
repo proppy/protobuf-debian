@@ -41,7 +41,7 @@
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/wire_format.h>
+#include <google/protobuf/wire_format_inl.h>
 #include <google/protobuf/descriptor.pb.h>
 
 namespace google {
@@ -311,6 +311,9 @@ void MessageGenerator::Generate(io::Printer* printer) {
   // Fields
   for (int i = 0; i < descriptor_->field_count(); i++) {
     PrintFieldComment(printer, descriptor_->field(i));
+    printer->Print("public static final int $constant_name$ = $number$;\n",
+      "constant_name", FieldConstantName(descriptor_->field(i)),
+      "number", SimpleItoa(descriptor_->field(i)->number()));
     field_generators_.get(descriptor_->field(i)).GenerateMembers(printer);
     printer->Print("\n");
   }
@@ -463,6 +466,17 @@ GenerateParseFromMethods(io::Printer* printer) {
     "  return newBuilder().mergeFrom(input, extensionRegistry)\n"
     "           .buildParsed();\n"
     "}\n"
+    "public static $classname$ parseDelimitedFrom(java.io.InputStream input)\n"
+    "    throws java.io.IOException {\n"
+    "  return newBuilder().mergeDelimitedFrom(input).buildParsed();\n"
+    "}\n"
+    "public static $classname$ parseDelimitedFrom(\n"
+    "    java.io.InputStream input,\n"
+    "    com.google.protobuf.ExtensionRegistry extensionRegistry)\n"
+    "    throws java.io.IOException {\n"
+    "  return newBuilder().mergeDelimitedFrom(input, extensionRegistry)\n"
+    "           .buildParsed();\n"
+    "}\n"
     "public static $classname$ parseFrom(\n"
     "    com.google.protobuf.CodedInputStream input)\n"
     "    throws java.io.IOException {\n"
@@ -500,6 +514,7 @@ void MessageGenerator::GenerateBuilder(io::Printer* printer) {
     "public static Builder newBuilder($classname$ prototype) {\n"
     "  return new Builder().mergeFrom(prototype);\n"
     "}\n"
+    "public Builder toBuilder() { return newBuilder(this); }\n"
     "\n",
     "classname", ClassName(descriptor_));
 
@@ -575,7 +590,8 @@ void MessageGenerator::GenerateCommonBuilderMethods(io::Printer* printer) {
 
   printer->Print(
     "public $classname$ build() {\n"
-    "  if (!isInitialized()) {\n"
+    // If result == null, we'll throw an appropriate exception later.
+    "  if (result != null && !isInitialized()) {\n"
     "    throw new com.google.protobuf.UninitializedMessageException(\n"
     "      result);\n"
     "  }\n"
@@ -591,7 +607,11 @@ void MessageGenerator::GenerateCommonBuilderMethods(io::Printer* printer) {
     "  return buildPartial();\n"
     "}\n"
     "\n"
-    "public $classname$ buildPartial() {\n",
+    "public $classname$ buildPartial() {\n"
+    "  if (result == null) {\n"
+    "    throw new IllegalStateException(\n"
+    "      \"build() has already been called on this Builder.\");"
+    "  }\n",
     "classname", ClassName(descriptor_));
   printer->Indent();
 
@@ -634,6 +654,13 @@ void MessageGenerator::GenerateCommonBuilderMethods(io::Printer* printer) {
     }
 
     printer->Outdent();
+
+    // if message type has extensions
+    if (descriptor_->extension_range_count() > 0) {
+      printer->Print(
+        "  this.mergeExtensionFields(other);\n");
+    }
+
     printer->Print(
       "  this.mergeUnknownFields(other.getUnknownFields());\n"
       "  return this;\n"
@@ -692,7 +719,7 @@ void MessageGenerator::GenerateBuilderParsingMethods(io::Printer* printer) {
   for (int i = 0; i < descriptor_->field_count(); i++) {
     const FieldDescriptor* field = sorted_fields[i];
     uint32 tag = WireFormat::MakeTag(field->number(),
-      WireFormat::WireTypeForFieldType(field->type()));
+      WireFormat::WireTypeForField(field));
 
     printer->Print(
       "case $tag$: {\n",

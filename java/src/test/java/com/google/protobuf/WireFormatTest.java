@@ -31,10 +31,16 @@
 package com.google.protobuf;
 
 import junit.framework.TestCase;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import protobuf_unittest.UnittestProto;
-import protobuf_unittest.UnittestProto.TestAllTypes;
 import protobuf_unittest.UnittestProto.TestAllExtensions;
+import protobuf_unittest.UnittestProto.TestAllTypes;
 import protobuf_unittest.UnittestProto.TestFieldOrderings;
+import protobuf_unittest.UnittestProto.TestPackedExtensions;
+import protobuf_unittest.UnittestProto.TestPackedTypes;
 import protobuf_unittest.UnittestMset.TestMessageSet;
 import protobuf_unittest.UnittestMset.RawMessageSet;
 import protobuf_unittest.UnittestMset.TestMessageSetExtension1;
@@ -57,9 +63,20 @@ public class WireFormatTest extends TestCase {
     TestUtil.assertAllFieldsSet(message2);
   }
 
+  public void testSerializationPacked() throws Exception {
+    TestPackedTypes message = TestUtil.getPackedSet();
+
+    ByteString rawBytes = message.toByteString();
+    assertEquals(rawBytes.size(), message.getSerializedSize());
+
+    TestPackedTypes message2 = TestPackedTypes.parseFrom(rawBytes);
+
+    TestUtil.assertPackedFieldsSet(message2);
+  }
+
   public void testSerializeExtensions() throws Exception {
     // TestAllTypes and TestAllExtensions should have compatible wire formats,
-    // so if we serealize a TestAllExtensions then parse it as TestAllTypes
+    // so if we serialize a TestAllExtensions then parse it as TestAllTypes
     // it should work.
 
     TestAllExtensions message = TestUtil.getAllExtensionsSet();
@@ -71,17 +88,27 @@ public class WireFormatTest extends TestCase {
     TestUtil.assertAllFieldsSet(message2);
   }
 
+  public void testSerializePackedExtensions() throws Exception {
+    // TestPackedTypes and TestPackedExtensions should have compatible wire
+    // formats; check that they serialize to the same string.
+    TestPackedExtensions message = TestUtil.getPackedExtensionsSet();
+    ByteString rawBytes = message.toByteString();
+
+    TestPackedTypes message2 = TestUtil.getPackedSet();
+    ByteString rawBytes2 = message2.toByteString();
+
+    assertEquals(rawBytes, rawBytes2);
+  }
+
   public void testParseExtensions() throws Exception {
     // TestAllTypes and TestAllExtensions should have compatible wire formats,
-    // so if we serealize a TestAllTypes then parse it as TestAllExtensions
+    // so if we serialize a TestAllTypes then parse it as TestAllExtensions
     // it should work.
 
     TestAllTypes message = TestUtil.getAllSet();
     ByteString rawBytes = message.toByteString();
 
-    ExtensionRegistry registry = ExtensionRegistry.newInstance();
-    TestUtil.registerAllExtensions(registry);
-    registry = registry.getUnmodifiable();
+    ExtensionRegistry registry = TestUtil.getExtensionRegistry();
 
     TestAllExtensions message2 =
       TestAllExtensions.parseFrom(rawBytes, registry);
@@ -89,9 +116,38 @@ public class WireFormatTest extends TestCase {
     TestUtil.assertAllExtensionsSet(message2);
   }
 
+  public void testParsePackedExtensions() throws Exception {
+    // Ensure that packed extensions can be properly parsed.
+    TestPackedExtensions message = TestUtil.getPackedExtensionsSet();
+    ByteString rawBytes = message.toByteString();
+
+    ExtensionRegistry registry = TestUtil.getExtensionRegistry();
+
+    TestPackedExtensions message2 =
+        TestPackedExtensions.parseFrom(rawBytes, registry);
+
+    TestUtil.assertPackedExtensionsSet(message2);
+  }
+
   public void testExtensionsSerializedSize() throws Exception {
     assertEquals(TestUtil.getAllSet().getSerializedSize(),
                  TestUtil.getAllExtensionsSet().getSerializedSize());
+  }
+
+  public void testSerializeDelimited() throws Exception {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    TestUtil.getAllSet().writeDelimitedTo(output);
+    output.write(12);
+    TestUtil.getPackedSet().writeDelimitedTo(output);
+    output.write(34);
+
+    ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
+
+    TestUtil.assertAllFieldsSet(TestAllTypes.parseDelimitedFrom(input));
+    assertEquals(12, input.read());
+    TestUtil.assertPackedFieldsSet(TestPackedTypes.parseDelimitedFrom(input));
+    assertEquals(34, input.read());
+    assertEquals(-1, input.read());
   }
 
   private void assertFieldsInOrder(ByteString data) throws Exception {
@@ -279,4 +335,3 @@ public class WireFormatTest extends TestCase {
     assertEquals("bar", field.getLengthDelimitedList().get(0).toStringUtf8());
   }
 }
-

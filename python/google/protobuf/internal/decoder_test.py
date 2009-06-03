@@ -57,7 +57,7 @@ class DecoderTest(unittest.TestCase):
     for expected_field_number in (1, 15, 16, 2047, 2048):
       for expected_wire_type in range(6):  # Highest-numbered wiretype is 5.
         e = encoder.Encoder()
-        e._AppendTag(expected_field_number, expected_wire_type)
+        e.AppendTag(expected_field_number, expected_wire_type)
         s = e.ToString()
         d = decoder.Decoder(s)
         field_number, wire_type = d.ReadFieldNumberAndWireType()
@@ -122,7 +122,7 @@ class DecoderTest(unittest.TestCase):
         ['fixed64', decoder.Decoder.ReadFixed64, 0xffffffffffffffff,
         'ReadLittleEndian64', 0xffffffffffffffff],
         ['sfixed32', decoder.Decoder.ReadSFixed32, long(-1),
-         'ReadLittleEndian32', 0xffffffff],
+         'ReadLittleEndian32', long(0xffffffff)],
         ['sfixed64', decoder.Decoder.ReadSFixed64, long(-1),
          'ReadLittleEndian64', 0xffffffffffffffff],
         ['float', decoder.Decoder.ReadFloat, 0.0,

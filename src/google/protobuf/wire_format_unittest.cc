@@ -44,6 +44,7 @@
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/testing/googletest.h>
 #include <gtest/gtest.h>
+#include <google/protobuf/stubs/stl_util-inl.h>
 
 namespace google {
 namespace protobuf {
@@ -90,6 +91,40 @@ TEST(WireFormatTest, ParseExtensions) {
   TestUtil::ExpectAllExtensionsSet(dest);
 }
 
+TEST(WireFormatTest, ParsePacked) {
+  unittest::TestPackedTypes source, dest;
+  string data;
+
+  // Serialize using the generated code.
+  TestUtil::SetPackedFields(&source);
+  source.SerializeToString(&data);
+
+  // Parse using WireFormat.
+  io::ArrayInputStream raw_input(data.data(), data.size());
+  io::CodedInputStream input(&raw_input);
+  WireFormat::ParseAndMergePartial(&input, &dest);
+
+  // Check.
+  TestUtil::ExpectPackedFieldsSet(dest);
+}
+
+TEST(WireFormatTest, ParsePackedExtensions) {
+  unittest::TestPackedExtensions source, dest;
+  string data;
+
+  // Serialize using the generated code.
+  TestUtil::SetPackedExtensions(&source);
+  source.SerializeToString(&data);
+
+  // Parse using WireFormat.
+  io::ArrayInputStream raw_input(data.data(), data.size());
+  io::CodedInputStream input(&raw_input);
+  WireFormat::ParseAndMergePartial(&input, &dest);
+
+  // Check.
+  TestUtil::ExpectPackedExtensionsSet(dest);
+}
+
 TEST(WireFormatTest, ByteSize) {
   unittest::TestAllTypes message;
   TestUtil::SetAllFields(&message);
@@ -111,6 +146,27 @@ TEST(WireFormatTest, ByteSizeExtensions) {
   EXPECT_EQ(0, WireFormat::ByteSize(message));
 }
 
+TEST(WireFormatTest, ByteSizePacked) {
+  unittest::TestPackedTypes message;
+  TestUtil::SetPackedFields(&message);
+
+  EXPECT_EQ(message.ByteSize(), WireFormat::ByteSize(message));
+  message.Clear();
+  EXPECT_EQ(0, message.ByteSize());
+  EXPECT_EQ(0, WireFormat::ByteSize(message));
+}
+
+TEST(WireFormatTest, ByteSizePackedExtensions) {
+  unittest::TestPackedExtensions message;
+  TestUtil::SetPackedExtensions(&message);
+
+  EXPECT_EQ(message.ByteSize(),
+            WireFormat::ByteSize(message));
+  message.Clear();
+  EXPECT_EQ(0, message.ByteSize());
+  EXPECT_EQ(0, WireFormat::ByteSize(message));
+}
+
 TEST(WireFormatTest, Serialize) {
   unittest::TestAllTypes message;
   string generated_data;
@@ -124,6 +180,7 @@ TEST(WireFormatTest, Serialize) {
     io::StringOutputStream raw_output(&generated_data);
     io::CodedOutputStream output(&raw_output);
     message.SerializeWithCachedSizes(&output);
+    ASSERT_FALSE(output.HadError());
   }
 
   // Serialize using WireFormat.
@@ -131,6 +188,7 @@ TEST(WireFormatTest, Serialize) {
     io::StringOutputStream raw_output(&dynamic_data);
     io::CodedOutputStream output(&raw_output);
     WireFormat::SerializeWithCachedSizes(message, size, &output);
+    ASSERT_FALSE(output.HadError());
   }
 
   // Should be the same.
@@ -152,6 +210,7 @@ TEST(WireFormatTest, SerializeExtensions) {
     io::StringOutputStream raw_output(&generated_data);
     io::CodedOutputStream output(&raw_output);
     message.SerializeWithCachedSizes(&output);
+    ASSERT_FALSE(output.HadError());
   }
 
   // Serialize using WireFormat.
@@ -159,6 +218,7 @@ TEST(WireFormatTest, SerializeExtensions) {
     io::StringOutputStream raw_output(&dynamic_data);
     io::CodedOutputStream output(&raw_output);
     WireFormat::SerializeWithCachedSizes(message, size, &output);
+    ASSERT_FALSE(output.HadError());
   }
 
   // Should be the same.
@@ -180,6 +240,7 @@ TEST(WireFormatTest, SerializeFieldsAndExtensions) {
     io::StringOutputStream raw_output(&generated_data);
     io::CodedOutputStream output(&raw_output);
     message.SerializeWithCachedSizes(&output);
+    ASSERT_FALSE(output.HadError());
   }
 
   // Serialize using WireFormat.
@@ -187,6 +248,7 @@ TEST(WireFormatTest, SerializeFieldsAndExtensions) {
     io::StringOutputStream raw_output(&dynamic_data);
     io::CodedOutputStream output(&raw_output);
     WireFormat::SerializeWithCachedSizes(message, size, &output);
+    ASSERT_FALSE(output.HadError());
   }
 
   // Should be the same.
@@ -232,8 +294,8 @@ TEST(WireFormatTest, SerializeMessageSet) {
     unittest::TestMessageSetExtension1::message_set_extension)->set_i(123);
   message_set.MutableExtension(
     unittest::TestMessageSetExtension2::message_set_extension)->set_str("foo");
-  message_set.mutable_unknown_fields()->AddField(kUnknownTypeId)
-                                      ->add_length_delimited("bar");
+  message_set.mutable_unknown_fields()->AddLengthDelimited(
+    kUnknownTypeId, "bar");
 
   string data;
   ASSERT_TRUE(message_set.SerializeToString(&data));
@@ -262,6 +324,43 @@ TEST(WireFormatTest, SerializeMessageSet) {
   EXPECT_EQ("foo", message2.str());
 
   EXPECT_EQ("bar", raw.item(2).message());
+}
+
+TEST(WireFormatTest, SerializeMessageSetToStreamAndArrayAreEqual) {
+  // Serialize a MessageSet to a stream and to a flat array and check that the
+  // results are equal.
+  // Set up a TestMessageSet with two known messages and an unknown one, as
+  // above.
+
+  unittest::TestMessageSet message_set;
+  message_set.MutableExtension(
+    unittest::TestMessageSetExtension1::message_set_extension)->set_i(123);
+  message_set.MutableExtension(
+    unittest::TestMessageSetExtension2::message_set_extension)->set_str("foo");
+  message_set.mutable_unknown_fields()->AddLengthDelimited(
+    kUnknownTypeId, "bar");
+
+  int size = message_set.ByteSize();
+  string flat_data;
+  string stream_data;
+  flat_data.resize(size);
+  stream_data.resize(size);
+  // Serialize to flat array
+  {
+    uint8* target = reinterpret_cast<uint8*>(string_as_array(&flat_data));
+    uint8* end = message_set.SerializeWithCachedSizesToArray(target);
+    EXPECT_EQ(size, end - target);
+  }
+
+  // Serialize to buffer
+  {
+    io::ArrayOutputStream array_stream(string_as_array(&stream_data), size, 1);
+    io::CodedOutputStream output_stream(&array_stream);
+    message_set.SerializeWithCachedSizes(&output_stream);
+    ASSERT_FALSE(output_stream.HadError());
+  }
+
+  EXPECT_TRUE(flat_data == stream_data);
 }
 
 TEST(WireFormatTest, ParseMessageSet) {
@@ -305,8 +404,9 @@ TEST(WireFormatTest, ParseMessageSet) {
     unittest::TestMessageSetExtension2::message_set_extension).str());
 
   ASSERT_EQ(1, message_set.unknown_fields().field_count());
-  ASSERT_EQ(1, message_set.unknown_fields().field(0).length_delimited_size());
-  EXPECT_EQ("bar", message_set.unknown_fields().field(0).length_delimited(0));
+  ASSERT_EQ(UnknownField::TYPE_LENGTH_DELIMITED,
+            message_set.unknown_fields().field(0).type());
+  EXPECT_EQ("bar", message_set.unknown_fields().field(0).length_delimited());
 }
 
 TEST(WireFormatTest, RecursionLimit) {
@@ -335,11 +435,11 @@ TEST(WireFormatTest, RecursionLimit) {
 TEST(WireFormatTest, UnknownFieldRecursionLimit) {
   unittest::TestEmptyMessage message;
   message.mutable_unknown_fields()
-        ->AddField(1234)->add_group()
-        ->AddField(1234)->add_group()
-        ->AddField(1234)->add_group()
-        ->AddField(1234)->add_group()
-        ->AddField(1234)->add_varint(123);
+        ->AddGroup(1234)
+        ->AddGroup(1234)
+        ->AddGroup(1234)
+        ->AddGroup(1234)
+        ->AddVarint(1234, 123);
   string data;
   message.SerializeToString(&data);
 
@@ -445,8 +545,7 @@ class WireFormatInvalidInputTest : public testing::Test {
       io::StringOutputStream raw_output(&result);
       io::CodedOutputStream output(&raw_output);
 
-      EXPECT_TRUE(WireFormat::WriteBytes(
-        field->number(), string(bytes, size), &output));
+      WireFormat::WriteBytes(field->number(), string(bytes, size), &output);
     }
 
     return result;
@@ -467,12 +566,11 @@ class WireFormatInvalidInputTest : public testing::Test {
       io::StringOutputStream raw_output(&result);
       io::CodedOutputStream output(&raw_output);
 
-      EXPECT_TRUE(output.WriteVarint32(WireFormat::MakeTag(field)));
-      EXPECT_TRUE(output.WriteString(string(bytes, size)));
+      output.WriteVarint32(WireFormat::MakeTag(field));
+      output.WriteString(string(bytes, size));
       if (include_end_tag) {
-        EXPECT_TRUE(
-          output.WriteVarint32(WireFormat::MakeTag(
-            field->number(), WireFormat::WIRETYPE_END_GROUP)));
+        output.WriteVarint32(WireFormat::MakeTag(
+          field->number(), WireFormat::WIRETYPE_END_GROUP));
       }
     }
 
@@ -575,7 +673,9 @@ TEST_F(WireFormatInvalidInputTest, InvalidStringInUnknownGroup) {
 // WriteAnyBytes: fine.
 // ReadAnyBytes: fine.
 const char * kInvalidUTF8String = "Invalid UTF-8: \xA0\xB0\xC0\xD0";
-const char * kValidUTF8String = "Valid UTF-8: \x01\x02\u8C37\u6B4C";
+// This used to be "Valid UTF-8: \x01\x02\u8C37\u6B4C", but MSVC seems to
+// interpret \u differently from GCC.
+const char * kValidUTF8String = "Valid UTF-8: \x01\x02\350\260\267\346\255\214";
 
 template<typename T>
 bool WriteMessage(const char *value, T *message, string *wire_buffer) {

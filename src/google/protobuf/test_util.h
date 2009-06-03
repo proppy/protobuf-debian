@@ -52,30 +52,44 @@ class TestUtil {
   static void SetAllFields(unittest::TestAllTypes* message);
   static void SetAllExtensions(unittest::TestAllExtensions* message);
   static void SetAllFieldsAndExtensions(unittest::TestFieldOrderings* message);
+  static void SetPackedFields(unittest::TestPackedTypes* message);
+  static void SetPackedExtensions(unittest::TestPackedExtensions* message);
 
   // Use the repeated versions of the set_*() accessors to modify all the
   // repeated fields of the messsage (which should already have been
-  // initialized with SetAllFields()).  SetAllFields() itself only tests
+  // initialized with Set*Fields()).  Set*Fields() itself only tests
   // the add_*() accessors.
   static void ModifyRepeatedFields(unittest::TestAllTypes* message);
   static void ModifyRepeatedExtensions(unittest::TestAllExtensions* message);
+  static void ModifyPackedFields(unittest::TestPackedTypes* message);
+  static void ModifyPackedExtensions(unittest::TestPackedExtensions* message);
 
   // Check that all fields have the values that they should have after
-  // SetAllFields() is called.
+  // Set*Fields() is called.
   static void ExpectAllFieldsSet(const unittest::TestAllTypes& message);
   static void ExpectAllExtensionsSet(
       const unittest::TestAllExtensions& message);
+  static void ExpectPackedFieldsSet(const unittest::TestPackedTypes& message);
+  static void ExpectPackedExtensionsSet(
+      const unittest::TestPackedExtensions& message);
 
   // Expect that the message is modified as would be expected from
-  // ModifyRepeatedFields().
+  // Modify*Fields().
   static void ExpectRepeatedFieldsModified(
       const unittest::TestAllTypes& message);
   static void ExpectRepeatedExtensionsModified(
       const unittest::TestAllExtensions& message);
+  static void ExpectPackedFieldsModified(
+      const unittest::TestPackedTypes& message);
+  static void ExpectPackedExtensionsModified(
+      const unittest::TestPackedExtensions& message);
 
   // Check that all fields have their default values.
   static void ExpectClear(const unittest::TestAllTypes& message);
   static void ExpectExtensionsClear(const unittest::TestAllExtensions& message);
+  static void ExpectPackedClear(const unittest::TestPackedTypes& message);
+  static void ExpectPackedExtensionsClear(
+      const unittest::TestPackedExtensions& message);
 
   // Check that the passed-in serialization is the canonical serialization we
   // expect for a TestFieldOrderings message filled in by
@@ -97,6 +111,11 @@ class TestUtil {
     void ExpectAllFieldsSetViaReflection(const Message& message);
     void ExpectClearViaReflection(const Message& message);
 
+    void SetPackedFieldsViaReflection(Message* message);
+    void ModifyPackedFieldsViaReflection(Message* message);
+    void ExpectPackedFieldsSetViaReflection(const Message& message);
+    void ExpectPackedClearViaReflection(const Message& message);
+
    private:
     const FieldDescriptor* F(const string& name);
 
@@ -117,6 +136,12 @@ class TestUtil {
     const EnumValueDescriptor* import_foo_;
     const EnumValueDescriptor* import_bar_;
     const EnumValueDescriptor* import_baz_;
+
+    // We have to split this into three function otherwise it creates a stack
+    // frame so large that it triggers a warning.
+    void ExpectAllFieldsSetViaReflection1(const Message& message);
+    void ExpectAllFieldsSetViaReflection2(const Message& message);
+    void ExpectAllFieldsSetViaReflection3(const Message& message);
 
     GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ReflectionTester);
   };

@@ -79,35 +79,6 @@ int FixedSize(FieldDescriptor::Type type) {
   return -1;
 }
 
-string DefaultValue(const FieldDescriptor* field) {
-  switch (field->cpp_type()) {
-    case FieldDescriptor::CPPTYPE_INT32:
-      return SimpleItoa(field->default_value_int32());
-    case FieldDescriptor::CPPTYPE_UINT32:
-      return SimpleItoa(field->default_value_uint32()) + "u";
-    case FieldDescriptor::CPPTYPE_INT64:
-      return "GOOGLE_LONGLONG(" + SimpleItoa(field->default_value_int64()) + ")";
-    case FieldDescriptor::CPPTYPE_UINT64:
-      return "GOOGLE_ULONGLONG(" + SimpleItoa(field->default_value_uint64())+ ")";
-    case FieldDescriptor::CPPTYPE_DOUBLE:
-      return SimpleDtoa(field->default_value_double());
-    case FieldDescriptor::CPPTYPE_FLOAT:
-      return SimpleFtoa(field->default_value_float());
-    case FieldDescriptor::CPPTYPE_BOOL:
-      return field->default_value_bool() ? "true" : "false";
-
-    case FieldDescriptor::CPPTYPE_ENUM:
-    case FieldDescriptor::CPPTYPE_STRING:
-    case FieldDescriptor::CPPTYPE_MESSAGE:
-      GOOGLE_LOG(FATAL) << "Shouldn't get here.";
-      return "";
-  }
-  // Can't actually get here; make compiler happy.  (We could add a default
-  // case above but then we wouldn't get the nice compiler warning when a
-  // new type is added.)
-  return "";
-}
-
 // TODO(kenton):  Factor out a "SetCommonFieldVariables()" to get rid of
 //   repeat code between this and the other field types.
 void SetPrimitiveVariables(const FieldDescriptor* descriptor,
@@ -180,8 +151,8 @@ GenerateSwappingCode(io::Printer* printer) const {
 }
 
 void PrimitiveFieldGenerator::
-GenerateInitializer(io::Printer* printer) const {
-  printer->Print(variables_, ",\n$name$_($default$)");
+GenerateConstructorCode(io::Printer* printer) const {
+  printer->Print(variables_, "$name$_ = $default$;\n");
 }
 
 void PrimitiveFieldGenerator::
@@ -195,8 +166,15 @@ GenerateMergeFromCodedStream(io::Printer* printer) const {
 void PrimitiveFieldGenerator::
 GenerateSerializeWithCachedSizes(io::Printer* printer) const {
   printer->Print(variables_,
-    "DO_(::google::protobuf::internal::WireFormat::Write$declared_type$("
-      "$number$, this->$name$(), output));\n");
+    "::google::protobuf::internal::WireFormat::Write$declared_type$("
+      "$number$, this->$name$(), output);\n");
+}
+
+void PrimitiveFieldGenerator::
+GenerateSerializeWithCachedSizesToArray(io::Printer* printer) const {
+  printer->Print(variables_,
+    "target = ::google::protobuf::internal::WireFormat::Write$declared_type$ToArray("
+      "$number$, this->$name$(), target);\n");
 }
 
 void PrimitiveFieldGenerator::
@@ -227,6 +205,11 @@ void RepeatedPrimitiveFieldGenerator::
 GeneratePrivateMembers(io::Printer* printer) const {
   printer->Print(variables_,
     "::google::protobuf::RepeatedField< $type$ > $name$_;\n");
+  if (descriptor_->options().packed() &&
+      descriptor_->file()->options().optimize_for() == FileOptions::SPEED) {
+    printer->Print(variables_,
+      "mutable int _$name$_cached_byte_size_;\n");
+  }
 }
 
 void RepeatedPrimitiveFieldGenerator::
@@ -277,39 +260,127 @@ GenerateSwappingCode(io::Printer* printer) const {
 }
 
 void RepeatedPrimitiveFieldGenerator::
-GenerateInitializer(io::Printer* printer) const {
+GenerateConstructorCode(io::Printer* printer) const {
   // Not needed for repeated fields.
 }
 
 void RepeatedPrimitiveFieldGenerator::
 GenerateMergeFromCodedStream(io::Printer* printer) const {
-  printer->Print(variables_,
-    "$type$ value;\n"
-    "DO_(::google::protobuf::internal::WireFormat::Read$declared_type$(input, &value));\n"
-    "add_$name$(value);\n");
+  if (descriptor_->options().packed()) {
+    printer->Print("{\n");
+    printer->Indent();
+    printer->Print(variables_,
+      "::google::protobuf::uint32 length;\n"
+      "DO_(input->ReadVarint32(&length));\n"
+      "::google::protobuf::io::CodedInputStream::Limit limit = "
+          "input->PushLimit(length);\n"
+      "while (input->BytesUntilLimit() > 0) {\n"
+      "  $type$ value;\n"
+      "  DO_(::google::protobuf::internal::WireFormat::Read$declared_type$("
+        "input, &value));\n"
+      "  add_$name$(value);\n"
+      "}\n"
+      "input->PopLimit(limit);\n");
+    printer->Outdent();
+    printer->Print("}\n");
+  } else {
+    printer->Print(variables_,
+      "$type$ value;\n"
+      "DO_(::google::protobuf::internal::WireFormat::Read$declared_type$("
+        "input, &value));\n"
+      "add_$name$(value);\n");
+  }
 }
 
 void RepeatedPrimitiveFieldGenerator::
 GenerateSerializeWithCachedSizes(io::Printer* printer) const {
+  if (descriptor_->options().packed()) {
+    // Write the tag and the size.
+    printer->Print(variables_,
+      "if (this->$name$_size() > 0) {\n"
+      "  ::google::protobuf::internal::WireFormat::WriteTag("
+          "$number$, "
+          "::google::protobuf::internal::WireFormat::WIRETYPE_LENGTH_DELIMITED, "
+          "output);\n"
+      "  output->WriteVarint32(_$name$_cached_byte_size_);\n"
+      "}\n");
+  }
   printer->Print(variables_,
-    "DO_(::google::protobuf::internal::WireFormat::Write$declared_type$("
-      "$number$, this->$name$(i), output));\n");
+      "for (int i = 0; i < this->$name$_size(); i++) {\n");
+  if (descriptor_->options().packed()) {
+    printer->Print(variables_,
+      "  ::google::protobuf::internal::WireFormat::Write$declared_type$NoTag("
+          "this->$name$(i), output);\n");
+  } else {
+    printer->Print(variables_,
+      "  ::google::protobuf::internal::WireFormat::Write$declared_type$("
+          "$number$, this->$name$(i), output);\n");
+  }
+  printer->Print("}\n");
+}
+
+void RepeatedPrimitiveFieldGenerator::
+GenerateSerializeWithCachedSizesToArray(io::Printer* printer) const {
+  if (descriptor_->options().packed()) {
+    // Write the tag and the size.
+    printer->Print(variables_,
+      "if (this->$name$_size() > 0) {\n"
+      "  target = ::google::protobuf::internal::WireFormat::WriteTagToArray("
+          "$number$, "
+          "::google::protobuf::internal::WireFormat::WIRETYPE_LENGTH_DELIMITED, "
+          "target);\n"
+      "  target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray("
+          "_$name$_cached_byte_size_, target);\n"
+      "}\n");
+  }
+  printer->Print(variables_,
+      "for (int i = 0; i < this->$name$_size(); i++) {\n");
+  if (descriptor_->options().packed()) {
+    printer->Print(variables_,
+      "  target = ::google::protobuf::internal::WireFormat::"
+          "Write$declared_type$NoTagToArray("
+          "this->$name$(i), target);\n");
+  } else {
+    printer->Print(variables_,
+      "  target = ::google::protobuf::internal::WireFormat::"
+          "Write$declared_type$ToArray("
+          "$number$, this->$name$(i), target);\n");
+  }
+  printer->Print("}\n");
 }
 
 void RepeatedPrimitiveFieldGenerator::
 GenerateByteSize(io::Printer* printer) const {
+  printer->Print(variables_,
+    "{\n"
+    "  int data_size = 0;\n");
+  printer->Indent();
   int fixed_size = FixedSize(descriptor_->type());
   if (fixed_size == -1) {
     printer->Print(variables_,
-      "total_size += $tag_size$ * $name$_size();\n"
-      "for (int i = 0; i < $name$_size(); i++) {\n"
-      "  total_size += ::google::protobuf::internal::WireFormat::$declared_type$Size(\n"
+      "for (int i = 0; i < this->$name$_size(); i++) {\n"
+      "  data_size += ::google::protobuf::internal::WireFormat::$declared_type$Size(\n"
       "    this->$name$(i));\n"
       "}\n");
   } else {
     printer->Print(variables_,
-      "total_size += ($tag_size$ + $fixed_size$) * $name$_size();\n");
+      "data_size = $fixed_size$ * this->$name$_size();\n");
   }
+
+  if (descriptor_->options().packed()) {
+    printer->Print(variables_,
+      "if (data_size > 0) {\n"
+      "  total_size += $tag_size$ + "
+        "::google::protobuf::internal::WireFormat::Int32Size(data_size);\n"
+      "}\n"
+      "_$name$_cached_byte_size_ = data_size;\n"
+      "total_size += data_size;\n");
+  } else {
+    printer->Print(variables_,
+      "total_size += $tag_size$ * this->$name$_size() + data_size;\n");
+  }
+  printer->Outdent();
+  printer->Print("}\n");
 }
 
 }  // namespace cpp

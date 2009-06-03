@@ -184,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\io\gzip_stream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\stubs\hash.h"
 				>
 			</File>
@@ -200,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\stubs\once.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\compiler\parser.h"
 				>
 			</File>
@@ -213,10 +221,6 @@
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\repeated_field.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\google\protobuf\stubs\scoped_memory_log.h"
 				>
 			</File>
 			<File
@@ -308,6 +312,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\io\gzip_stream.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\stubs\hash.cc"
 				>
 			</File>
@@ -321,6 +329,10 @@
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\message.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\src\google\protobuf\stubs\once.cc"
 				>
 			</File>
 			<File
@@ -348,15 +360,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\stubs\structurally_valid.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\stubs\strutil.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\stubs\substitute.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\src\google\protobuf\stubs\structurally_valid.cc"
 				>
 			</File>
 			<File

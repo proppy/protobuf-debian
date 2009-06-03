@@ -38,6 +38,7 @@
 #include <google/protobuf/compiler/cpp/cpp_helpers.h>
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/strutil.h>
+#include <google/protobuf/stubs/substitute.h>
 
 namespace google {
 namespace protobuf {
@@ -76,6 +77,31 @@ hash_set<string> MakeKeywordsMap() {
 }
 
 hash_set<string> kKeywords = MakeKeywordsMap();
+
+string UnderscoresToCamelCase(const string& input, bool cap_next_letter) {
+  string result;
+  // Note:  I distrust ctype.h due to locales.
+  for (int i = 0; i < input.size(); i++) {
+    if ('a' <= input[i] && input[i] <= 'z') {
+      if (cap_next_letter) {
+        result += input[i] + ('A' - 'a');
+      } else {
+        result += input[i];
+      }
+      cap_next_letter = false;
+    } else if ('A' <= input[i] && input[i] <= 'Z') {
+      // Capital letters are left as-is.
+      result += input[i];
+      cap_next_letter = false;
+    } else if ('0' <= input[i] && input[i] <= '9') {
+      result += input[i];
+      cap_next_letter = true;
+    } else {
+      cap_next_letter = true;
+    }
+  }
+  return result;
+}
 
 }  // namespace
 
@@ -122,6 +148,11 @@ string FieldName(const FieldDescriptor* field) {
     result.append("_");
   }
   return result;
+}
+
+string FieldConstantName(const FieldDescriptor *field) {
+  string field_name = UnderscoresToCamelCase(field->name(), true);
+  return "k" + field_name + "FieldNumber";
 }
 
 string StripProto(const string& filename) {
@@ -183,6 +214,41 @@ const char* DeclaredTypeMethodName(FieldDescriptor::Type type) {
   return "";
 }
 
+string DefaultValue(const FieldDescriptor* field) {
+  switch (field->cpp_type()) {
+    case FieldDescriptor::CPPTYPE_INT32:
+      return SimpleItoa(field->default_value_int32());
+    case FieldDescriptor::CPPTYPE_UINT32:
+      return SimpleItoa(field->default_value_uint32()) + "u";
+    case FieldDescriptor::CPPTYPE_INT64:
+      return "GOOGLE_LONGLONG(" + SimpleItoa(field->default_value_int64()) + ")";
+    case FieldDescriptor::CPPTYPE_UINT64:
+      return "GOOGLE_ULONGLONG(" + SimpleItoa(field->default_value_uint64())+ ")";
+    case FieldDescriptor::CPPTYPE_DOUBLE:
+      return SimpleDtoa(field->default_value_double());
+    case FieldDescriptor::CPPTYPE_FLOAT:
+      return SimpleFtoa(field->default_value_float());
+    case FieldDescriptor::CPPTYPE_BOOL:
+      return field->default_value_bool() ? "true" : "false";
+    case FieldDescriptor::CPPTYPE_ENUM:
+      // Lazy:  Generate a static_cast because we don't have a helper function
+      //   that constructs the full name of an enum value.
+      return strings::Substitute(
+          "static_cast< $0 >($1)",
+          ClassName(field->enum_type(), true),
+          field->default_value_enum()->number());
+    case FieldDescriptor::CPPTYPE_STRING:
+      return "\"" + CEscape(field->default_value_string()) + "\"";
+    case FieldDescriptor::CPPTYPE_MESSAGE:
+      return ClassName(field->message_type(), true) + "::default_instance()";
+  }
+  // Can't actually get here; make compiler happy.  (We could add a default
+  // case above but then we wouldn't get the nice compiler warning when a
+  // new type is added.)
+  GOOGLE_LOG(FATAL) << "Can't get here.";
+  return "";
+}
+
 // Convert a file name into a valid identifier.
 string FilenameIdentifier(const string& filename) {
   string result;
@@ -200,9 +266,19 @@ string FilenameIdentifier(const string& filename) {
   return result;
 }
 
-// Return the name of the BuildDescriptors() function for a given file.
-string GlobalBuildDescriptorsName(const string& filename) {
-  return "protobuf_BuildDesc_" + FilenameIdentifier(filename);
+// Return the name of the AddDescriptors() function for a given file.
+string GlobalAddDescriptorsName(const string& filename) {
+  return "protobuf_AddDesc_" + FilenameIdentifier(filename);
+}
+
+// Return the name of the AssignDescriptors() function for a given file.
+string GlobalAssignDescriptorsName(const string& filename) {
+  return "protobuf_AssignDesc_" + FilenameIdentifier(filename);
+}
+
+// Return the name of the ShutdownFile() function for a given file.
+string GlobalShutdownFileName(const string& filename) {
+  return "protobuf_ShutdownFile_" + FilenameIdentifier(filename);
 }
 
 }  // namespace cpp
