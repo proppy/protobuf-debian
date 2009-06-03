@@ -1,0 +1,41 @@
+Date: Tue, 2 Jun 2009 11:44:33 +0200
+From: Sune Vuorela <Sune@vuorela.dk>
+To: 530606@bugs.debian.org
+Subject: Bug#530606: protobuf: FTBFS on ia64
+
+Hi
+
+With the following patch, it builds on ia64 and on hppa.
+--- a/src/gtest/gtest-death-test.cc
++++ b/src/gtest/gtest-death-test.cc
+@@ -37,6 +37,15 @@
+ #include <errno.h>
+ #include <limits.h>
+ #include <stdarg.h>
++#include <sched.h>
++
++#ifdef __ia64__
++extern "C" {
++int  __clone2(int (*fn) (void *arg), void *child_stack_base,
++  size_t child_stack_size, int flags, void *arg,
++  pid_t *parent_tid, void *tls, pid_t *child_tid);
++}
++#endif
+ 
+ #include <gtest/gtest-message.h>
+ #include <gtest/internal/gtest-string.h>
+@@ -579,8 +588,14 @@
+   void* const stack_top =
+       static_cast<char*>(stack) + (stack_grows_down ? stack_size : 0);
+   ExecDeathTestArgs args = { argv, close_fd };
++#ifdef __ia64__
++  const pid_t child_pid = __clone2(&ExecDeathTestChildMain, stack_top, stack_size,
++                                   SIGCHLD, &args, NULL, NULL, NULL);
++#else
+   const pid_t child_pid = clone(&ExecDeathTestChildMain, stack_top,
+                                 SIGCHLD, &args);
++#endif
++
+   GTEST_DEATH_TEST_CHECK(child_pid != -1);
+   GTEST_DEATH_TEST_CHECK(munmap(stack, stack_size) != -1);
+   return child_pid;
