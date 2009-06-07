@@ -9,10 +9,10 @@ Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
 
-Package: libprotobuf3
+Package: libprotobuf4
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: protocol buffer C++ library
+Description: protocol buffers C++ library
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
  simpler. You define how you want your data to be structured once, then you can
@@ -24,14 +24,13 @@ Description: protocol buffer C++ library
  Google uses Protocol Buffers for almost all of its internal RPC protocols and
  file formats.
  .
- This package contains the runtime libraries needed for C++ applications and
- the protocol buffer compiler
+ This package contains the runtime libraries needed for C++ applications.
 
 Package: libprotobuf-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf3
-Description: protocol buffer C++ library (development headers)
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf4
+Description: protocol buffers C++ library (development headers)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
  simpler. You define how you want your data to be structured once, then you can
@@ -46,9 +45,46 @@ Description: protocol buffer C++ library (development headers)
  This package contains the development libraries needed for writing C++
  applications.
 
+Package: libprotoc4
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: protocol buffers compiler library
+ Protocol buffers are a flexible, efficient, automated mechanism for
+ serializing structured data - similar to XML, but smaller, faster, and
+ simpler. You define how you want your data to be structured once, then you can
+ use special generated source code to easily write and read your structured
+ data to and from a variety of data streams and using a variety of languages.
+ You can even update your data structure without breaking deployed programs
+ that are compiled against the "old" format.
+ .
+ Google uses Protocol Buffers for almost all of its internal RPC protocols and
+ file formats.
+ .
+ This package contains the runtime libraries needed for the protocol buffer
+ compiler.
+
+Package: libprotoc-dev
+Architecture: any
+Section: libdevel
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc4, libprotobuf-dev
+Description: protocol buffers compiler library (development headers)
+ Protocol buffers are a flexible, efficient, automated mechanism for
+ serializing structured data - similar to XML, but smaller, faster, and
+ simpler. You define how you want your data to be structured once, then you can
+ use special generated source code to easily write and read your structured
+ data to and from a variety of data streams and using a variety of languages.
+ You can even update your data structure without breaking deployed programs
+ that are compiled against the "old" format.
+ .
+ Google uses Protocol Buffers for almost all of its internal RPC protocols and
+ file formats.
+ .
+ This package contains the development libraries needed for writing protobuf
+ compilers.
+
 Package: protobuf-compiler
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf3 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc4 (= ${binary:Version})
 Description: compiler for protocol buffer definition files
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and

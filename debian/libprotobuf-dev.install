@@ -1,4 +1,3 @@
-usr/lib/libprotobuf*.so
-usr/lib/libprotoc*.so
-usr/lib/*.la
+usr/lib/libprotobuf.so
+usr/lib/libprotobuf.la
 usr/include
