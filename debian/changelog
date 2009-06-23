@@ -3,8 +3,10 @@ protobuf (2.1.0-1) unstable; urgency=low
   * New Upstream Version
   * Fix "Please split out libprotoc.so.N out of the libprotobufN
     package" (Closes: #524087)
+  * Update Standards Version to 3.8.2 (no changes needed, sections are already
+    correct and the rest doesn't affect this package)
 
- -- Iustin Pop <iusty@k1024.org>  Wed, 24 Jun 2009 00:09:36 +0200
+ -- Iustin Pop <iusty@k1024.org>  Wed, 24 Jun 2009 00:19:03 +0200
 
 protobuf (2.0.3-2.2) unstable; urgency=medium
 
