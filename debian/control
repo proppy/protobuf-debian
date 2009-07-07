@@ -67,6 +67,8 @@ Package: libprotoc-dev
 Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc4, libprotobuf-dev
+Replaces: libprotobuf-dev (<< 2.1.0)
+Conflicts: libprotobuf-dev (<< 2.1.0)
 Description: protocol buffers compiler library (development headers)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
