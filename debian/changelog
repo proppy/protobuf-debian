@@ -1,3 +1,19 @@
+protobuf (2.2.0-0.1) unstable; urgency=low
+
+  * Non-maintainer upload coordinated with maintainer
+  * New upstream release				(Closes: #551931)
+
+  * debian/libprotobuf-install: Added 'usr/lib/pkgconfig/*' to have 
+    pkg-config support files installed 
+
+  * debian/control: Added (= ${binary:Version}) to Depends for -dev 
+    packages for tighter link to underlying libraries [lintian warning]
+  * debian/control: Updated StandardVersion: to 3.8.3
+  
+  * debian/control: Major version not incremented as upstream kept it at 4
+  
+ -- Dirk Eddelbuettel <edd@debian.org>  Sat, 14 Nov 2009 06:44:22 -0600
+
 protobuf (2.1.0-1) unstable; urgency=low
 
   * New Upstream Version

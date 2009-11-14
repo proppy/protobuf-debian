@@ -28,6 +28,6 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar destfile="${targetdir}/protobuf-2.1.0.jar" basedir="${classesdir}" />
+        <jar destfile="${targetdir}/protobuf-2.2.0.jar" basedir="${classesdir}" />
     </target>
 </project>

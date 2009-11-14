@@ -90,9 +90,11 @@ clean: unpatch
 	# remove the built manpage
 	rm -f protoc.1
 
-	cd python && \
-		python setup.py clean --all ;\
-		rm -rf protobuf.egg-info
+	if [ -f python/protobuf.egg-info ]; then \
+		( cd python && \
+		  python setup.py clean --all && \
+		  rm -rf protobuf.egg-info ) \
+	fi
 
 	# remove java builds
 	$(SHELL) ./debian/ant-wrapper -f debian/java-build.xml clean || true
