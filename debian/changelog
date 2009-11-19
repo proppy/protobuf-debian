@@ -1,3 +1,14 @@
+protobuf (2.2.0a-0.1) unstable; urgency=low
+
+  * Non-maintainer upload 
+  * New upstream release made this evening correction major SONAME
+  * debian/control: Updated major version to 5 		(Closes: #556563)
+  * debian/rules: Updated two links to use libproto*5 
+  * debian/libprotobuf5.shlibs: Added
+  * debian/libprotoc5.shlibs: Added
+  
+ -- Dirk Eddelbuettel <edd@debian.org>  Wed, 18 Nov 2009 21:47:41 -0600
+
 protobuf (2.2.0-0.1) unstable; urgency=low
 
   * Non-maintainer upload coordinated with maintainer

@@ -9,7 +9,7 @@ Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
 
-Package: libprotobuf4
+Package: libprotobuf5
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: protocol buffers C++ library
@@ -29,7 +29,7 @@ Description: protocol buffers C++ library
 Package: libprotobuf-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf4 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf5 (= ${binary:Version})
 Description: protocol buffers C++ library (development headers)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
@@ -45,7 +45,7 @@ Description: protocol buffers C++ library (development headers)
  This package contains the development libraries needed for writing C++
  applications.
 
-Package: libprotoc4
+Package: libprotoc5
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: protocol buffers compiler library
@@ -66,7 +66,7 @@ Description: protocol buffers compiler library
 Package: libprotoc-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc4 (= ${binary:Version}), libprotobuf-dev (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc5 (= ${binary:Version}), libprotobuf-dev (= ${binary:Version})
 Replaces: libprotobuf-dev (<< 2.1.0)
 Conflicts: libprotobuf-dev (<< 2.1.0)
 Description: protocol buffers compiler library (development headers)
@@ -86,7 +86,7 @@ Description: protocol buffers compiler library (development headers)
 
 Package: protobuf-compiler
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc4 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc5 (= ${binary:Version})
 Description: compiler for protocol buffer definition files
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
