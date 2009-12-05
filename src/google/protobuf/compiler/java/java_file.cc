@@ -151,7 +151,9 @@ void FileGenerator::Generate(io::Printer* printer) {
 
   printer->Print(
     "public static void registerAllExtensions(\n"
-    "    com.google.protobuf.ExtensionRegistry registry) {\n");
+    "    com.google.protobuf.ExtensionRegistry$lite$ registry) {\n",
+    "lite", HasDescriptorMethods(file_) ? "" : "Lite");
+
   printer->Indent();
 
   for (int i = 0; i < file_->extension_count(); i++) {
@@ -195,8 +197,42 @@ void FileGenerator::Generate(io::Printer* printer) {
 
   printer->Print("\n");
 
-  // -----------------------------------------------------------------
+  if (HasDescriptorMethods(file_)) {
+    GenerateEmbeddedDescriptor(printer);
+  } else {
+    printer->Print(
+      "static {\n");
+    printer->Indent();
 
+    for (int i = 0; i < file_->message_type_count(); i++) {
+      // TODO(kenton):  Reuse MessageGenerator objects?
+      MessageGenerator(file_->message_type(i))
+        .GenerateStaticVariableInitializers(printer);
+    }
+
+    for (int i = 0; i < file_->extension_count(); i++) {
+      // TODO(kenton):  Reuse ExtensionGenerator objects?
+      ExtensionGenerator(file_->extension(i))
+        .GenerateInitializationCode(printer);
+    }
+
+    printer->Outdent();
+    printer->Print(
+      "}\n");
+  }
+
+  // Dummy function we can use to force the static initialization block to
+  // run.  Needed by inner classes.  Cannot be private due to
+  // java_multiple_files option.
+  printer->Print(
+    "\n"
+    "public static void internalForceInit() {}\n");
+
+  printer->Outdent();
+  printer->Print("}\n");
+}
+
+void FileGenerator::GenerateEmbeddedDescriptor(io::Printer* printer) {
   // Embed the descriptor.  We simply serialize the entire FileDescriptorProto
   // and embed it as a string literal, which is parsed and built into real
   // descriptors at initialization time.  We unfortunately have to put it in
@@ -220,20 +256,28 @@ void FileGenerator::Generate(io::Printer* printer) {
     "private static com.google.protobuf.Descriptors.FileDescriptor\n"
     "    descriptor;\n"
     "static {\n"
-    "  java.lang.String descriptorData =\n");
+    "  java.lang.String[] descriptorData = {\n");
   printer->Indent();
   printer->Indent();
 
   // Only write 40 bytes per line.
   static const int kBytesPerLine = 40;
   for (int i = 0; i < file_data.size(); i += kBytesPerLine) {
-    if (i > 0) printer->Print(" +\n");
+    if (i > 0) {
+      // Every 400 lines, start a new string literal, in order to avoid the
+      // 64k length limit.
+      if (i % 400 == 0) {
+        printer->Print(",\n");
+      } else {
+        printer->Print(" +\n");
+      }
+    }
     printer->Print("\"$data$\"",
       "data", CEscape(file_data.substr(i, kBytesPerLine)));
   }
-  printer->Print(";\n");
 
   printer->Outdent();
+  printer->Print("\n};\n");
 
   // -----------------------------------------------------------------
   // Create the InternalDescriptorAssigner.
@@ -310,9 +354,6 @@ void FileGenerator::Generate(io::Printer* printer) {
   printer->Outdent();
   printer->Print(
     "}\n");
-
-  printer->Outdent();
-  printer->Print("}\n");
 }
 
 template<typename GeneratorClass, typename DescriptorClass>

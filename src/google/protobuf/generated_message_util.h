@@ -28,14 +28,38 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// from google3/util/gtl/stl_util-inl.cc
+// Author: kenton@google.com (Kenton Varda)
+//  Based on original Protocol Buffers design by
+//  Sanjay Ghemawat, Jeff Dean, and others.
+//
+// This file contains miscellaneous helper code used by generated code --
+// including lite types -- but which should not be used directly by users.
 
-#include <google/protobuf/stubs/stl_util-inl.h>
+#ifndef GOOGLE_PROTOBUF_GENERATED_MESSAGE_UTIL_H__
+#define GOOGLE_PROTOBUF_GENERATED_MESSAGE_UTIL_H__
+
+#include <google/protobuf/stubs/common.h>
+
 
 namespace google {
 namespace protobuf {
+namespace internal {
 
-// Template module.  Nothing to see here.
+// Annotation for the compiler to emit a deprecation message if a field marked
+// with option 'deprecated=true' is used in the code.
+//
+// For internal use in the pb.cc files, deprecation warnings are suppressed
+// there.
+#undef DEPRECATED_PROTOBUF_FIELD
+#if !defined(INTERNAL_SUPPRESS_PROTOBUF_FIELD_DEPRECATION)
+#  define DEPRECATED_PROTOBUF_FIELD GOOGLE_ATTRIBUTE_DEPRECATED
+#else
+#  define DEPRECATED_PROTOBUF_FIELD
+#endif
 
+
+}  // namespace internal
 }  // namespace protobuf
+
 }  // namespace google
+#endif  // GOOGLE_PROTOBUF_GENERATED_MESSAGE_UTIL_H__

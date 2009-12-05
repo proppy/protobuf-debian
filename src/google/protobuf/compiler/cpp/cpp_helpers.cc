@@ -152,7 +152,18 @@ string FieldName(const FieldDescriptor* field) {
 
 string FieldConstantName(const FieldDescriptor *field) {
   string field_name = UnderscoresToCamelCase(field->name(), true);
-  return "k" + field_name + "FieldNumber";
+  string result = "k" + field_name + "FieldNumber";
+
+  if (!field->is_extension() &&
+      field->containing_type()->FindFieldByCamelcaseName(
+        field->camelcase_name()) != field) {
+    // This field's camelcase name is not unique.  As a hack, add the field
+    // number to the constant name.  This makes the constant rather useless,
+    // but what can we do?
+    result += "_" + SimpleItoa(field->number());
+  }
+
+  return result;
 }
 
 string StripProto(const string& filename) {
@@ -227,7 +238,15 @@ string DefaultValue(const FieldDescriptor* field) {
     case FieldDescriptor::CPPTYPE_DOUBLE:
       return SimpleDtoa(field->default_value_double());
     case FieldDescriptor::CPPTYPE_FLOAT:
-      return SimpleFtoa(field->default_value_float());
+      {
+        // If floating point value contains a period (.) or an exponent (either
+        // E or e), then append suffix 'f' to make it a floating-point literal.
+        string float_value = SimpleFtoa(field->default_value_float());
+        if (float_value.find_first_of(".eE") != string::npos) {
+          float_value.push_back('f');
+        }
+        return float_value;
+      }
     case FieldDescriptor::CPPTYPE_BOOL:
       return field->default_value_bool() ? "true" : "false";
     case FieldDescriptor::CPPTYPE_ENUM:

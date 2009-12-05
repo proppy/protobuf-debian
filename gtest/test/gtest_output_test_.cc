@@ -743,11 +743,11 @@ class TypedTestP : public testing::Test {
 TYPED_TEST_CASE_P(TypedTestP);
 
 TYPED_TEST_P(TypedTestP, Success) {
-  EXPECT_EQ(0, TypeParam());
+  EXPECT_EQ(0U, TypeParam());
 }
 
 TYPED_TEST_P(TypedTestP, Failure) {
-  EXPECT_EQ(1, TypeParam()) << "Expected failure";
+  EXPECT_EQ(1U, TypeParam()) << "Expected failure";
 }
 
 REGISTER_TYPED_TEST_CASE_P(TypedTestP, Success, Failure);
@@ -808,7 +808,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(My, ATypeParamDeathTest, NumericTypes);
 // Tests various failure conditions of
 // EXPECT_{,NON}FATAL_FAILURE{,_ON_ALL_THREADS}.
 class ExpectFailureTest : public testing::Test {
- protected:
+ public:  // Must be public and not protected due to a bug in g++ 3.4.2.
   enum FailureMode {
     FATAL_FAILURE,
     NONFATAL_FAILURE
@@ -974,6 +974,10 @@ int main(int argc, char **argv) {
   // We just run the tests, knowing some of them are intended to fail.
   // We will use a separate Python script to compare the output of
   // this program with the golden file.
+
+  // It's hard to test InitGoogleTest() directly, as it has many
+  // global side effects.  The following line serves as a sanity test
+  // for it.
   testing::InitGoogleTest(&argc, argv);
   if (argc >= 2 &&
       String(argv[1]) == "--gtest_internal_skip_environment_and_ad_hoc_tests")

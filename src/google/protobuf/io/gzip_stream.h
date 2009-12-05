@@ -1,5 +1,5 @@
 // Protocol Buffers - Google's data interchange format
-// Copyright 2009 Google Inc.  All rights reserved.
+// Copyright 2008 Google Inc.  All rights reserved.
 // http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Author: brianolson@google.com (Brian Olson)
-//  Based on original Protocol Buffers design by
-//  Sanjay Ghemawat, Jeff Dean, and others.
 //
 // This file contains the definition for classes GzipInputStream and
 // GzipOutputStream.
@@ -119,11 +117,39 @@ class LIBPROTOBUF_EXPORT GzipOutputStream : public ZeroCopyOutputStream {
     ZLIB = 2,
   };
 
-  // buffer_size and format may be -1 for default of 64kB and GZIP format
-  explicit GzipOutputStream(
+  struct Options {
+    // Defaults to GZIP.
+    Format format;
+
+    // What size buffer to use internally.  Defaults to 64kB.
+    int buffer_size;
+
+    // A number between 0 and 9, where 0 is no compression and 9 is best
+    // compression.  Defaults to Z_DEFAULT_COMPRESSION (see zlib.h).
+    int compression_level;
+
+    // Defaults to Z_DEFAULT_STRATEGY.  Can also be set to Z_FILTERED,
+    // Z_HUFFMAN_ONLY, or Z_RLE.  See the documentation for deflateInit2 in
+    // zlib.h for definitions of these constants.
+    int compression_strategy;
+
+    Options();  // Initializes with default values.
+  };
+
+  // Create a GzipOutputStream with default options.
+  explicit GzipOutputStream(ZeroCopyOutputStream* sub_stream);
+
+  // Create a GzipOutputStream with the given options.
+  GzipOutputStream(
       ZeroCopyOutputStream* sub_stream,
-      Format format = GZIP,
-      int buffer_size = -1);
+      const Options& options);
+
+  // DEPRECATED:  Use one of the above constructors instead.
+  GzipOutputStream(
+      ZeroCopyOutputStream* sub_stream,
+      Format format,
+      int buffer_size = -1) GOOGLE_ATTRIBUTE_DEPRECATED;
+
   virtual ~GzipOutputStream();
 
   // Return last error message or NULL if no error.
@@ -163,6 +189,9 @@ class LIBPROTOBUF_EXPORT GzipOutputStream : public ZeroCopyOutputStream {
   void* input_buffer_;
   size_t input_buffer_length_;
 
+  // Shared constructor code.
+  void Init(ZeroCopyOutputStream* sub_stream, const Options& options);
+
   // Do some compression.
   // Takes zlib flush mode.
   // Returns zlib error code.
@@ -173,6 +202,6 @@ class LIBPROTOBUF_EXPORT GzipOutputStream : public ZeroCopyOutputStream {
 
 }  // namespace io
 }  // namespace protobuf
-}  // namespace google
 
+}  // namespace google
 #endif  // GOOGLE_PROTOBUF_IO_GZIP_STREAM_H__

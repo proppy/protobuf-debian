@@ -83,24 +83,24 @@ namespace internal {
 
 // The current version, represented as a single integer to make comparison
 // easier:  major * 10^6 + minor * 10^3 + micro
-#define GOOGLE_PROTOBUF_VERSION 2001000
+#define GOOGLE_PROTOBUF_VERSION 2002000
 
 // The minimum library version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2001000
+#define GOOGLE_PROTOBUF_MIN_LIBRARY_VERSION 2002000
 
 // The minimum header version which works with the current version of
 // the library.  This constant should only be used by protoc's C++ code
 // generator.
-static const int kMinHeaderVersionForLibrary = 2001000;
+static const int kMinHeaderVersionForLibrary = 2002000;
 
 // The minimum protoc version which works with the current version of the
 // headers.
-#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2001000
+#define GOOGLE_PROTOBUF_MIN_PROTOC_VERSION 2002000
 
 // The minimum header version which works with the current version of
 // protoc.  This constant should only be used in VerifyVersion().
-static const int kMinHeaderVersionForProtoc = 2001000;
+static const int kMinHeaderVersionForProtoc = 2002000;
 
 // Verifies that the headers and libraries are compatible.  Use the macro
 // below to call this.
@@ -179,6 +179,14 @@ static const uint64 kuint64max = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
 #else
 // Other compilers will have to figure it out for themselves.
 #define GOOGLE_ATTRIBUTE_ALWAYS_INLINE
+#endif
+
+#undef GOOGLE_ATTRIBUTE_DEPRECATED
+#ifdef __GNUC__
+// If the method/variable/type is used anywhere, produce a warning.
+#define GOOGLE_ATTRIBUTE_DEPRECATED __attribute__((deprecated))
+#else
+#define GOOGLE_ATTRIBUTE_DEPRECATED
 #endif
 
 // ===================================================================
@@ -642,24 +650,24 @@ class LIBPROTOBUF_EXPORT LogFinisher {
 
 #define GOOGLE_CHECK(EXPRESSION) \
   GOOGLE_LOG_IF(FATAL, !(EXPRESSION)) << "CHECK failed: " #EXPRESSION ": "
-#define GOOGLE_CHECK_EQ(A, B) GOOGLE_CHECK(A == B)
-#define GOOGLE_CHECK_NE(A, B) GOOGLE_CHECK(A != B)
-#define GOOGLE_CHECK_LT(A, B) GOOGLE_CHECK(A <  B)
-#define GOOGLE_CHECK_LE(A, B) GOOGLE_CHECK(A <= B)
-#define GOOGLE_CHECK_GT(A, B) GOOGLE_CHECK(A >  B)
-#define GOOGLE_CHECK_GE(A, B) GOOGLE_CHECK(A >= B)
+#define GOOGLE_CHECK_EQ(A, B) GOOGLE_CHECK((A) == (B))
+#define GOOGLE_CHECK_NE(A, B) GOOGLE_CHECK((A) != (B))
+#define GOOGLE_CHECK_LT(A, B) GOOGLE_CHECK((A) <  (B))
+#define GOOGLE_CHECK_LE(A, B) GOOGLE_CHECK((A) <= (B))
+#define GOOGLE_CHECK_GT(A, B) GOOGLE_CHECK((A) >  (B))
+#define GOOGLE_CHECK_GE(A, B) GOOGLE_CHECK((A) >= (B))
 
 #ifdef NDEBUG
 
-#define GOOGLE_DLOG GOOGLE_LOG_IF(false, INFO)
+#define GOOGLE_DLOG GOOGLE_LOG_IF(INFO, false)
 
 #define GOOGLE_DCHECK(EXPRESSION) while(false) GOOGLE_CHECK(EXPRESSION)
-#define GOOGLE_DCHECK_EQ(A, B) GOOGLE_DCHECK(A == B)
-#define GOOGLE_DCHECK_NE(A, B) GOOGLE_DCHECK(A != B)
-#define GOOGLE_DCHECK_LT(A, B) GOOGLE_DCHECK(A <  B)
-#define GOOGLE_DCHECK_LE(A, B) GOOGLE_DCHECK(A <= B)
-#define GOOGLE_DCHECK_GT(A, B) GOOGLE_DCHECK(A >  B)
-#define GOOGLE_DCHECK_GE(A, B) GOOGLE_DCHECK(A >= B)
+#define GOOGLE_DCHECK_EQ(A, B) GOOGLE_DCHECK((A) == (B))
+#define GOOGLE_DCHECK_NE(A, B) GOOGLE_DCHECK((A) != (B))
+#define GOOGLE_DCHECK_LT(A, B) GOOGLE_DCHECK((A) <  (B))
+#define GOOGLE_DCHECK_LE(A, B) GOOGLE_DCHECK((A) <= (B))
+#define GOOGLE_DCHECK_GT(A, B) GOOGLE_DCHECK((A) >  (B))
+#define GOOGLE_DCHECK_GE(A, B) GOOGLE_DCHECK((A) >= (B))
 
 #else  // NDEBUG
 

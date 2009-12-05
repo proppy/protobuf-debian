@@ -119,6 +119,9 @@ GTEST_DECLARE_string_(output);
 // test.
 GTEST_DECLARE_bool_(print_time);
 
+// This flag specifies the random number seed.
+GTEST_DECLARE_int32_(random_seed);
+
 // This flag sets how many times the tests are repeated. The default value
 // is 1. If the value is -1 the tests are repeating forever.
 GTEST_DECLARE_int32_(repeat);
@@ -126,6 +129,9 @@ GTEST_DECLARE_int32_(repeat);
 // This flag controls whether Google Test includes Google Test internal
 // stack frames in failure stack traces.
 GTEST_DECLARE_bool_(show_internal_stack_frames);
+
+// When this flag is specified, tests' order is randomized on every run.
+GTEST_DECLARE_bool_(shuffle);
 
 // This flag specifies the maximum number of stack frames to be
 // printed in a failure message.
@@ -141,7 +147,19 @@ const int kMaxStackTraceDepth = 100;
 
 namespace internal {
 
+class AssertHelper;
+class DefaultGlobalTestPartResultReporter;
+class ExecDeathTest;
+class FinalSuccessChecker;
 class GTestFlagSaver;
+class TestCase;
+class TestInfoImpl;
+class TestResultAccessor;
+class UnitTestAccessor;
+class WindowsDeathTest;
+class UnitTestImpl* GetUnitTestImpl();
+void ReportFailureInUnknownLocation(TestPartResultType result_type,
+                                    const String& message);
 
 // Converts a streamable value to a String.  A NULL pointer is
 // converted to "(null)".  When the input value is a ::string,
@@ -346,6 +364,159 @@ class Test {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Test);
 };
 
+typedef internal::TimeInMillis TimeInMillis;
+
+namespace internal {
+
+// A copyable object representing a user specified test property which can be
+// output as a key/value string pair.
+//
+// Don't inherit from TestProperty as its destructor is not virtual.
+class TestProperty {
+ public:
+  // C'tor.  TestProperty does NOT have a default constructor.
+  // Always use this constructor (with parameters) to create a
+  // TestProperty object.
+  TestProperty(const char* key, const char* value) :
+    key_(key), value_(value) {
+  }
+
+  // Gets the user supplied key.
+  const char* key() const {
+    return key_.c_str();
+  }
+
+  // Gets the user supplied value.
+  const char* value() const {
+    return value_.c_str();
+  }
+
+  // Sets a new value, overriding the one supplied in the constructor.
+  void SetValue(const char* new_value) {
+    value_ = new_value;
+  }
+
+ private:
+  // The key supplied by the user.
+  internal::String key_;
+  // The value supplied by the user.
+  internal::String value_;
+};
+
+// The result of a single Test.  This includes a list of
+// TestPartResults, a list of TestProperties, a count of how many
+// death tests there are in the Test, and how much time it took to run
+// the Test.
+//
+// TestResult is not copyable.
+class TestResult {
+ public:
+  // Creates an empty TestResult.
+  TestResult();
+
+  // D'tor.  Do not inherit from TestResult.
+  ~TestResult();
+
+  // Gets the number of all test parts.  This is the sum of the number
+  // of successful test parts and the number of failed test parts.
+  int total_part_count() const;
+
+  // Returns the number of the test properties.
+  int test_property_count() const;
+
+  // Returns true iff the test passed (i.e. no test part failed).
+  bool Passed() const { return !Failed(); }
+
+  // Returns true iff the test failed.
+  bool Failed() const;
+
+  // Returns true iff the test fatally failed.
+  bool HasFatalFailure() const;
+
+  // Returns true iff the test has a non-fatal failure.
+  bool HasNonfatalFailure() const;
+
+  // Returns the elapsed time, in milliseconds.
+  TimeInMillis elapsed_time() const { return elapsed_time_; }
+
+  // Returns the i-th test part result among all the results. i can range
+  // from 0 to test_property_count() - 1. If i is not in that range, aborts
+  // the program.
+  const TestPartResult& GetTestPartResult(int i) const;
+
+  // Returns the i-th test property. i can range from 0 to
+  // test_property_count() - 1. If i is not in that range, aborts the
+  // program.
+  const TestProperty& GetTestProperty(int i) const;
+
+ private:
+  friend class internal::DefaultGlobalTestPartResultReporter;
+  friend class internal::ExecDeathTest;
+  friend class internal::TestInfoImpl;
+  friend class internal::TestResultAccessor;
+  friend class internal::UnitTestImpl;
+  friend class internal::WindowsDeathTest;
+  friend class testing::TestInfo;
+  friend class testing::UnitTest;
+
+  // Gets the vector of TestPartResults.
+  const internal::Vector<TestPartResult>& test_part_results() const {
+    return *test_part_results_;
+  }
+
+  // Gets the vector of TestProperties.
+  const internal::Vector<TestProperty>& test_properties() const {
+    return *test_properties_;
+  }
+
+  // Sets the elapsed time.
+  void set_elapsed_time(TimeInMillis elapsed) { elapsed_time_ = elapsed; }
+
+  // Adds a test property to the list. The property is validated and may add
+  // a non-fatal failure if invalid (e.g., if it conflicts with reserved
+  // key names). If a property is already recorded for the same key, the
+  // value will be updated, rather than storing multiple values for the same
+  // key.
+  void RecordProperty(const TestProperty& test_property);
+
+  // Adds a failure if the key is a reserved attribute of Google Test
+  // testcase tags.  Returns true if the property is valid.
+  // TODO(russr): Validate attribute names are legal and human readable.
+  static bool ValidateTestProperty(const TestProperty& test_property);
+
+  // Adds a test part result to the list.
+  void AddTestPartResult(const TestPartResult& test_part_result);
+
+  // Returns the death test count.
+  int death_test_count() const { return death_test_count_; }
+
+  // Increments the death test count, returning the new count.
+  int increment_death_test_count() { return ++death_test_count_; }
+
+  // Clears the test part results.
+  void ClearTestPartResults();
+
+  // Clears the object.
+  void Clear();
+
+  // Protects mutable state of the property vector and of owned
+  // properties, whose values may be updated.
+  internal::Mutex test_properites_mutex_;
+
+  // The vector of TestPartResults
+  internal::scoped_ptr<internal::Vector<TestPartResult> > test_part_results_;
+  // The vector of TestProperties
+  internal::scoped_ptr<internal::Vector<TestProperty> > test_properties_;
+  // Running count of death tests.
+  int death_test_count_;
+  // The elapsed time, in milliseconds.
+  TimeInMillis elapsed_time_;
+
+  // We disallow copying TestResult.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestResult);
+};  // class TestResult
+
+}  // namespace internal
 
 // A TestInfo object stores the following information about a test:
 //
@@ -376,9 +547,6 @@ class TestInfo {
   // Returns the test comment.
   const char* comment() const;
 
-  // Returns true if this test matches the user-specified filter.
-  bool matches_filter() const;
-
   // Returns true if this test should run, that is if the test is not disabled
   // (or it is disabled but the also_run_disabled_tests flag has been specified)
   // and its full name matches the user-specified filter.
@@ -399,6 +567,7 @@ class TestInfo {
 
   // Returns the result of the test.
   const internal::TestResult* result() const;
+
  private:
 #if GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
@@ -406,7 +575,7 @@ class TestInfo {
   friend class internal::TestInfoImpl;
   friend class internal::UnitTestImpl;
   friend class Test;
-  friend class TestCase;
+  friend class internal::TestCase;
   friend TestInfo* internal::MakeAndRegisterTestInfo(
       const char* test_case_name, const char* name,
       const char* test_case_comment, const char* comment,
@@ -414,6 +583,9 @@ class TestInfo {
       Test::SetUpTestCaseFunc set_up_tc,
       Test::TearDownTestCaseFunc tear_down_tc,
       internal::TestFactoryBase* factory);
+
+  // Returns true if this test matches the user-specified filter.
+  bool matches_filter() const;
 
   // Increments the number of death tests encountered in this test so
   // far.
@@ -435,6 +607,133 @@ class TestInfo {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
+
+namespace internal {
+
+// A test case, which consists of a vector of TestInfos.
+//
+// TestCase is not copyable.
+class TestCase {
+ public:
+  // Creates a TestCase with the given name.
+  //
+  // TestCase does NOT have a default constructor.  Always use this
+  // constructor to create a TestCase object.
+  //
+  // Arguments:
+  //
+  //   name:         name of the test case
+  //   set_up_tc:    pointer to the function that sets up the test case
+  //   tear_down_tc: pointer to the function that tears down the test case
+  TestCase(const char* name, const char* comment,
+           Test::SetUpTestCaseFunc set_up_tc,
+           Test::TearDownTestCaseFunc tear_down_tc);
+
+  // Destructor of TestCase.
+  virtual ~TestCase();
+
+  // Gets the name of the TestCase.
+  const char* name() const { return name_.c_str(); }
+
+  // Returns the test case comment.
+  const char* comment() const { return comment_.c_str(); }
+
+  // Returns true if any test in this test case should run.
+  bool should_run() const { return should_run_; }
+
+  // Gets the number of successful tests in this test case.
+  int successful_test_count() const;
+
+  // Gets the number of failed tests in this test case.
+  int failed_test_count() const;
+
+  // Gets the number of disabled tests in this test case.
+  int disabled_test_count() const;
+
+  // Get the number of tests in this test case that should run.
+  int test_to_run_count() const;
+
+  // Gets the number of all tests in this test case.
+  int total_test_count() const;
+
+  // Returns true iff the test case passed.
+  bool Passed() const { return !Failed(); }
+
+  // Returns true iff the test case failed.
+  bool Failed() const { return failed_test_count() > 0; }
+
+  // Returns the elapsed time, in milliseconds.
+  TimeInMillis elapsed_time() const { return elapsed_time_; }
+
+  // Returns the i-th test among all the tests. i can range from 0 to
+  // total_test_count() - 1. If i is not in that range, returns NULL.
+  const TestInfo* GetTestInfo(int i) const;
+
+ private:
+  friend class testing::Test;
+  friend class internal::UnitTestImpl;
+
+  // Gets the (mutable) vector of TestInfos in this TestCase.
+  internal::Vector<TestInfo*>& test_info_list() { return *test_info_list_; }
+
+  // Gets the (immutable) vector of TestInfos in this TestCase.
+  const internal::Vector<TestInfo *> & test_info_list() const {
+    return *test_info_list_;
+  }
+
+  // Sets the should_run member.
+  void set_should_run(bool should) { should_run_ = should; }
+
+  // Adds a TestInfo to this test case.  Will delete the TestInfo upon
+  // destruction of the TestCase object.
+  void AddTestInfo(TestInfo * test_info);
+
+  // Clears the results of all tests in this test case.
+  void ClearResult();
+
+  // Clears the results of all tests in the given test case.
+  static void ClearTestCaseResult(TestCase* test_case) {
+    test_case->ClearResult();
+  }
+
+  // Runs every test in this TestCase.
+  void Run();
+
+  // Runs every test in the given TestCase.
+  static void RunTestCase(TestCase * test_case) { test_case->Run(); }
+
+  // Returns true iff test passed.
+  static bool TestPassed(const TestInfo * test_info);
+
+  // Returns true iff test failed.
+  static bool TestFailed(const TestInfo * test_info);
+
+  // Returns true iff test is disabled.
+  static bool TestDisabled(const TestInfo * test_info);
+
+  // Returns true if the given test should run.
+  static bool ShouldRunTest(const TestInfo *test_info);
+
+  // Name of the test case.
+  internal::String name_;
+  // Comment on the test case.
+  internal::String comment_;
+  // Vector of TestInfos.
+  internal::Vector<TestInfo*>* test_info_list_;
+  // Pointer to the function that sets up the test case.
+  Test::SetUpTestCaseFunc set_up_tc_;
+  // Pointer to the function that tears down the test case.
+  Test::TearDownTestCaseFunc tear_down_tc_;
+  // True iff any test in this test case should run.
+  bool should_run_;
+  // Elapsed time, in milliseconds.
+  TimeInMillis elapsed_time_;
+
+  // We disallow copying TestCases.
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestCase);
+};
+
+}  // namespace internal
 
 // An Environment object is capable of setting up and tearing down an
 // environment.  The user should subclass this to define his own
@@ -467,7 +766,7 @@ class Environment {
   virtual Setup_should_be_spelled_SetUp* Setup() { return NULL; }
 };
 
-// A UnitTest consists of a list of TestCases.
+// A UnitTest consists of a vector of TestCases.
 //
 // This is a singleton class.  The only instance of UnitTest is
 // created when UnitTest::GetInstance() is first called.  This
@@ -484,6 +783,38 @@ class UnitTest {
   // Consecutive calls will return the same object.
   static UnitTest* GetInstance();
 
+  // Runs all tests in this UnitTest object and prints the result.
+  // Returns 0 if successful, or 1 otherwise.
+  //
+  // This method can only be called from the main thread.
+  //
+  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+  int Run() GTEST_MUST_USE_RESULT_;
+
+  // Returns the working directory when the first TEST() or TEST_F()
+  // was executed.  The UnitTest object owns the string.
+  const char* original_working_dir() const;
+
+  // Returns the TestCase object for the test that's currently running,
+  // or NULL if no test is running.
+  const internal::TestCase* current_test_case() const;
+
+  // Returns the TestInfo object for the test that's currently running,
+  // or NULL if no test is running.
+  const TestInfo* current_test_info() const;
+
+  // Returns the random seed used at the start of the current test run.
+  int random_seed() const;
+
+#if GTEST_HAS_PARAM_TEST
+  // Returns the ParameterizedTestCaseRegistry object used to keep track of
+  // value-parameterized tests and instantiate and register them.
+  //
+  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
+  internal::ParameterizedTestCaseRegistry& parameterized_test_registry();
+#endif  // GTEST_HAS_PARAM_TEST
+
+ private:
   // Registers and returns a global test environment.  When a test
   // program is run, all global test environments will be set-up in
   // the order they were registered.  After all tests in the program
@@ -499,8 +830,6 @@ class UnitTest {
   // Google Test assertion macros (e.g. ASSERT_TRUE, EXPECT_EQ, etc)
   // eventually call this to report their results.  The user code
   // should use the assertion macros instead of calling this directly.
-  //
-  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
   void AddTestPartResult(TestPartResultType result_type,
                          const char* file_name,
                          int line_number,
@@ -511,39 +840,73 @@ class UnitTest {
   // contains a property with the same key, the value will be updated.
   void RecordPropertyForCurrentTest(const char* key, const char* value);
 
-  // Runs all tests in this UnitTest object and prints the result.
-  // Returns 0 if successful, or 1 otherwise.
-  //
-  // This method can only be called from the main thread.
-  //
-  // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
-  int Run() GTEST_MUST_USE_RESULT_;
-
-  // Returns the working directory when the first TEST() or TEST_F()
-  // was executed.  The UnitTest object owns the string.
-  const char* original_working_dir() const;
-
-  // Returns the TestCase object for the test that's currently running,
-  // or NULL if no test is running.
-  const TestCase* current_test_case() const;
-
-  // Returns the TestInfo object for the test that's currently running,
-  // or NULL if no test is running.
-  const TestInfo* current_test_info() const;
-
-#if GTEST_HAS_PARAM_TEST
-  // Returns the ParameterizedTestCaseRegistry object used to keep track of
-  // value-parameterized tests and instantiate and register them.
-  internal::ParameterizedTestCaseRegistry& parameterized_test_registry();
-#endif  // GTEST_HAS_PARAM_TEST
-
   // Accessors for the implementation object.
   internal::UnitTestImpl* impl() { return impl_; }
   const internal::UnitTestImpl* impl() const { return impl_; }
- private:
+
+  // Gets the number of successful test cases.
+  int successful_test_case_count() const;
+
+  // Gets the number of failed test cases.
+  int failed_test_case_count() const;
+
+  // Gets the number of all test cases.
+  int total_test_case_count() const;
+
+  // Gets the number of all test cases that contain at least one test
+  // that should run.
+  int test_case_to_run_count() const;
+
+  // Gets the number of successful tests.
+  int successful_test_count() const;
+
+  // Gets the number of failed tests.
+  int failed_test_count() const;
+
+  // Gets the number of disabled tests.
+  int disabled_test_count() const;
+
+  // Gets the number of all tests.
+  int total_test_count() const;
+
+  // Gets the number of tests that should run.
+  int test_to_run_count() const;
+
+  // Gets the elapsed time, in milliseconds.
+  TimeInMillis elapsed_time() const;
+
+  // Returns true iff the unit test passed (i.e. all test cases passed).
+  bool Passed() const;
+
+  // Returns true iff the unit test failed (i.e. some test case failed
+  // or something outside of all tests failed).
+  bool Failed() const;
+
+  // Gets the i-th test case among all the test cases. i can range from 0 to
+  // total_test_case_count() - 1. If i is not in that range, returns NULL.
+  const internal::TestCase* GetTestCase(int i) const;
+
   // ScopedTrace is a friend as it needs to modify the per-thread
   // trace stack, which is a private member of UnitTest.
+  // TODO(vladl@google.com): Order all declarations according to the style
+  // guide after publishing of the above methods is done.
   friend class internal::ScopedTrace;
+  friend Environment* AddGlobalTestEnvironment(Environment* env);
+  friend internal::UnitTestImpl* internal::GetUnitTestImpl();
+  friend class internal::AssertHelper;
+  friend class Test;
+  friend void internal::ReportFailureInUnknownLocation(
+      TestPartResultType result_type,
+      const internal::String& message);
+  // TODO(vladl@google.com): Remove these when publishing the new accessors.
+  friend class PrettyUnitTestResultPrinter;
+  friend class XmlUnitTestResultPrinter;
+  friend class internal::UnitTestAccessor;
+  friend class FinalSuccessChecker;
+  FRIEND_TEST(ApiTest, UnitTestImmutableAccessorsWork);
+  FRIEND_TEST(ApiTest, TestCaseImmutableAccessorsWork);
+  FRIEND_TEST(ApiTest, DisabledTestCaseAccessorsWork);
+
 
   // Creates an empty UnitTest.
   UnitTest();

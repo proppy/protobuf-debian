@@ -36,8 +36,10 @@
 #include <stdio.h>
 
 #if GTEST_OS_WINDOWS
+#ifndef _WIN32_WCE
 #include <io.h>
 #include <sys/stat.h>
+#endif  // _WIN32_WCE
 #else
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
@@ -425,11 +427,9 @@ void GTestLog(GTestLogSeverity severity, const char* file,
   fprintf(stderr, "\n%s %s:%d: %s\n", marker, file, line, msg);
   if (severity == GTEST_FATAL) {
     fflush(NULL);  // abort() is not guaranteed to flush open file streams.
-    abort();
+    posix::Abort();
   }
 }
-
-#if GTEST_HAS_STD_STRING
 
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
@@ -444,6 +444,10 @@ class CapturedStderr {
  public:
   // The ctor redirects stderr to a temporary file.
   CapturedStderr() {
+#ifdef _WIN32_WCE
+    // Not supported on Windows CE.
+    posix::Abort();
+#else
     uncaptured_fd_ = dup(kStdErrFileno);
 
 #if GTEST_OS_WINDOWS
@@ -465,19 +469,24 @@ class CapturedStderr {
     fflush(NULL);
     dup2(captured_fd, kStdErrFileno);
     close(captured_fd);
+#endif  // _WIN32_WCE
   }
 
   ~CapturedStderr() {
+#ifndef _WIN32_WCE
     remove(filename_.c_str());
+#endif  // _WIN32_WCE
   }
 
   // Stops redirecting stderr.
   void StopCapture() {
+#ifndef _WIN32_WCE
     // Restores the original stream.
     fflush(NULL);
     dup2(uncaptured_fd_, kStdErrFileno);
     close(uncaptured_fd_);
     uncaptured_fd_ = -1;
+#endif  // !_WIN32_WCE
   }
 
   // Returns the name of the temporary file holding the stderr output.
@@ -503,7 +512,7 @@ static size_t GetFileSize(FILE * file) {
 }
 
 // Reads the entire content of a file as a string.
-static ::std::string ReadEntireFile(FILE * file) {
+static String ReadEntireFile(FILE * file) {
   const size_t file_size = GetFileSize(file);
   char* const buffer = new char[file_size];
 
@@ -519,7 +528,7 @@ static ::std::string ReadEntireFile(FILE * file) {
     bytes_read += bytes_last_read;
   } while (bytes_last_read > 0 && bytes_read < file_size);
 
-  const ::std::string content(buffer, buffer+bytes_read);
+  const String content(buffer, bytes_read);
   delete[] buffer;
 
   return content;
@@ -536,11 +545,11 @@ void CaptureStderr() {
 // Stops capturing stderr and returns the captured string.
 // GTEST_HAS_DEATH_TEST implies that we have ::std::string, so we can
 // use it here.
-::std::string GetCapturedStderr() {
+String GetCapturedStderr() {
   g_captured_stderr->StopCapture();
 
   FILE* const file = posix::FOpen(g_captured_stderr->filename().c_str(), "r");
-  const ::std::string content = ReadEntireFile(file);
+  const String content = ReadEntireFile(file);
   posix::FClose(file);
 
   delete g_captured_stderr;
@@ -548,8 +557,6 @@ void CaptureStderr() {
 
   return content;
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 #if GTEST_HAS_DEATH_TEST
 

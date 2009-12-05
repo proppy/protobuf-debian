@@ -7,6 +7,7 @@ EXTRA_DIST = \
   CHANGES \
   CONTRIBUTORS \
   include/gtest/gtest-param-test.h.pump \
+  include/gtest/internal/gtest-tuple.h.pump \
   include/gtest/internal/gtest-type-util.h.pump \
   include/gtest/internal/gtest-param-util-generated.h.pump \
   make/Makefile \
@@ -109,6 +110,7 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
   include/gtest/internal/gtest-string.h \
+  include/gtest/internal/gtest-tuple.h \
   include/gtest/internal/gtest-type-util.h
 
 lib_libgtest_main_la_SOURCES = src/gtest_main.cc
@@ -291,6 +293,36 @@ TESTS += test/gtest_unittest
 check_PROGRAMS += test/gtest_unittest
 test_gtest_unittest_SOURCES = test/gtest_unittest.cc
 test_gtest_unittest_LDADD = lib/libgtest_main.la
+
+TESTS += test/gtest-unittest-api_test
+check_PROGRAMS += test/gtest-unittest-api_test
+test_gtest_unittest_api_test_SOURCES = test/gtest-unittest-api_test.cc
+test_gtest_unittest_api_test_LDADD = lib/libgtest_main.la
+
+# Verifies that Google Test works when RTTI is disabled.
+TESTS += test/gtest_no_rtti_test
+check_PROGRAMS += test/gtest_no_rtti_test
+test_gtest_no_rtti_test_SOURCES = test/gtest_unittest.cc \
+                                  src/gtest-all.cc \
+                                  src/gtest_main.cc
+test_gtest_no_rtti_test_CXXFLAGS = $(AM_CXXFLAGS) -fno-rtti -DGTEST_HAS_RTTI=0
+
+# Verifies that Google Test's own TR1 tuple implementation works.
+TESTS += test/gtest-tuple_test
+check_PROGRAMS += test/gtest-tuple_test
+test_gtest_tuple_test_SOURCES = test/gtest-tuple_test.cc \
+                                src/gtest-all.cc \
+                                src/gtest_main.cc
+test_gtest_tuple_test_CXXFLAGS = $(AM_CXXFLAGS) -DGTEST_USE_OWN_TR1_TUPLE=1
+
+# Verifies that Google Test's features that use its own TR1 tuple work.
+TESTS += test/gtest_use_own_tuple_test
+check_PROGRAMS += test/gtest_use_own_tuple_test
+test_gtest_use_own_tuple_test_SOURCES = test/gtest-param-test_test.cc \
+                                        test/gtest-param-test2_test.cc \
+                                        src/gtest-all.cc
+test_gtest_use_own_tuple_test_CXXFLAGS = \
+    $(AM_CXXFLAGS) -DGTEST_USE_OWN_TR1_TUPLE=1
 
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. TODO(chandlerc@google.com): While we currently only attempt

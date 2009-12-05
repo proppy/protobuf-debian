@@ -64,7 +64,11 @@ TESTS = samples/sample1_unittest$(EXEEXT) \
 	test/gtest-test-part_test$(EXEEXT) \
 	test/gtest_throw_on_failure_ex_test$(EXEEXT) \
 	test/gtest-typed-test_test$(EXEEXT) \
-	test/gtest_unittest$(EXEEXT) $(am__append_2)
+	test/gtest_unittest$(EXEEXT) \
+	test/gtest-unittest-api_test$(EXEEXT) \
+	test/gtest_no_rtti_test$(EXEEXT) \
+	test/gtest-tuple_test$(EXEEXT) \
+	test/gtest_use_own_tuple_test$(EXEEXT) $(am__append_2)
 check_PROGRAMS = samples/sample1_unittest$(EXEEXT) \
 	samples/sample2_unittest$(EXEEXT) \
 	samples/sample3_unittest$(EXEEXT) \
@@ -90,7 +94,11 @@ check_PROGRAMS = samples/sample1_unittest$(EXEEXT) \
 	test/gtest-test-part_test$(EXEEXT) \
 	test/gtest_throw_on_failure_ex_test$(EXEEXT) \
 	test/gtest-typed-test_test$(EXEEXT) \
-	test/gtest_unittest$(EXEEXT) $(am__EXEEXT_1)
+	test/gtest_unittest$(EXEEXT) \
+	test/gtest-unittest-api_test$(EXEEXT) \
+	test/gtest_no_rtti_test$(EXEEXT) \
+	test/gtest-tuple_test$(EXEEXT) \
+	test/gtest_use_own_tuple_test$(EXEEXT) $(am__EXEEXT_1)
 @HAVE_PYTHON_TRUE@am__append_1 =  \
 @HAVE_PYTHON_TRUE@	test/gtest_break_on_failure_unittest_ \
 @HAVE_PYTHON_TRUE@	test/gtest_color_test_ \
@@ -272,12 +280,27 @@ am_test_gtest_test_part_test_OBJECTS =  \
 test_gtest_test_part_test_OBJECTS =  \
 	$(am_test_gtest_test_part_test_OBJECTS)
 test_gtest_test_part_test_DEPENDENCIES = lib/libgtest_main.la
+am_test_gtest_tuple_test_OBJECTS =  \
+	test/test_gtest_tuple_test-gtest-tuple_test.$(OBJEXT) \
+	src/test_gtest_tuple_test-gtest-all.$(OBJEXT) \
+	src/test_gtest_tuple_test-gtest_main.$(OBJEXT)
+test_gtest_tuple_test_OBJECTS = $(am_test_gtest_tuple_test_OBJECTS)
+test_gtest_tuple_test_LDADD = $(LDADD)
+test_gtest_tuple_test_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_test_gtest_typed_test_test_OBJECTS =  \
 	test/gtest-typed-test_test.$(OBJEXT) \
 	test/gtest-typed-test2_test.$(OBJEXT)
 test_gtest_typed_test_test_OBJECTS =  \
 	$(am_test_gtest_typed_test_test_OBJECTS)
 test_gtest_typed_test_test_DEPENDENCIES = lib/libgtest_main.la
+am_test_gtest_unittest_api_test_OBJECTS =  \
+	test/gtest-unittest-api_test.$(OBJEXT)
+test_gtest_unittest_api_test_OBJECTS =  \
+	$(am_test_gtest_unittest_api_test_OBJECTS)
+test_gtest_unittest_api_test_DEPENDENCIES = lib/libgtest_main.la
 am__test_gtest_break_on_failure_unittest__SOURCES_DIST =  \
 	test/gtest_break_on_failure_unittest_.cc
 @HAVE_PYTHON_TRUE@am_test_gtest_break_on_failure_unittest__OBJECTS = test/gtest_break_on_failure_unittest_.$(OBJEXT)
@@ -331,6 +354,17 @@ am_test_gtest_main_unittest_OBJECTS =  \
 test_gtest_main_unittest_OBJECTS =  \
 	$(am_test_gtest_main_unittest_OBJECTS)
 test_gtest_main_unittest_DEPENDENCIES = lib/libgtest_main.la
+am_test_gtest_no_rtti_test_OBJECTS =  \
+	test/test_gtest_no_rtti_test-gtest_unittest.$(OBJEXT) \
+	src/test_gtest_no_rtti_test-gtest-all.$(OBJEXT) \
+	src/test_gtest_no_rtti_test-gtest_main.$(OBJEXT)
+test_gtest_no_rtti_test_OBJECTS =  \
+	$(am_test_gtest_no_rtti_test_OBJECTS)
+test_gtest_no_rtti_test_LDADD = $(LDADD)
+test_gtest_no_rtti_test_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_test_gtest_no_test_unittest_OBJECTS =  \
 	test/gtest_no_test_unittest.$(OBJEXT)
 test_gtest_no_test_unittest_OBJECTS =  \
@@ -394,6 +428,16 @@ test_gtest_uninitialized_test__OBJECTS =  \
 am_test_gtest_unittest_OBJECTS = test/gtest_unittest.$(OBJEXT)
 test_gtest_unittest_OBJECTS = $(am_test_gtest_unittest_OBJECTS)
 test_gtest_unittest_DEPENDENCIES = lib/libgtest_main.la
+am_test_gtest_use_own_tuple_test_OBJECTS = test/test_gtest_use_own_tuple_test-gtest-param-test_test.$(OBJEXT) \
+	test/test_gtest_use_own_tuple_test-gtest-param-test2_test.$(OBJEXT) \
+	src/test_gtest_use_own_tuple_test-gtest-all.$(OBJEXT)
+test_gtest_use_own_tuple_test_OBJECTS =  \
+	$(am_test_gtest_use_own_tuple_test_OBJECTS)
+test_gtest_use_own_tuple_test_LDADD = $(LDADD)
+test_gtest_use_own_tuple_test_LINK = $(LIBTOOL) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 am__test_gtest_xml_outfile1_test__SOURCES_DIST =  \
 	test/gtest_xml_outfile1_test_.cc
 @HAVE_PYTHON_TRUE@am_test_gtest_xml_outfile1_test__OBJECTS =  \
@@ -459,7 +503,9 @@ SOURCES = $(lib_libgtest_la_SOURCES) $(lib_libgtest_main_la_SOURCES) \
 	$(test_gtest_param_test_test_SOURCES) \
 	$(test_gtest_port_test_SOURCES) \
 	$(test_gtest_test_part_test_SOURCES) \
+	$(test_gtest_tuple_test_SOURCES) \
 	$(test_gtest_typed_test_test_SOURCES) \
+	$(test_gtest_unittest_api_test_SOURCES) \
 	$(test_gtest_break_on_failure_unittest__SOURCES) \
 	$(test_gtest_color_test__SOURCES) \
 	$(test_gtest_env_var_test__SOURCES) \
@@ -468,6 +514,7 @@ SOURCES = $(lib_libgtest_la_SOURCES) $(lib_libgtest_main_la_SOURCES) \
 	$(test_gtest_help_test__SOURCES) \
 	$(test_gtest_list_tests_unittest__SOURCES) \
 	$(test_gtest_main_unittest_SOURCES) \
+	$(test_gtest_no_rtti_test_SOURCES) \
 	$(test_gtest_no_test_unittest_SOURCES) \
 	$(test_gtest_output_test__SOURCES) \
 	$(test_gtest_pred_impl_unittest_SOURCES) \
@@ -479,6 +526,7 @@ SOURCES = $(lib_libgtest_la_SOURCES) $(lib_libgtest_main_la_SOURCES) \
 	$(test_gtest_throw_on_failure_test__SOURCES) \
 	$(test_gtest_uninitialized_test__SOURCES) \
 	$(test_gtest_unittest_SOURCES) \
+	$(test_gtest_use_own_tuple_test_SOURCES) \
 	$(test_gtest_xml_outfile1_test__SOURCES) \
 	$(test_gtest_xml_outfile2_test__SOURCES) \
 	$(test_gtest_xml_output_unittest__SOURCES)
@@ -501,7 +549,9 @@ DIST_SOURCES = $(lib_libgtest_la_SOURCES) \
 	$(test_gtest_param_test_test_SOURCES) \
 	$(test_gtest_port_test_SOURCES) \
 	$(test_gtest_test_part_test_SOURCES) \
+	$(test_gtest_tuple_test_SOURCES) \
 	$(test_gtest_typed_test_test_SOURCES) \
+	$(test_gtest_unittest_api_test_SOURCES) \
 	$(am__test_gtest_break_on_failure_unittest__SOURCES_DIST) \
 	$(am__test_gtest_color_test__SOURCES_DIST) \
 	$(am__test_gtest_env_var_test__SOURCES_DIST) \
@@ -510,6 +560,7 @@ DIST_SOURCES = $(lib_libgtest_la_SOURCES) \
 	$(am__test_gtest_help_test__SOURCES_DIST) \
 	$(am__test_gtest_list_tests_unittest__SOURCES_DIST) \
 	$(test_gtest_main_unittest_SOURCES) \
+	$(test_gtest_no_rtti_test_SOURCES) \
 	$(test_gtest_no_test_unittest_SOURCES) \
 	$(am__test_gtest_output_test__SOURCES_DIST) \
 	$(test_gtest_pred_impl_unittest_SOURCES) \
@@ -521,6 +572,7 @@ DIST_SOURCES = $(lib_libgtest_la_SOURCES) \
 	$(am__test_gtest_throw_on_failure_test__SOURCES_DIST) \
 	$(am__test_gtest_uninitialized_test__SOURCES_DIST) \
 	$(test_gtest_unittest_SOURCES) \
+	$(test_gtest_use_own_tuple_test_SOURCES) \
 	$(am__test_gtest_xml_outfile1_test__SOURCES_DIST) \
 	$(am__test_gtest_xml_outfile2_test__SOURCES_DIST) \
 	$(am__test_gtest_xml_output_unittest__SOURCES_DIST)
@@ -672,6 +724,7 @@ top_srcdir = @top_srcdir@
 # C++Builder project files
 EXTRA_DIST = CHANGES CONTRIBUTORS \
 	include/gtest/gtest-param-test.h.pump \
+	include/gtest/internal/gtest-tuple.h.pump \
 	include/gtest/internal/gtest-type-util.h.pump \
 	include/gtest/internal/gtest-param-util-generated.h.pump \
 	make/Makefile scons/SConscript scripts/fuse_gtest_files.py \
@@ -748,6 +801,7 @@ pkginclude_internal_HEADERS = \
   include/gtest/internal/gtest-param-util.h \
   include/gtest/internal/gtest-port.h \
   include/gtest/internal/gtest-string.h \
+  include/gtest/internal/gtest-tuple.h \
   include/gtest/internal/gtest-type-util.h
 
 lib_libgtest_main_la_SOURCES = src/gtest_main.cc
@@ -862,6 +916,25 @@ test_gtest_typed_test_test_SOURCES = test/gtest-typed-test_test.cc \
 test_gtest_typed_test_test_LDADD = lib/libgtest_main.la
 test_gtest_unittest_SOURCES = test/gtest_unittest.cc
 test_gtest_unittest_LDADD = lib/libgtest_main.la
+test_gtest_unittest_api_test_SOURCES = test/gtest-unittest-api_test.cc
+test_gtest_unittest_api_test_LDADD = lib/libgtest_main.la
+test_gtest_no_rtti_test_SOURCES = test/gtest_unittest.cc \
+                                  src/gtest-all.cc \
+                                  src/gtest_main.cc
+
+test_gtest_no_rtti_test_CXXFLAGS = $(AM_CXXFLAGS) -fno-rtti -DGTEST_HAS_RTTI=0
+test_gtest_tuple_test_SOURCES = test/gtest-tuple_test.cc \
+                                src/gtest-all.cc \
+                                src/gtest_main.cc
+
+test_gtest_tuple_test_CXXFLAGS = $(AM_CXXFLAGS) -DGTEST_USE_OWN_TR1_TUPLE=1
+test_gtest_use_own_tuple_test_SOURCES = test/gtest-param-test_test.cc \
+                                        test/gtest-param-test2_test.cc \
+                                        src/gtest-all.cc
+
+test_gtest_use_own_tuple_test_CXXFLAGS = \
+    $(AM_CXXFLAGS) -DGTEST_USE_OWN_TR1_TUPLE=1
+
 
 # The following tests depend on the presence of a Python installation and are
 # keyed off of it. TODO(chandlerc@google.com): While we currently only attempt
@@ -1138,6 +1211,15 @@ test/gtest-test-part_test.$(OBJEXT): test/$(am__dirstamp) \
 test/gtest-test-part_test$(EXEEXT): $(test_gtest_test_part_test_OBJECTS) $(test_gtest_test_part_test_DEPENDENCIES) test/$(am__dirstamp)
 	@rm -f test/gtest-test-part_test$(EXEEXT)
 	$(CXXLINK) $(test_gtest_test_part_test_OBJECTS) $(test_gtest_test_part_test_LDADD) $(LIBS)
+test/test_gtest_tuple_test-gtest-tuple_test.$(OBJEXT):  \
+	test/$(am__dirstamp) test/$(DEPDIR)/$(am__dirstamp)
+src/test_gtest_tuple_test-gtest-all.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/test_gtest_tuple_test-gtest_main.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+test/gtest-tuple_test$(EXEEXT): $(test_gtest_tuple_test_OBJECTS) $(test_gtest_tuple_test_DEPENDENCIES) test/$(am__dirstamp)
+	@rm -f test/gtest-tuple_test$(EXEEXT)
+	$(test_gtest_tuple_test_LINK) $(test_gtest_tuple_test_OBJECTS) $(test_gtest_tuple_test_LDADD) $(LIBS)
 test/gtest-typed-test_test.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/gtest-typed-test2_test.$(OBJEXT): test/$(am__dirstamp) \
@@ -1145,6 +1227,11 @@ test/gtest-typed-test2_test.$(OBJEXT): test/$(am__dirstamp) \
 test/gtest-typed-test_test$(EXEEXT): $(test_gtest_typed_test_test_OBJECTS) $(test_gtest_typed_test_test_DEPENDENCIES) test/$(am__dirstamp)
 	@rm -f test/gtest-typed-test_test$(EXEEXT)
 	$(CXXLINK) $(test_gtest_typed_test_test_OBJECTS) $(test_gtest_typed_test_test_LDADD) $(LIBS)
+test/gtest-unittest-api_test.$(OBJEXT): test/$(am__dirstamp) \
+	test/$(DEPDIR)/$(am__dirstamp)
+test/gtest-unittest-api_test$(EXEEXT): $(test_gtest_unittest_api_test_OBJECTS) $(test_gtest_unittest_api_test_DEPENDENCIES) test/$(am__dirstamp)
+	@rm -f test/gtest-unittest-api_test$(EXEEXT)
+	$(CXXLINK) $(test_gtest_unittest_api_test_OBJECTS) $(test_gtest_unittest_api_test_LDADD) $(LIBS)
 test/gtest_break_on_failure_unittest_.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/gtest_break_on_failure_unittest_$(EXEEXT): $(test_gtest_break_on_failure_unittest__OBJECTS) $(test_gtest_break_on_failure_unittest__DEPENDENCIES) test/$(am__dirstamp)
@@ -1185,6 +1272,15 @@ test/gtest_main_unittest.$(OBJEXT): test/$(am__dirstamp) \
 test/gtest_main_unittest$(EXEEXT): $(test_gtest_main_unittest_OBJECTS) $(test_gtest_main_unittest_DEPENDENCIES) test/$(am__dirstamp)
 	@rm -f test/gtest_main_unittest$(EXEEXT)
 	$(CXXLINK) $(test_gtest_main_unittest_OBJECTS) $(test_gtest_main_unittest_LDADD) $(LIBS)
+test/test_gtest_no_rtti_test-gtest_unittest.$(OBJEXT):  \
+	test/$(am__dirstamp) test/$(DEPDIR)/$(am__dirstamp)
+src/test_gtest_no_rtti_test-gtest-all.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/test_gtest_no_rtti_test-gtest_main.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+test/gtest_no_rtti_test$(EXEEXT): $(test_gtest_no_rtti_test_OBJECTS) $(test_gtest_no_rtti_test_DEPENDENCIES) test/$(am__dirstamp)
+	@rm -f test/gtest_no_rtti_test$(EXEEXT)
+	$(test_gtest_no_rtti_test_LINK) $(test_gtest_no_rtti_test_OBJECTS) $(test_gtest_no_rtti_test_LDADD) $(LIBS)
 test/gtest_no_test_unittest.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/gtest_no_test_unittest$(EXEEXT): $(test_gtest_no_test_unittest_OBJECTS) $(test_gtest_no_test_unittest_DEPENDENCIES) test/$(am__dirstamp)
@@ -1246,6 +1342,15 @@ test/gtest_unittest.$(OBJEXT): test/$(am__dirstamp) \
 test/gtest_unittest$(EXEEXT): $(test_gtest_unittest_OBJECTS) $(test_gtest_unittest_DEPENDENCIES) test/$(am__dirstamp)
 	@rm -f test/gtest_unittest$(EXEEXT)
 	$(CXXLINK) $(test_gtest_unittest_OBJECTS) $(test_gtest_unittest_LDADD) $(LIBS)
+test/test_gtest_use_own_tuple_test-gtest-param-test_test.$(OBJEXT):  \
+	test/$(am__dirstamp) test/$(DEPDIR)/$(am__dirstamp)
+test/test_gtest_use_own_tuple_test-gtest-param-test2_test.$(OBJEXT):  \
+	test/$(am__dirstamp) test/$(DEPDIR)/$(am__dirstamp)
+src/test_gtest_use_own_tuple_test-gtest-all.$(OBJEXT):  \
+	src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+test/gtest_use_own_tuple_test$(EXEEXT): $(test_gtest_use_own_tuple_test_OBJECTS) $(test_gtest_use_own_tuple_test_DEPENDENCIES) test/$(am__dirstamp)
+	@rm -f test/gtest_use_own_tuple_test$(EXEEXT)
+	$(test_gtest_use_own_tuple_test_LINK) $(test_gtest_use_own_tuple_test_OBJECTS) $(test_gtest_use_own_tuple_test_LDADD) $(LIBS)
 test/gtest_xml_outfile1_test_.$(OBJEXT): test/$(am__dirstamp) \
 	test/$(DEPDIR)/$(am__dirstamp)
 test/gtest_xml_outfile1_test_$(EXEEXT): $(test_gtest_xml_outfile1_test__OBJECTS) $(test_gtest_xml_outfile1_test__DEPENDENCIES) test/$(am__dirstamp)
@@ -1311,8 +1416,13 @@ mostlyclean-compile:
 	-rm -f src/gtest.lo
 	-rm -f src/gtest_main.$(OBJEXT)
 	-rm -f src/gtest_main.lo
+	-rm -f src/test_gtest_no_rtti_test-gtest-all.$(OBJEXT)
+	-rm -f src/test_gtest_no_rtti_test-gtest_main.$(OBJEXT)
 	-rm -f src/test_gtest_throw_on_failure_ex_test-gtest-all.$(OBJEXT)
 	-rm -f src/test_gtest_throw_on_failure_test_-gtest-all.$(OBJEXT)
+	-rm -f src/test_gtest_tuple_test-gtest-all.$(OBJEXT)
+	-rm -f src/test_gtest_tuple_test-gtest_main.$(OBJEXT)
+	-rm -f src/test_gtest_use_own_tuple_test-gtest-all.$(OBJEXT)
 	-rm -f test/gtest-filepath_test.$(OBJEXT)
 	-rm -f test/gtest-linked_ptr_test.$(OBJEXT)
 	-rm -f test/gtest-message_test.$(OBJEXT)
@@ -1323,6 +1433,7 @@ mostlyclean-compile:
 	-rm -f test/gtest-test-part_test.$(OBJEXT)
 	-rm -f test/gtest-typed-test2_test.$(OBJEXT)
 	-rm -f test/gtest-typed-test_test.$(OBJEXT)
+	-rm -f test/gtest-unittest-api_test.$(OBJEXT)
 	-rm -f test/gtest_break_on_failure_unittest_.$(OBJEXT)
 	-rm -f test/gtest_color_test_.$(OBJEXT)
 	-rm -f test/gtest_env_var_test_.$(OBJEXT)
@@ -1345,8 +1456,12 @@ mostlyclean-compile:
 	-rm -f test/gtest_xml_output_unittest_.$(OBJEXT)
 	-rm -f test/production.$(OBJEXT)
 	-rm -f test/test_gtest_death_test_test-gtest-death-test_test.$(OBJEXT)
+	-rm -f test/test_gtest_no_rtti_test-gtest_unittest.$(OBJEXT)
 	-rm -f test/test_gtest_throw_on_failure_ex_test-gtest_throw_on_failure_ex_test.$(OBJEXT)
 	-rm -f test/test_gtest_throw_on_failure_test_-gtest_throw_on_failure_test_.$(OBJEXT)
+	-rm -f test/test_gtest_tuple_test-gtest-tuple_test.$(OBJEXT)
+	-rm -f test/test_gtest_use_own_tuple_test-gtest-param-test2_test.$(OBJEXT)
+	-rm -f test/test_gtest_use_own_tuple_test-gtest-param-test_test.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -1369,8 +1484,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/gtest-typed-test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/gtest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/gtest_main.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_throw_on_failure_ex_test-gtest-all.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_throw_on_failure_test_-gtest-all.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-filepath_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-linked_ptr_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-message_test.Po@am__quote@
@@ -1381,6 +1501,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-test-part_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-typed-test2_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-typed-test_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest-unittest-api_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest_break_on_failure_unittest_.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest_color_test_.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest_env_var_test_.Po@am__quote@
@@ -1403,8 +1524,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/gtest_xml_output_unittest_.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/production.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_death_test_test-gtest-death-test_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_throw_on_failure_ex_test-gtest_throw_on_failure_ex_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_throw_on_failure_test_-gtest_throw_on_failure_test_.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -1443,6 +1568,90 @@ test/test_gtest_death_test_test-gtest-death-test_test.obj: test/gtest-death-test
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-death-test_test.cc' object='test/test_gtest_death_test_test-gtest-death-test_test.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_death_test_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_death_test_test-gtest-death-test_test.obj `if test -f 'test/gtest-death-test_test.cc'; then $(CYGPATH_W) 'test/gtest-death-test_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-death-test_test.cc'; fi`
+
+test/test_gtest_tuple_test-gtest-tuple_test.o: test/gtest-tuple_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_tuple_test-gtest-tuple_test.o -MD -MP -MF test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Tpo -c -o test/test_gtest_tuple_test-gtest-tuple_test.o `test -f 'test/gtest-tuple_test.cc' || echo '$(srcdir)/'`test/gtest-tuple_test.cc
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Tpo test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-tuple_test.cc' object='test/test_gtest_tuple_test-gtest-tuple_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_tuple_test-gtest-tuple_test.o `test -f 'test/gtest-tuple_test.cc' || echo '$(srcdir)/'`test/gtest-tuple_test.cc
+
+test/test_gtest_tuple_test-gtest-tuple_test.obj: test/gtest-tuple_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_tuple_test-gtest-tuple_test.obj -MD -MP -MF test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Tpo -c -o test/test_gtest_tuple_test-gtest-tuple_test.obj `if test -f 'test/gtest-tuple_test.cc'; then $(CYGPATH_W) 'test/gtest-tuple_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-tuple_test.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Tpo test/$(DEPDIR)/test_gtest_tuple_test-gtest-tuple_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-tuple_test.cc' object='test/test_gtest_tuple_test-gtest-tuple_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_tuple_test-gtest-tuple_test.obj `if test -f 'test/gtest-tuple_test.cc'; then $(CYGPATH_W) 'test/gtest-tuple_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-tuple_test.cc'; fi`
+
+src/test_gtest_tuple_test-gtest-all.o: src/gtest-all.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_tuple_test-gtest-all.o -MD -MP -MF src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Tpo -c -o src/test_gtest_tuple_test-gtest-all.o `test -f 'src/gtest-all.cc' || echo '$(srcdir)/'`src/gtest-all.cc
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Tpo src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_tuple_test-gtest-all.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_tuple_test-gtest-all.o `test -f 'src/gtest-all.cc' || echo '$(srcdir)/'`src/gtest-all.cc
+
+src/test_gtest_tuple_test-gtest-all.obj: src/gtest-all.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_tuple_test-gtest-all.obj -MD -MP -MF src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Tpo -c -o src/test_gtest_tuple_test-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Tpo src/$(DEPDIR)/test_gtest_tuple_test-gtest-all.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_tuple_test-gtest-all.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_tuple_test-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
+
+src/test_gtest_tuple_test-gtest_main.o: src/gtest_main.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_tuple_test-gtest_main.o -MD -MP -MF src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Tpo -c -o src/test_gtest_tuple_test-gtest_main.o `test -f 'src/gtest_main.cc' || echo '$(srcdir)/'`src/gtest_main.cc
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Tpo src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest_main.cc' object='src/test_gtest_tuple_test-gtest_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_tuple_test-gtest_main.o `test -f 'src/gtest_main.cc' || echo '$(srcdir)/'`src/gtest_main.cc
+
+src/test_gtest_tuple_test-gtest_main.obj: src/gtest_main.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_tuple_test-gtest_main.obj -MD -MP -MF src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Tpo -c -o src/test_gtest_tuple_test-gtest_main.obj `if test -f 'src/gtest_main.cc'; then $(CYGPATH_W) 'src/gtest_main.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest_main.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Tpo src/$(DEPDIR)/test_gtest_tuple_test-gtest_main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest_main.cc' object='src/test_gtest_tuple_test-gtest_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_tuple_test-gtest_main.obj `if test -f 'src/gtest_main.cc'; then $(CYGPATH_W) 'src/gtest_main.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest_main.cc'; fi`
+
+test/test_gtest_no_rtti_test-gtest_unittest.o: test/gtest_unittest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_no_rtti_test-gtest_unittest.o -MD -MP -MF test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Tpo -c -o test/test_gtest_no_rtti_test-gtest_unittest.o `test -f 'test/gtest_unittest.cc' || echo '$(srcdir)/'`test/gtest_unittest.cc
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Tpo test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest_unittest.cc' object='test/test_gtest_no_rtti_test-gtest_unittest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_no_rtti_test-gtest_unittest.o `test -f 'test/gtest_unittest.cc' || echo '$(srcdir)/'`test/gtest_unittest.cc
+
+test/test_gtest_no_rtti_test-gtest_unittest.obj: test/gtest_unittest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_no_rtti_test-gtest_unittest.obj -MD -MP -MF test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Tpo -c -o test/test_gtest_no_rtti_test-gtest_unittest.obj `if test -f 'test/gtest_unittest.cc'; then $(CYGPATH_W) 'test/gtest_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest_unittest.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Tpo test/$(DEPDIR)/test_gtest_no_rtti_test-gtest_unittest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest_unittest.cc' object='test/test_gtest_no_rtti_test-gtest_unittest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_no_rtti_test-gtest_unittest.obj `if test -f 'test/gtest_unittest.cc'; then $(CYGPATH_W) 'test/gtest_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest_unittest.cc'; fi`
+
+src/test_gtest_no_rtti_test-gtest-all.o: src/gtest-all.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_no_rtti_test-gtest-all.o -MD -MP -MF src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Tpo -c -o src/test_gtest_no_rtti_test-gtest-all.o `test -f 'src/gtest-all.cc' || echo '$(srcdir)/'`src/gtest-all.cc
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Tpo src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_no_rtti_test-gtest-all.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_no_rtti_test-gtest-all.o `test -f 'src/gtest-all.cc' || echo '$(srcdir)/'`src/gtest-all.cc
+
+src/test_gtest_no_rtti_test-gtest-all.obj: src/gtest-all.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_no_rtti_test-gtest-all.obj -MD -MP -MF src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Tpo -c -o src/test_gtest_no_rtti_test-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Tpo src/$(DEPDIR)/test_gtest_no_rtti_test-gtest-all.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_no_rtti_test-gtest-all.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_no_rtti_test-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
+
+src/test_gtest_no_rtti_test-gtest_main.o: src/gtest_main.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_no_rtti_test-gtest_main.o -MD -MP -MF src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Tpo -c -o src/test_gtest_no_rtti_test-gtest_main.o `test -f 'src/gtest_main.cc' || echo '$(srcdir)/'`src/gtest_main.cc
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Tpo src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest_main.cc' object='src/test_gtest_no_rtti_test-gtest_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_no_rtti_test-gtest_main.o `test -f 'src/gtest_main.cc' || echo '$(srcdir)/'`src/gtest_main.cc
+
+src/test_gtest_no_rtti_test-gtest_main.obj: src/gtest_main.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_no_rtti_test-gtest_main.obj -MD -MP -MF src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Tpo -c -o src/test_gtest_no_rtti_test-gtest_main.obj `if test -f 'src/gtest_main.cc'; then $(CYGPATH_W) 'src/gtest_main.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest_main.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Tpo src/$(DEPDIR)/test_gtest_no_rtti_test-gtest_main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest_main.cc' object='src/test_gtest_no_rtti_test-gtest_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_no_rtti_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_no_rtti_test-gtest_main.obj `if test -f 'src/gtest_main.cc'; then $(CYGPATH_W) 'src/gtest_main.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest_main.cc'; fi`
 
 test/test_gtest_throw_on_failure_ex_test-gtest_throw_on_failure_ex_test.o: test/gtest_throw_on_failure_ex_test.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_throw_on_failure_ex_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_throw_on_failure_ex_test-gtest_throw_on_failure_ex_test.o -MD -MP -MF test/$(DEPDIR)/test_gtest_throw_on_failure_ex_test-gtest_throw_on_failure_ex_test.Tpo -c -o test/test_gtest_throw_on_failure_ex_test-gtest_throw_on_failure_ex_test.o `test -f 'test/gtest_throw_on_failure_ex_test.cc' || echo '$(srcdir)/'`test/gtest_throw_on_failure_ex_test.cc
@@ -1499,6 +1708,48 @@ src/test_gtest_throw_on_failure_test_-gtest-all.obj: src/gtest-all.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_throw_on_failure_test_-gtest-all.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_throw_on_failure_test__CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_throw_on_failure_test_-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
+
+test/test_gtest_use_own_tuple_test-gtest-param-test_test.o: test/gtest-param-test_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_use_own_tuple_test-gtest-param-test_test.o -MD -MP -MF test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Tpo -c -o test/test_gtest_use_own_tuple_test-gtest-param-test_test.o `test -f 'test/gtest-param-test_test.cc' || echo '$(srcdir)/'`test/gtest-param-test_test.cc
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Tpo test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-param-test_test.cc' object='test/test_gtest_use_own_tuple_test-gtest-param-test_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_use_own_tuple_test-gtest-param-test_test.o `test -f 'test/gtest-param-test_test.cc' || echo '$(srcdir)/'`test/gtest-param-test_test.cc
+
+test/test_gtest_use_own_tuple_test-gtest-param-test_test.obj: test/gtest-param-test_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_use_own_tuple_test-gtest-param-test_test.obj -MD -MP -MF test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Tpo -c -o test/test_gtest_use_own_tuple_test-gtest-param-test_test.obj `if test -f 'test/gtest-param-test_test.cc'; then $(CYGPATH_W) 'test/gtest-param-test_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-param-test_test.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Tpo test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-param-test_test.cc' object='test/test_gtest_use_own_tuple_test-gtest-param-test_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_use_own_tuple_test-gtest-param-test_test.obj `if test -f 'test/gtest-param-test_test.cc'; then $(CYGPATH_W) 'test/gtest-param-test_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-param-test_test.cc'; fi`
+
+test/test_gtest_use_own_tuple_test-gtest-param-test2_test.o: test/gtest-param-test2_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_use_own_tuple_test-gtest-param-test2_test.o -MD -MP -MF test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Tpo -c -o test/test_gtest_use_own_tuple_test-gtest-param-test2_test.o `test -f 'test/gtest-param-test2_test.cc' || echo '$(srcdir)/'`test/gtest-param-test2_test.cc
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Tpo test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-param-test2_test.cc' object='test/test_gtest_use_own_tuple_test-gtest-param-test2_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_use_own_tuple_test-gtest-param-test2_test.o `test -f 'test/gtest-param-test2_test.cc' || echo '$(srcdir)/'`test/gtest-param-test2_test.cc
+
+test/test_gtest_use_own_tuple_test-gtest-param-test2_test.obj: test/gtest-param-test2_test.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT test/test_gtest_use_own_tuple_test-gtest-param-test2_test.obj -MD -MP -MF test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Tpo -c -o test/test_gtest_use_own_tuple_test-gtest-param-test2_test.obj `if test -f 'test/gtest-param-test2_test.cc'; then $(CYGPATH_W) 'test/gtest-param-test2_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-param-test2_test.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Tpo test/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-param-test2_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test/gtest-param-test2_test.cc' object='test/test_gtest_use_own_tuple_test-gtest-param-test2_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o test/test_gtest_use_own_tuple_test-gtest-param-test2_test.obj `if test -f 'test/gtest-param-test2_test.cc'; then $(CYGPATH_W) 'test/gtest-param-test2_test.cc'; else $(CYGPATH_W) '$(srcdir)/test/gtest-param-test2_test.cc'; fi`
+
+src/test_gtest_use_own_tuple_test-gtest-all.o: src/gtest-all.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_use_own_tuple_test-gtest-all.o -MD -MP -MF src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Tpo -c -o src/test_gtest_use_own_tuple_test-gtest-all.o `test -f 'src/gtest-all.cc' || echo '$(srcdir)/'`src/gtest-all.cc
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Tpo src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_use_own_tuple_test-gtest-all.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_use_own_tuple_test-gtest-all.o `test -f 'src/gtest-all.cc' || echo '$(srcdir)/'`src/gtest-all.cc
+
+src/test_gtest_use_own_tuple_test-gtest-all.obj: src/gtest-all.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -MT src/test_gtest_use_own_tuple_test-gtest-all.obj -MD -MP -MF src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Tpo -c -o src/test_gtest_use_own_tuple_test-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Tpo src/$(DEPDIR)/test_gtest_use_own_tuple_test-gtest-all.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/gtest-all.cc' object='src/test_gtest_use_own_tuple_test-gtest-all.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_gtest_use_own_tuple_test_CXXFLAGS) $(CXXFLAGS) -c -o src/test_gtest_use_own_tuple_test-gtest-all.obj `if test -f 'src/gtest-all.cc'; then $(CYGPATH_W) 'src/gtest-all.cc'; else $(CYGPATH_W) '$(srcdir)/src/gtest-all.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -28,15 +28,17 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// from google3/util/gtl/map-util.cc
-// Author: Anton Carver
+// Author: kenton@google.com (Kenton Varda)
+//  Based on original Protocol Buffers design by
+//  Sanjay Ghemawat, Jeff Dean, and others.
 
-#include <google/protobuf/stubs/map-util.h>
+#include <google/protobuf/generated_message_util.h>
 
 namespace google {
 namespace protobuf {
+namespace internal {
 
-// Template module.  Nothing to see here.
 
+}  // namespace internal
 }  // namespace protobuf
 }  // namespace google
