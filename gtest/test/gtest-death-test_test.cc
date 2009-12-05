@@ -67,6 +67,7 @@ using testing::internal::DeathTest;
 using testing::internal::DeathTestFactory;
 using testing::internal::FilePath;
 using testing::internal::GetLastErrnoDescription;
+using testing::internal::GetUnitTestImpl;
 using testing::internal::ParseNaturalNumber;
 using testing::internal::String;
 
@@ -77,22 +78,22 @@ namespace internal {
 // single UnitTest object during their lifetimes.
 class ReplaceDeathTestFactory {
  public:
-  ReplaceDeathTestFactory(UnitTest* parent, DeathTestFactory* new_factory)
-      : parent_impl_(parent->impl()) {
-    old_factory_ = parent_impl_->death_test_factory_.release();
-    parent_impl_->death_test_factory_.reset(new_factory);
+  explicit ReplaceDeathTestFactory(DeathTestFactory* new_factory)
+      : unit_test_impl_(GetUnitTestImpl()) {
+    old_factory_ = unit_test_impl_->death_test_factory_.release();
+    unit_test_impl_->death_test_factory_.reset(new_factory);
   }
 
   ~ReplaceDeathTestFactory() {
-    parent_impl_->death_test_factory_.release();
-    parent_impl_->death_test_factory_.reset(old_factory_);
+    unit_test_impl_->death_test_factory_.release();
+    unit_test_impl_->death_test_factory_.reset(old_factory_);
   }
  private:
   // Prevents copying ReplaceDeathTestFactory objects.
   ReplaceDeathTestFactory(const ReplaceDeathTestFactory&);
   void operator=(const ReplaceDeathTestFactory&);
 
-  UnitTestImpl* parent_impl_;
+  UnitTestImpl* unit_test_impl_;
   DeathTestFactory* old_factory_;
 };
 
@@ -846,8 +847,7 @@ class MacroLogicDeathTest : public testing::Test {
 
   static void SetUpTestCase() {
     factory_ = new MockDeathTestFactory;
-    replacer_ = new testing::internal::ReplaceDeathTestFactory(
-        testing::UnitTest::GetInstance(), factory_);
+    replacer_ = new testing::internal::ReplaceDeathTestFactory(factory_);
   }
 
   static void TearDownTestCase() {
@@ -957,17 +957,11 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
   EXPECT_TRUE(factory_->TestDeleted());
 }
 
-// Returns the number of successful parts in the current test.
-static size_t GetSuccessfulTestPartCount() {
-  return testing::UnitTest::GetInstance()->impl()->current_test_result()->
-    successful_part_count();
-}
-
 // Tests that a successful death test does not register a successful
 // test part.
 TEST(SuccessRegistrationDeathTest, NoSuccessPart) {
   EXPECT_DEATH(_exit(1), "");
-  EXPECT_EQ(0u, GetSuccessfulTestPartCount());
+  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 TEST(StreamingAssertionsDeathTest, DeathTest) {
@@ -1063,16 +1057,16 @@ TEST(ParseNaturalNumberTest, AcceptsValidNumbers) {
 
   result = 0;
   ASSERT_TRUE(ParseNaturalNumber(String("123"), &result));
-  EXPECT_EQ(123, result);
+  EXPECT_EQ(123U, result);
 
   // Check 0 as an edge case.
   result = 1;
   ASSERT_TRUE(ParseNaturalNumber(String("0"), &result));
-  EXPECT_EQ(0, result);
+  EXPECT_EQ(0U, result);
 
   result = 1;
   ASSERT_TRUE(ParseNaturalNumber(String("00000"), &result));
-  EXPECT_EQ(0, result);
+  EXPECT_EQ(0U, result);
 }
 
 TEST(ParseNaturalNumberTest, AcceptsTypeLimits) {
@@ -1123,6 +1117,44 @@ TEST(EnvironmentTest, HandleFitsIntoSizeT) {
   ASSERT_TRUE(sizeof(HANDLE) <= sizeof(size_t));
 }
 #endif  // GTEST_OS_WINDOWS
+
+// Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED trigger
+// failures when death tests are available on the system.
+TEST(ConditionalDeathMacrosDeathTest, ExpectsDeathWhenDeathTestsAvailable) {
+  EXPECT_DEATH_IF_SUPPORTED(GTEST_CHECK_(false) << "failure", "false.*failure");
+  ASSERT_DEATH_IF_SUPPORTED(GTEST_CHECK_(false) << "failure", "false.*failure");
+
+  // Empty statement will not crash, which must trigger a failure.
+  EXPECT_NONFATAL_FAILURE(EXPECT_DEATH_IF_SUPPORTED(;, ""), "");
+  EXPECT_FATAL_FAILURE(ASSERT_DEATH_IF_SUPPORTED(;, ""), "");
+}
+
+#else
+
+using testing::internal::CaptureStderr;
+using testing::internal::GetCapturedStderr;
+using testing::internal::String;
+
+// Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED are still
+// defined but do not rigger failures when death tests are not available on
+// the system.
+TEST(ConditionalDeathMacrosTest, WarnsWhenDeathTestsNotAvailable) {
+  // Empty statement will not crash, but that should not trigger a failure
+  // when death tests are not supported.
+  CaptureStderr();
+  EXPECT_DEATH_IF_SUPPORTED(;, "");
+  String output = GetCapturedStderr();
+  ASSERT_TRUE(NULL != strstr(output.c_str(),
+                             "Death tests are not supported on this platform"));
+  ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));
+
+  CaptureStderr();
+  ASSERT_DEATH_IF_SUPPORTED(;, "");
+  output = GetCapturedStderr();
+  ASSERT_TRUE(NULL != strstr(output.c_str(),
+                             "Death tests are not supported on this platform"));
+  ASSERT_TRUE(NULL != strstr(output.c_str(), ";"));
+}
 
 #endif  // GTEST_HAS_DEATH_TEST
 

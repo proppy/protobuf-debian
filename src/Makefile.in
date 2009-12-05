@@ -35,11 +35,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+target_triplet = @target@
 bin_PROGRAMS = protoc$(EXEEXT)
 check_PROGRAMS = protobuf-test$(EXEEXT) \
-	protobuf-lazy-descriptor-test$(EXEEXT) $(am__EXEEXT_1)
+	protobuf-lazy-descriptor-test$(EXEEXT) \
+	protobuf-lite-test$(EXEEXT) $(am__EXEEXT_1)
 TESTS = protobuf-test$(EXEEXT) protobuf-lazy-descriptor-test$(EXEEXT) \
-	$(am__EXEEXT_2)
+	protobuf-lite-test$(EXEEXT) $(am__EXEEXT_2)
 subdir = src
 DIST_COMMON = $(am__nobase_include_HEADERS_DIST) \
 	$(nobase_dist_proto_DATA) $(srcdir)/Makefile.am \
@@ -67,16 +69,27 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
+libprotobuf_lite_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_libprotobuf_lite_la_OBJECTS = common.lo once.lo hash.lo \
+	extension_set.lo generated_message_util.lo message_lite.lo \
+	repeated_field.lo wire_format_lite.lo coded_stream.lo \
+	zero_copy_stream.lo zero_copy_stream_impl_lite.lo
+libprotobuf_lite_la_OBJECTS = $(am_libprotobuf_lite_la_OBJECTS)
+libprotobuf_lite_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(libprotobuf_lite_la_LDFLAGS) $(LDFLAGS) -o $@
 libprotobuf_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_libprotobuf_la_OBJECTS = common.lo once.lo hash.lo map-util.lo \
-	stl_util-inl.lo substitute.lo strutil.lo structurally_valid.lo \
-	descriptor.lo descriptor.pb.lo descriptor_database.lo \
-	dynamic_message.lo extension_set.lo \
-	generated_message_reflection.lo message.lo reflection_ops.lo \
-	repeated_field.lo service.lo text_format.lo \
-	unknown_field_set.lo wire_format.lo coded_stream.lo \
-	gzip_stream.lo printer.lo tokenizer.lo zero_copy_stream.lo \
-	zero_copy_stream_impl.lo importer.lo parser.lo
+am__objects_1 = common.lo once.lo hash.lo extension_set.lo \
+	generated_message_util.lo message_lite.lo repeated_field.lo \
+	wire_format_lite.lo coded_stream.lo zero_copy_stream.lo \
+	zero_copy_stream_impl_lite.lo
+am_libprotobuf_la_OBJECTS = $(am__objects_1) strutil.lo substitute.lo \
+	structurally_valid.lo descriptor.lo descriptor.pb.lo \
+	descriptor_database.lo dynamic_message.lo \
+	extension_set_heavy.lo generated_message_reflection.lo \
+	message.lo reflection_ops.lo service.lo text_format.lo \
+	unknown_field_set.lo wire_format.lo gzip_stream.lo printer.lo \
+	tokenizer.lo zero_copy_stream_impl.lo importer.lo parser.lo
 libprotobuf_la_OBJECTS = $(am_libprotobuf_la_OBJECTS)
 libprotobuf_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -97,28 +110,51 @@ libprotoc_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 @HAVE_ZLIB_TRUE@am__EXEEXT_1 = zcgzip$(EXEEXT) zcgunzip$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
-am__objects_1 = protobuf_lazy_descriptor_test-test_util.$(OBJEXT) \
+am__objects_2 = protobuf_lazy_descriptor_test-test_util.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-googletest.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-file.$(OBJEXT)
 am_protobuf_lazy_descriptor_test_OBJECTS =  \
 	protobuf_lazy_descriptor_test-cpp_unittest.$(OBJEXT) \
-	$(am__objects_1)
-am__objects_2 = protobuf_lazy_descriptor_test-unittest.pb.$(OBJEXT) \
+	$(am__objects_2)
+am__objects_3 =  \
+	protobuf_lazy_descriptor_test-unittest_lite.pb.$(OBJEXT) \
+	protobuf_lazy_descriptor_test-unittest_import_lite.pb.$(OBJEXT)
+am__objects_4 = $(am__objects_3) \
+	protobuf_lazy_descriptor_test-unittest.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-unittest_empty.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-unittest_import.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-unittest_mset.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-unittest_optimize_for.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-unittest_custom_options.pb.$(OBJEXT) \
+	protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.$(OBJEXT) \
 	protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.$(OBJEXT)
-nodist_protobuf_lazy_descriptor_test_OBJECTS = $(am__objects_2)
+nodist_protobuf_lazy_descriptor_test_OBJECTS = $(am__objects_4)
 protobuf_lazy_descriptor_test_OBJECTS =  \
 	$(am_protobuf_lazy_descriptor_test_OBJECTS) \
 	$(nodist_protobuf_lazy_descriptor_test_OBJECTS)
 protobuf_lazy_descriptor_test_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	libprotobuf.la $(top_builddir)/gtest/lib/libgtest.la \
 	$(top_builddir)/gtest/lib/libgtest_main.la
-am__objects_3 = protobuf_test-test_util.$(OBJEXT) \
+protobuf_lazy_descriptor_test_LINK = $(LIBTOOL) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_protobuf_lite_test_OBJECTS =  \
+	protobuf_lite_test-lite_unittest.$(OBJEXT) \
+	protobuf_lite_test-test_util_lite.$(OBJEXT)
+am__objects_5 = protobuf_lite_test-unittest_lite.pb.$(OBJEXT) \
+	protobuf_lite_test-unittest_import_lite.pb.$(OBJEXT)
+nodist_protobuf_lite_test_OBJECTS = $(am__objects_5)
+protobuf_lite_test_OBJECTS = $(am_protobuf_lite_test_OBJECTS) \
+	$(nodist_protobuf_lite_test_OBJECTS)
+protobuf_lite_test_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	libprotobuf-lite.la
+protobuf_lite_test_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__objects_6 = protobuf_test-test_util.$(OBJEXT) \
 	protobuf_test-googletest.$(OBJEXT) \
 	protobuf_test-file.$(OBJEXT)
 am_protobuf_test_OBJECTS = protobuf_test-common_unittest.$(OBJEXT) \
@@ -144,16 +180,19 @@ am_protobuf_test_OBJECTS = protobuf_test-common_unittest.$(OBJEXT) \
 	protobuf_test-importer_unittest.$(OBJEXT) \
 	protobuf_test-parser_unittest.$(OBJEXT) \
 	protobuf_test-cpp_bootstrap_unittest.$(OBJEXT) \
-	protobuf_test-cpp_unittest.$(OBJEXT) $(am__objects_3)
-am__objects_4 = protobuf_test-unittest.pb.$(OBJEXT) \
+	protobuf_test-cpp_unittest.$(OBJEXT) $(am__objects_6)
+am__objects_7 = protobuf_test-unittest_lite.pb.$(OBJEXT) \
+	protobuf_test-unittest_import_lite.pb.$(OBJEXT)
+am__objects_8 = $(am__objects_7) protobuf_test-unittest.pb.$(OBJEXT) \
 	protobuf_test-unittest_empty.pb.$(OBJEXT) \
 	protobuf_test-unittest_import.pb.$(OBJEXT) \
 	protobuf_test-unittest_mset.pb.$(OBJEXT) \
 	protobuf_test-unittest_optimize_for.pb.$(OBJEXT) \
 	protobuf_test-unittest_embed_optimize_for.pb.$(OBJEXT) \
 	protobuf_test-unittest_custom_options.pb.$(OBJEXT) \
+	protobuf_test-unittest_lite_imports_nonlite.pb.$(OBJEXT) \
 	protobuf_test-cpp_test_bad_identifiers.pb.$(OBJEXT)
-nodist_protobuf_test_OBJECTS = $(am__objects_4)
+nodist_protobuf_test_OBJECTS = $(am__objects_8)
 protobuf_test_OBJECTS = $(am_protobuf_test_OBJECTS) \
 	$(nodist_protobuf_test_OBJECTS)
 protobuf_test_DEPENDENCIES = $(am__DEPENDENCIES_1) libprotobuf.la \
@@ -197,15 +236,20 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libprotobuf_la_SOURCES) $(libprotoc_la_SOURCES) \
+SOURCES = $(libprotobuf_lite_la_SOURCES) $(libprotobuf_la_SOURCES) \
+	$(libprotoc_la_SOURCES) \
 	$(protobuf_lazy_descriptor_test_SOURCES) \
 	$(nodist_protobuf_lazy_descriptor_test_SOURCES) \
-	$(protobuf_test_SOURCES) $(nodist_protobuf_test_SOURCES) \
-	$(protoc_SOURCES) $(zcgunzip_SOURCES) $(zcgzip_SOURCES)
-DIST_SOURCES = $(libprotobuf_la_SOURCES) $(libprotoc_la_SOURCES) \
+	$(protobuf_lite_test_SOURCES) \
+	$(nodist_protobuf_lite_test_SOURCES) $(protobuf_test_SOURCES) \
+	$(nodist_protobuf_test_SOURCES) $(protoc_SOURCES) \
+	$(zcgunzip_SOURCES) $(zcgzip_SOURCES)
+DIST_SOURCES = $(libprotobuf_lite_la_SOURCES) \
+	$(libprotobuf_la_SOURCES) $(libprotoc_la_SOURCES) \
 	$(protobuf_lazy_descriptor_test_SOURCES) \
-	$(protobuf_test_SOURCES) $(protoc_SOURCES) \
-	$(am__zcgunzip_SOURCES_DIST) $(am__zcgzip_SOURCES_DIST)
+	$(protobuf_lite_test_SOURCES) $(protobuf_test_SOURCES) \
+	$(protoc_SOURCES) $(am__zcgunzip_SOURCES_DIST) \
+	$(am__zcgzip_SOURCES_DIST)
 nobase_dist_protoDATA_INSTALL = $(install_sh_DATA)
 DATA = $(nobase_dist_proto_DATA)
 am__nobase_include_HEADERS_DIST = google/protobuf/stubs/common.h \
@@ -214,18 +258,22 @@ am__nobase_include_HEADERS_DIST = google/protobuf/stubs/common.h \
 	google/protobuf/descriptor_database.h \
 	google/protobuf/dynamic_message.h \
 	google/protobuf/extension_set.h \
+	google/protobuf/generated_message_util.h \
 	google/protobuf/generated_message_reflection.h \
-	google/protobuf/message.h google/protobuf/reflection_ops.h \
+	google/protobuf/message.h google/protobuf/message_lite.h \
+	google/protobuf/reflection_ops.h \
 	google/protobuf/repeated_field.h google/protobuf/service.h \
 	google/protobuf/text_format.h \
 	google/protobuf/unknown_field_set.h \
 	google/protobuf/wire_format.h \
-	google/protobuf/wire_format_inl.h \
+	google/protobuf/wire_format_lite.h \
+	google/protobuf/wire_format_lite_inl.h \
 	google/protobuf/io/coded_stream.h \
 	google/protobuf/io/gzip_stream.h google/protobuf/io/printer.h \
 	google/protobuf/io/tokenizer.h \
 	google/protobuf/io/zero_copy_stream.h \
 	google/protobuf/io/zero_copy_stream_impl.h \
+	google/protobuf/io/zero_copy_stream_impl_lite.h \
 	google/protobuf/compiler/code_generator.h \
 	google/protobuf/compiler/command_line_interface.h \
 	google/protobuf/compiler/importer.h \
@@ -272,6 +320,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+ISAINFO = @ISAINFO@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -357,7 +406,11 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
+target = @target@
 target_alias = @target_alias@
+target_cpu = @target_cpu@
+target_os = @target_os@
+target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @HAVE_ZLIB_FALSE@GZCHECKPROGRAMS = 
@@ -389,21 +442,25 @@ nobase_include_HEADERS = \
   google/protobuf/descriptor_database.h                        \
   google/protobuf/dynamic_message.h                            \
   google/protobuf/extension_set.h                              \
+  google/protobuf/generated_message_util.h                     \
   google/protobuf/generated_message_reflection.h               \
   google/protobuf/message.h                                    \
+  google/protobuf/message_lite.h                               \
   google/protobuf/reflection_ops.h                             \
   google/protobuf/repeated_field.h                             \
   google/protobuf/service.h                                    \
   google/protobuf/text_format.h                                \
   google/protobuf/unknown_field_set.h                          \
   google/protobuf/wire_format.h                                \
-  google/protobuf/wire_format_inl.h                            \
+  google/protobuf/wire_format_lite.h                           \
+  google/protobuf/wire_format_lite_inl.h                       \
   google/protobuf/io/coded_stream.h                            \
   $(GZHEADERS)                                                 \
   google/protobuf/io/printer.h                                 \
   google/protobuf/io/tokenizer.h                               \
   google/protobuf/io/zero_copy_stream.h                        \
   google/protobuf/io/zero_copy_stream_impl.h                   \
+  google/protobuf/io/zero_copy_stream_impl_lite.h              \
   google/protobuf/compiler/code_generator.h                    \
   google/protobuf/compiler/command_line_interface.h            \
   google/protobuf/compiler/importer.h                          \
@@ -412,41 +469,49 @@ nobase_include_HEADERS = \
   google/protobuf/compiler/java/java_generator.h               \
   google/protobuf/compiler/python/python_generator.h
 
-lib_LTLIBRARIES = libprotobuf.la libprotoc.la
-libprotobuf_la_LIBADD = $(PTHREAD_LIBS)
-libprotobuf_la_LDFLAGS = -version-info 4:0:0
-libprotobuf_la_SOURCES = \
+lib_LTLIBRARIES = libprotobuf-lite.la libprotobuf.la libprotoc.la
+libprotobuf_lite_la_LIBADD = $(PTHREAD_LIBS)
+libprotobuf_lite_la_LDFLAGS = -version-info 4:0:0
+libprotobuf_lite_la_SOURCES = \
   google/protobuf/stubs/common.cc                              \
   google/protobuf/stubs/once.cc                                \
   google/protobuf/stubs/hash.cc                                \
   google/protobuf/stubs/hash.h                                 \
-  google/protobuf/stubs/map-util.cc                            \
   google/protobuf/stubs/map-util.h                             \
-  google/protobuf/stubs/stl_util-inl.cc                        \
   google/protobuf/stubs/stl_util-inl.h                         \
-  google/protobuf/stubs/substitute.cc                          \
-  google/protobuf/stubs/substitute.h                           \
+  google/protobuf/extension_set.cc                             \
+  google/protobuf/generated_message_util.cc                    \
+  google/protobuf/message_lite.cc                              \
+  google/protobuf/repeated_field.cc                            \
+  google/protobuf/wire_format_lite.cc                          \
+  google/protobuf/io/coded_stream.cc                           \
+  google/protobuf/io/zero_copy_stream.cc                       \
+  google/protobuf/io/zero_copy_stream_impl_lite.cc
+
+libprotobuf_la_LIBADD = $(PTHREAD_LIBS)
+libprotobuf_la_LDFLAGS = -version-info 4:0:0
+libprotobuf_la_SOURCES = \
+  $(libprotobuf_lite_la_SOURCES)                               \
   google/protobuf/stubs/strutil.cc                             \
   google/protobuf/stubs/strutil.h                              \
+  google/protobuf/stubs/substitute.cc                          \
+  google/protobuf/stubs/substitute.h                           \
   google/protobuf/stubs/structurally_valid.cc                  \
   google/protobuf/descriptor.cc                                \
   google/protobuf/descriptor.pb.cc                             \
   google/protobuf/descriptor_database.cc                       \
   google/protobuf/dynamic_message.cc                           \
-  google/protobuf/extension_set.cc                             \
+  google/protobuf/extension_set_heavy.cc                       \
   google/protobuf/generated_message_reflection.cc              \
   google/protobuf/message.cc                                   \
   google/protobuf/reflection_ops.cc                            \
-  google/protobuf/repeated_field.cc                            \
   google/protobuf/service.cc                                   \
   google/protobuf/text_format.cc                               \
   google/protobuf/unknown_field_set.cc                         \
   google/protobuf/wire_format.cc                               \
-  google/protobuf/io/coded_stream.cc                           \
   google/protobuf/io/gzip_stream.cc                            \
   google/protobuf/io/printer.cc                                \
   google/protobuf/io/tokenizer.cc                              \
-  google/protobuf/io/zero_copy_stream.cc                       \
   google/protobuf/io/zero_copy_stream_impl.cc                  \
   google/protobuf/compiler/importer.cc                         \
   google/protobuf/compiler/parser.cc
@@ -514,6 +579,9 @@ protoc_inputs = \
   google/protobuf/unittest_optimize_for.proto                  \
   google/protobuf/unittest_embed_optimize_for.proto            \
   google/protobuf/unittest_custom_options.proto                \
+  google/protobuf/unittest_lite.proto                          \
+  google/protobuf/unittest_import_lite.proto                   \
+  google/protobuf/unittest_lite_imports_nonlite.proto          \
   google/protobuf/compiler/cpp/cpp_test_bad_identifiers.proto
 
 EXTRA_DIST = \
@@ -527,9 +595,17 @@ EXTRA_DIST = \
   google/protobuf/testdata/text_format_unittest_extensions_data.txt  \
   google/protobuf/package_info.h                               \
   google/protobuf/io/package_info.h                            \
-  google/protobuf/compiler/package_info.h
+  google/protobuf/compiler/package_info.h                      \
+  google/protobuf/unittest_enormous_descriptor.proto
+
+protoc_lite_outputs = \
+  google/protobuf/unittest_lite.pb.cc                          \
+  google/protobuf/unittest_lite.pb.h                           \
+  google/protobuf/unittest_import_lite.pb.cc                   \
+  google/protobuf/unittest_import_lite.pb.h
 
 protoc_outputs = \
+  $(protoc_lite_outputs)                                       \
   google/protobuf/unittest.pb.cc                               \
   google/protobuf/unittest.pb.h                                \
   google/protobuf/unittest_empty.pb.cc                         \
@@ -544,6 +620,8 @@ protoc_outputs = \
   google/protobuf/unittest_embed_optimize_for.pb.h             \
   google/protobuf/unittest_custom_options.pb.cc                \
   google/protobuf/unittest_custom_options.pb.h                 \
+  google/protobuf/unittest_lite_imports_nonlite.pb.cc          \
+  google/protobuf/unittest_lite_imports_nonlite.pb.h           \
   google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc  \
   google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.h
 
@@ -605,11 +683,22 @@ protobuf_lazy_descriptor_test_CPPFLAGS = -I$(top_srcdir)/gtest/include    \
                                          -I$(top_builddir)/gtest/include  \
                                          -DPROTOBUF_TEST_NO_DESCRIPTORS
 
+protobuf_lazy_descriptor_test_CXXFLAGS = $(NO_OPT_CXXFLAGS)
 protobuf_lazy_descriptor_test_SOURCES = \
   google/protobuf/compiler/cpp/cpp_unittest.cc                 \
   $(COMMON_TEST_SOURCES)
 
 nodist_protobuf_lazy_descriptor_test_SOURCES = $(protoc_outputs)
+
+# Build lite_unittest separately, since it doesn't use gtest.
+protobuf_lite_test_LDADD = $(PTHREAD_LIBS) libprotobuf-lite.la
+protobuf_lite_test_CXXFLAGS = $(NO_OPT_CXXFLAGS)
+protobuf_lite_test_SOURCES = \
+  google/protobuf/lite_unittest.cc                                     \
+  google/protobuf/test_util_lite.cc                                    \
+  google/protobuf/test_util_lite.h
+
+nodist_protobuf_lite_test_SOURCES = $(protoc_lite_outputs)
 @HAVE_ZLIB_TRUE@zcgzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
 @HAVE_ZLIB_TRUE@zcgzip_SOURCES = google/protobuf/testing/zcgzip.cc
 @HAVE_ZLIB_TRUE@zcgunzip_LDADD = $(PTHREAD_LIBS) libprotobuf.la
@@ -675,6 +764,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+libprotobuf-lite.la: $(libprotobuf_lite_la_OBJECTS) $(libprotobuf_lite_la_DEPENDENCIES) 
+	$(libprotobuf_lite_la_LINK) -rpath $(libdir) $(libprotobuf_lite_la_OBJECTS) $(libprotobuf_lite_la_LIBADD) $(LIBS)
 libprotobuf.la: $(libprotobuf_la_OBJECTS) $(libprotobuf_la_DEPENDENCIES) 
 	$(libprotobuf_la_LINK) -rpath $(libdir) $(libprotobuf_la_OBJECTS) $(libprotobuf_la_LIBADD) $(LIBS)
 libprotoc.la: $(libprotoc_la_OBJECTS) $(libprotoc_la_DEPENDENCIES) 
@@ -716,7 +807,10 @@ clean-checkPROGRAMS:
 	done
 protobuf-lazy-descriptor-test$(EXEEXT): $(protobuf_lazy_descriptor_test_OBJECTS) $(protobuf_lazy_descriptor_test_DEPENDENCIES) 
 	@rm -f protobuf-lazy-descriptor-test$(EXEEXT)
-	$(CXXLINK) $(protobuf_lazy_descriptor_test_OBJECTS) $(protobuf_lazy_descriptor_test_LDADD) $(LIBS)
+	$(protobuf_lazy_descriptor_test_LINK) $(protobuf_lazy_descriptor_test_OBJECTS) $(protobuf_lazy_descriptor_test_LDADD) $(LIBS)
+protobuf-lite-test$(EXEEXT): $(protobuf_lite_test_OBJECTS) $(protobuf_lite_test_DEPENDENCIES) 
+	@rm -f protobuf-lite-test$(EXEEXT)
+	$(protobuf_lite_test_LINK) $(protobuf_lite_test_OBJECTS) $(protobuf_lite_test_LDADD) $(LIBS)
 protobuf-test$(EXEEXT): $(protobuf_test_OBJECTS) $(protobuf_test_DEPENDENCIES) 
 	@rm -f protobuf-test$(EXEEXT)
 	$(protobuf_test_LINK) $(protobuf_test_OBJECTS) $(protobuf_test_LDADD) $(LIBS)
@@ -757,7 +851,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptor_database.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynamic_message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension_set.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extension_set_heavy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generated_message_reflection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generated_message_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gzip_stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/importer.Plo@am__quote@
@@ -773,8 +869,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/java_primitive_field.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/java_service.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message_lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/once.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/printer.Plo@am__quote@
@@ -788,8 +884,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lite_test-lite_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lite_test-test_util_lite.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-coded_stream_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-command_line_interface_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-common_unittest.Po@am__quote@
@@ -820,6 +923,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_embed_optimize_for.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_empty.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_import.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_import_lite.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_lite.pb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_mset.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unittest_optimize_for.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protobuf_test-unknown_field_set_unittest.Po@am__quote@
@@ -829,7 +935,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reflection_ops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repeated_field.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/service.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stl_util-inl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/structurally_valid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strutil.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substitute.Plo@am__quote@
@@ -837,10 +942,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tokenizer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unknown_field_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wire_format.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wire_format_lite.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zcgunzip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zcgzip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zero_copy_stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zero_copy_stream_impl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zero_copy_stream_impl_lite.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -884,26 +991,61 @@ hash.lo: google/protobuf/stubs/hash.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o hash.lo `test -f 'google/protobuf/stubs/hash.cc' || echo '$(srcdir)/'`google/protobuf/stubs/hash.cc
 
-map-util.lo: google/protobuf/stubs/map-util.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT map-util.lo -MD -MP -MF $(DEPDIR)/map-util.Tpo -c -o map-util.lo `test -f 'google/protobuf/stubs/map-util.cc' || echo '$(srcdir)/'`google/protobuf/stubs/map-util.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/map-util.Tpo $(DEPDIR)/map-util.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/map-util.cc' object='map-util.lo' libtool=yes @AMDEPBACKSLASH@
+extension_set.lo: google/protobuf/extension_set.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extension_set.lo -MD -MP -MF $(DEPDIR)/extension_set.Tpo -c -o extension_set.lo `test -f 'google/protobuf/extension_set.cc' || echo '$(srcdir)/'`google/protobuf/extension_set.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/extension_set.Tpo $(DEPDIR)/extension_set.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/extension_set.cc' object='extension_set.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o map-util.lo `test -f 'google/protobuf/stubs/map-util.cc' || echo '$(srcdir)/'`google/protobuf/stubs/map-util.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extension_set.lo `test -f 'google/protobuf/extension_set.cc' || echo '$(srcdir)/'`google/protobuf/extension_set.cc
 
-stl_util-inl.lo: google/protobuf/stubs/stl_util-inl.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT stl_util-inl.lo -MD -MP -MF $(DEPDIR)/stl_util-inl.Tpo -c -o stl_util-inl.lo `test -f 'google/protobuf/stubs/stl_util-inl.cc' || echo '$(srcdir)/'`google/protobuf/stubs/stl_util-inl.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/stl_util-inl.Tpo $(DEPDIR)/stl_util-inl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/stl_util-inl.cc' object='stl_util-inl.lo' libtool=yes @AMDEPBACKSLASH@
+generated_message_util.lo: google/protobuf/generated_message_util.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT generated_message_util.lo -MD -MP -MF $(DEPDIR)/generated_message_util.Tpo -c -o generated_message_util.lo `test -f 'google/protobuf/generated_message_util.cc' || echo '$(srcdir)/'`google/protobuf/generated_message_util.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/generated_message_util.Tpo $(DEPDIR)/generated_message_util.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/generated_message_util.cc' object='generated_message_util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o stl_util-inl.lo `test -f 'google/protobuf/stubs/stl_util-inl.cc' || echo '$(srcdir)/'`google/protobuf/stubs/stl_util-inl.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o generated_message_util.lo `test -f 'google/protobuf/generated_message_util.cc' || echo '$(srcdir)/'`google/protobuf/generated_message_util.cc
 
-substitute.lo: google/protobuf/stubs/substitute.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT substitute.lo -MD -MP -MF $(DEPDIR)/substitute.Tpo -c -o substitute.lo `test -f 'google/protobuf/stubs/substitute.cc' || echo '$(srcdir)/'`google/protobuf/stubs/substitute.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/substitute.Tpo $(DEPDIR)/substitute.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/substitute.cc' object='substitute.lo' libtool=yes @AMDEPBACKSLASH@
+message_lite.lo: google/protobuf/message_lite.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT message_lite.lo -MD -MP -MF $(DEPDIR)/message_lite.Tpo -c -o message_lite.lo `test -f 'google/protobuf/message_lite.cc' || echo '$(srcdir)/'`google/protobuf/message_lite.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/message_lite.Tpo $(DEPDIR)/message_lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/message_lite.cc' object='message_lite.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o substitute.lo `test -f 'google/protobuf/stubs/substitute.cc' || echo '$(srcdir)/'`google/protobuf/stubs/substitute.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o message_lite.lo `test -f 'google/protobuf/message_lite.cc' || echo '$(srcdir)/'`google/protobuf/message_lite.cc
+
+repeated_field.lo: google/protobuf/repeated_field.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT repeated_field.lo -MD -MP -MF $(DEPDIR)/repeated_field.Tpo -c -o repeated_field.lo `test -f 'google/protobuf/repeated_field.cc' || echo '$(srcdir)/'`google/protobuf/repeated_field.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/repeated_field.Tpo $(DEPDIR)/repeated_field.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/repeated_field.cc' object='repeated_field.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o repeated_field.lo `test -f 'google/protobuf/repeated_field.cc' || echo '$(srcdir)/'`google/protobuf/repeated_field.cc
+
+wire_format_lite.lo: google/protobuf/wire_format_lite.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wire_format_lite.lo -MD -MP -MF $(DEPDIR)/wire_format_lite.Tpo -c -o wire_format_lite.lo `test -f 'google/protobuf/wire_format_lite.cc' || echo '$(srcdir)/'`google/protobuf/wire_format_lite.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/wire_format_lite.Tpo $(DEPDIR)/wire_format_lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/wire_format_lite.cc' object='wire_format_lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wire_format_lite.lo `test -f 'google/protobuf/wire_format_lite.cc' || echo '$(srcdir)/'`google/protobuf/wire_format_lite.cc
+
+coded_stream.lo: google/protobuf/io/coded_stream.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT coded_stream.lo -MD -MP -MF $(DEPDIR)/coded_stream.Tpo -c -o coded_stream.lo `test -f 'google/protobuf/io/coded_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/coded_stream.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/coded_stream.Tpo $(DEPDIR)/coded_stream.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/io/coded_stream.cc' object='coded_stream.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o coded_stream.lo `test -f 'google/protobuf/io/coded_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/coded_stream.cc
+
+zero_copy_stream.lo: google/protobuf/io/zero_copy_stream.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT zero_copy_stream.lo -MD -MP -MF $(DEPDIR)/zero_copy_stream.Tpo -c -o zero_copy_stream.lo `test -f 'google/protobuf/io/zero_copy_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/zero_copy_stream.Tpo $(DEPDIR)/zero_copy_stream.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/io/zero_copy_stream.cc' object='zero_copy_stream.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o zero_copy_stream.lo `test -f 'google/protobuf/io/zero_copy_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream.cc
+
+zero_copy_stream_impl_lite.lo: google/protobuf/io/zero_copy_stream_impl_lite.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT zero_copy_stream_impl_lite.lo -MD -MP -MF $(DEPDIR)/zero_copy_stream_impl_lite.Tpo -c -o zero_copy_stream_impl_lite.lo `test -f 'google/protobuf/io/zero_copy_stream_impl_lite.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream_impl_lite.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/zero_copy_stream_impl_lite.Tpo $(DEPDIR)/zero_copy_stream_impl_lite.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/io/zero_copy_stream_impl_lite.cc' object='zero_copy_stream_impl_lite.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o zero_copy_stream_impl_lite.lo `test -f 'google/protobuf/io/zero_copy_stream_impl_lite.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream_impl_lite.cc
 
 strutil.lo: google/protobuf/stubs/strutil.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT strutil.lo -MD -MP -MF $(DEPDIR)/strutil.Tpo -c -o strutil.lo `test -f 'google/protobuf/stubs/strutil.cc' || echo '$(srcdir)/'`google/protobuf/stubs/strutil.cc
@@ -911,6 +1053,13 @@ strutil.lo: google/protobuf/stubs/strutil.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/strutil.cc' object='strutil.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o strutil.lo `test -f 'google/protobuf/stubs/strutil.cc' || echo '$(srcdir)/'`google/protobuf/stubs/strutil.cc
+
+substitute.lo: google/protobuf/stubs/substitute.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT substitute.lo -MD -MP -MF $(DEPDIR)/substitute.Tpo -c -o substitute.lo `test -f 'google/protobuf/stubs/substitute.cc' || echo '$(srcdir)/'`google/protobuf/stubs/substitute.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/substitute.Tpo $(DEPDIR)/substitute.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/stubs/substitute.cc' object='substitute.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o substitute.lo `test -f 'google/protobuf/stubs/substitute.cc' || echo '$(srcdir)/'`google/protobuf/stubs/substitute.cc
 
 structurally_valid.lo: google/protobuf/stubs/structurally_valid.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT structurally_valid.lo -MD -MP -MF $(DEPDIR)/structurally_valid.Tpo -c -o structurally_valid.lo `test -f 'google/protobuf/stubs/structurally_valid.cc' || echo '$(srcdir)/'`google/protobuf/stubs/structurally_valid.cc
@@ -947,12 +1096,12 @@ dynamic_message.lo: google/protobuf/dynamic_message.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dynamic_message.lo `test -f 'google/protobuf/dynamic_message.cc' || echo '$(srcdir)/'`google/protobuf/dynamic_message.cc
 
-extension_set.lo: google/protobuf/extension_set.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extension_set.lo -MD -MP -MF $(DEPDIR)/extension_set.Tpo -c -o extension_set.lo `test -f 'google/protobuf/extension_set.cc' || echo '$(srcdir)/'`google/protobuf/extension_set.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/extension_set.Tpo $(DEPDIR)/extension_set.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/extension_set.cc' object='extension_set.lo' libtool=yes @AMDEPBACKSLASH@
+extension_set_heavy.lo: google/protobuf/extension_set_heavy.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extension_set_heavy.lo -MD -MP -MF $(DEPDIR)/extension_set_heavy.Tpo -c -o extension_set_heavy.lo `test -f 'google/protobuf/extension_set_heavy.cc' || echo '$(srcdir)/'`google/protobuf/extension_set_heavy.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/extension_set_heavy.Tpo $(DEPDIR)/extension_set_heavy.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/extension_set_heavy.cc' object='extension_set_heavy.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extension_set.lo `test -f 'google/protobuf/extension_set.cc' || echo '$(srcdir)/'`google/protobuf/extension_set.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extension_set_heavy.lo `test -f 'google/protobuf/extension_set_heavy.cc' || echo '$(srcdir)/'`google/protobuf/extension_set_heavy.cc
 
 generated_message_reflection.lo: google/protobuf/generated_message_reflection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT generated_message_reflection.lo -MD -MP -MF $(DEPDIR)/generated_message_reflection.Tpo -c -o generated_message_reflection.lo `test -f 'google/protobuf/generated_message_reflection.cc' || echo '$(srcdir)/'`google/protobuf/generated_message_reflection.cc
@@ -974,13 +1123,6 @@ reflection_ops.lo: google/protobuf/reflection_ops.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/reflection_ops.cc' object='reflection_ops.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o reflection_ops.lo `test -f 'google/protobuf/reflection_ops.cc' || echo '$(srcdir)/'`google/protobuf/reflection_ops.cc
-
-repeated_field.lo: google/protobuf/repeated_field.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT repeated_field.lo -MD -MP -MF $(DEPDIR)/repeated_field.Tpo -c -o repeated_field.lo `test -f 'google/protobuf/repeated_field.cc' || echo '$(srcdir)/'`google/protobuf/repeated_field.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/repeated_field.Tpo $(DEPDIR)/repeated_field.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/repeated_field.cc' object='repeated_field.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o repeated_field.lo `test -f 'google/protobuf/repeated_field.cc' || echo '$(srcdir)/'`google/protobuf/repeated_field.cc
 
 service.lo: google/protobuf/service.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT service.lo -MD -MP -MF $(DEPDIR)/service.Tpo -c -o service.lo `test -f 'google/protobuf/service.cc' || echo '$(srcdir)/'`google/protobuf/service.cc
@@ -1010,13 +1152,6 @@ wire_format.lo: google/protobuf/wire_format.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wire_format.lo `test -f 'google/protobuf/wire_format.cc' || echo '$(srcdir)/'`google/protobuf/wire_format.cc
 
-coded_stream.lo: google/protobuf/io/coded_stream.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT coded_stream.lo -MD -MP -MF $(DEPDIR)/coded_stream.Tpo -c -o coded_stream.lo `test -f 'google/protobuf/io/coded_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/coded_stream.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/coded_stream.Tpo $(DEPDIR)/coded_stream.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/io/coded_stream.cc' object='coded_stream.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o coded_stream.lo `test -f 'google/protobuf/io/coded_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/coded_stream.cc
-
 gzip_stream.lo: google/protobuf/io/gzip_stream.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT gzip_stream.lo -MD -MP -MF $(DEPDIR)/gzip_stream.Tpo -c -o gzip_stream.lo `test -f 'google/protobuf/io/gzip_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/gzip_stream.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/gzip_stream.Tpo $(DEPDIR)/gzip_stream.Plo
@@ -1037,13 +1172,6 @@ tokenizer.lo: google/protobuf/io/tokenizer.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/io/tokenizer.cc' object='tokenizer.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tokenizer.lo `test -f 'google/protobuf/io/tokenizer.cc' || echo '$(srcdir)/'`google/protobuf/io/tokenizer.cc
-
-zero_copy_stream.lo: google/protobuf/io/zero_copy_stream.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT zero_copy_stream.lo -MD -MP -MF $(DEPDIR)/zero_copy_stream.Tpo -c -o zero_copy_stream.lo `test -f 'google/protobuf/io/zero_copy_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/zero_copy_stream.Tpo $(DEPDIR)/zero_copy_stream.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/io/zero_copy_stream.cc' object='zero_copy_stream.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o zero_copy_stream.lo `test -f 'google/protobuf/io/zero_copy_stream.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream.cc
 
 zero_copy_stream_impl.lo: google/protobuf/io/zero_copy_stream_impl.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT zero_copy_stream_impl.lo -MD -MP -MF $(DEPDIR)/zero_copy_stream_impl.Tpo -c -o zero_copy_stream_impl.lo `test -f 'google/protobuf/io/zero_copy_stream_impl.cc' || echo '$(srcdir)/'`google/protobuf/io/zero_copy_stream_impl.cc
@@ -1249,172 +1377,270 @@ python_generator.lo: google/protobuf/compiler/python/python_generator.cc
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o python_generator.lo `test -f 'google/protobuf/compiler/python/python_generator.cc' || echo '$(srcdir)/'`google/protobuf/compiler/python/python_generator.cc
 
 protobuf_lazy_descriptor_test-cpp_unittest.o: google/protobuf/compiler/cpp/cpp_unittest.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_unittest.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Tpo -c -o protobuf_lazy_descriptor_test-cpp_unittest.o `test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_unittest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_unittest.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Tpo -c -o protobuf_lazy_descriptor_test-cpp_unittest.o `test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_unittest.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/compiler/cpp/cpp_unittest.cc' object='protobuf_lazy_descriptor_test-cpp_unittest.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_unittest.o `test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_unittest.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_unittest.o `test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_unittest.cc
 
 protobuf_lazy_descriptor_test-cpp_unittest.obj: google/protobuf/compiler/cpp/cpp_unittest.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_unittest.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Tpo -c -o protobuf_lazy_descriptor_test-cpp_unittest.obj `if test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_unittest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_unittest.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Tpo -c -o protobuf_lazy_descriptor_test-cpp_unittest.obj `if test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_unittest.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_unittest.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/compiler/cpp/cpp_unittest.cc' object='protobuf_lazy_descriptor_test-cpp_unittest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_unittest.obj `if test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_unittest.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_unittest.obj `if test -f 'google/protobuf/compiler/cpp/cpp_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_unittest.cc'; fi`
 
 protobuf_lazy_descriptor_test-test_util.o: google/protobuf/test_util.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-test_util.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Tpo -c -o protobuf_lazy_descriptor_test-test_util.o `test -f 'google/protobuf/test_util.cc' || echo '$(srcdir)/'`google/protobuf/test_util.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-test_util.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Tpo -c -o protobuf_lazy_descriptor_test-test_util.o `test -f 'google/protobuf/test_util.cc' || echo '$(srcdir)/'`google/protobuf/test_util.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/test_util.cc' object='protobuf_lazy_descriptor_test-test_util.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-test_util.o `test -f 'google/protobuf/test_util.cc' || echo '$(srcdir)/'`google/protobuf/test_util.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-test_util.o `test -f 'google/protobuf/test_util.cc' || echo '$(srcdir)/'`google/protobuf/test_util.cc
 
 protobuf_lazy_descriptor_test-test_util.obj: google/protobuf/test_util.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-test_util.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Tpo -c -o protobuf_lazy_descriptor_test-test_util.obj `if test -f 'google/protobuf/test_util.cc'; then $(CYGPATH_W) 'google/protobuf/test_util.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/test_util.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-test_util.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Tpo -c -o protobuf_lazy_descriptor_test-test_util.obj `if test -f 'google/protobuf/test_util.cc'; then $(CYGPATH_W) 'google/protobuf/test_util.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/test_util.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-test_util.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/test_util.cc' object='protobuf_lazy_descriptor_test-test_util.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-test_util.obj `if test -f 'google/protobuf/test_util.cc'; then $(CYGPATH_W) 'google/protobuf/test_util.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/test_util.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-test_util.obj `if test -f 'google/protobuf/test_util.cc'; then $(CYGPATH_W) 'google/protobuf/test_util.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/test_util.cc'; fi`
 
 protobuf_lazy_descriptor_test-googletest.o: google/protobuf/testing/googletest.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-googletest.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Tpo -c -o protobuf_lazy_descriptor_test-googletest.o `test -f 'google/protobuf/testing/googletest.cc' || echo '$(srcdir)/'`google/protobuf/testing/googletest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-googletest.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Tpo -c -o protobuf_lazy_descriptor_test-googletest.o `test -f 'google/protobuf/testing/googletest.cc' || echo '$(srcdir)/'`google/protobuf/testing/googletest.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/testing/googletest.cc' object='protobuf_lazy_descriptor_test-googletest.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-googletest.o `test -f 'google/protobuf/testing/googletest.cc' || echo '$(srcdir)/'`google/protobuf/testing/googletest.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-googletest.o `test -f 'google/protobuf/testing/googletest.cc' || echo '$(srcdir)/'`google/protobuf/testing/googletest.cc
 
 protobuf_lazy_descriptor_test-googletest.obj: google/protobuf/testing/googletest.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-googletest.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Tpo -c -o protobuf_lazy_descriptor_test-googletest.obj `if test -f 'google/protobuf/testing/googletest.cc'; then $(CYGPATH_W) 'google/protobuf/testing/googletest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/googletest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-googletest.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Tpo -c -o protobuf_lazy_descriptor_test-googletest.obj `if test -f 'google/protobuf/testing/googletest.cc'; then $(CYGPATH_W) 'google/protobuf/testing/googletest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/googletest.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-googletest.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/testing/googletest.cc' object='protobuf_lazy_descriptor_test-googletest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-googletest.obj `if test -f 'google/protobuf/testing/googletest.cc'; then $(CYGPATH_W) 'google/protobuf/testing/googletest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/googletest.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-googletest.obj `if test -f 'google/protobuf/testing/googletest.cc'; then $(CYGPATH_W) 'google/protobuf/testing/googletest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/googletest.cc'; fi`
 
 protobuf_lazy_descriptor_test-file.o: google/protobuf/testing/file.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-file.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-file.Tpo -c -o protobuf_lazy_descriptor_test-file.o `test -f 'google/protobuf/testing/file.cc' || echo '$(srcdir)/'`google/protobuf/testing/file.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-file.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-file.Tpo -c -o protobuf_lazy_descriptor_test-file.o `test -f 'google/protobuf/testing/file.cc' || echo '$(srcdir)/'`google/protobuf/testing/file.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-file.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-file.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/testing/file.cc' object='protobuf_lazy_descriptor_test-file.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-file.o `test -f 'google/protobuf/testing/file.cc' || echo '$(srcdir)/'`google/protobuf/testing/file.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-file.o `test -f 'google/protobuf/testing/file.cc' || echo '$(srcdir)/'`google/protobuf/testing/file.cc
 
 protobuf_lazy_descriptor_test-file.obj: google/protobuf/testing/file.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-file.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-file.Tpo -c -o protobuf_lazy_descriptor_test-file.obj `if test -f 'google/protobuf/testing/file.cc'; then $(CYGPATH_W) 'google/protobuf/testing/file.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/file.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-file.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-file.Tpo -c -o protobuf_lazy_descriptor_test-file.obj `if test -f 'google/protobuf/testing/file.cc'; then $(CYGPATH_W) 'google/protobuf/testing/file.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/file.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-file.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-file.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/testing/file.cc' object='protobuf_lazy_descriptor_test-file.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-file.obj `if test -f 'google/protobuf/testing/file.cc'; then $(CYGPATH_W) 'google/protobuf/testing/file.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/file.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-file.obj `if test -f 'google/protobuf/testing/file.cc'; then $(CYGPATH_W) 'google/protobuf/testing/file.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/file.cc'; fi`
+
+protobuf_lazy_descriptor_test-unittest_lite.pb.o: google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_lite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_lite.pb.o `test -f 'google/protobuf/unittest_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite.pb.cc' object='protobuf_lazy_descriptor_test-unittest_lite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_lite.pb.o `test -f 'google/protobuf/unittest_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite.pb.cc
+
+protobuf_lazy_descriptor_test-unittest_lite.pb.obj: google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_lite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_lite.pb.obj `if test -f 'google/protobuf/unittest_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite.pb.cc' object='protobuf_lazy_descriptor_test-unittest_lite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_lite.pb.obj `if test -f 'google/protobuf/unittest_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite.pb.cc'; fi`
+
+protobuf_lazy_descriptor_test-unittest_import_lite.pb.o: google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_import_lite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_import_lite.pb.o `test -f 'google/protobuf/unittest_import_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import_lite.pb.cc' object='protobuf_lazy_descriptor_test-unittest_import_lite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_import_lite.pb.o `test -f 'google/protobuf/unittest_import_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import_lite.pb.cc
+
+protobuf_lazy_descriptor_test-unittest_import_lite.pb.obj: google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_import_lite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_import_lite.pb.obj `if test -f 'google/protobuf/unittest_import_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import_lite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import_lite.pb.cc' object='protobuf_lazy_descriptor_test-unittest_import_lite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_import_lite.pb.obj `if test -f 'google/protobuf/unittest_import_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import_lite.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest.pb.o: google/protobuf/unittest.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest.pb.o `test -f 'google/protobuf/unittest.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest.pb.o `test -f 'google/protobuf/unittest.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest.pb.cc' object='protobuf_lazy_descriptor_test-unittest.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest.pb.o `test -f 'google/protobuf/unittest.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest.pb.o `test -f 'google/protobuf/unittest.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest.pb.cc
 
 protobuf_lazy_descriptor_test-unittest.pb.obj: google/protobuf/unittest.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest.pb.obj `if test -f 'google/protobuf/unittest.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest.pb.obj `if test -f 'google/protobuf/unittest.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest.pb.cc' object='protobuf_lazy_descriptor_test-unittest.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest.pb.obj `if test -f 'google/protobuf/unittest.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest.pb.obj `if test -f 'google/protobuf/unittest.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest_empty.pb.o: google/protobuf/unittest_empty.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_empty.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.o `test -f 'google/protobuf/unittest_empty.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_empty.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_empty.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.o `test -f 'google/protobuf/unittest_empty.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_empty.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_empty.pb.cc' object='protobuf_lazy_descriptor_test-unittest_empty.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.o `test -f 'google/protobuf/unittest_empty.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_empty.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.o `test -f 'google/protobuf/unittest_empty.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_empty.pb.cc
 
 protobuf_lazy_descriptor_test-unittest_empty.pb.obj: google/protobuf/unittest_empty.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_empty.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.obj `if test -f 'google/protobuf/unittest_empty.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_empty.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_empty.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_empty.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.obj `if test -f 'google/protobuf/unittest_empty.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_empty.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_empty.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_empty.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_empty.pb.cc' object='protobuf_lazy_descriptor_test-unittest_empty.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.obj `if test -f 'google/protobuf/unittest_empty.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_empty.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_empty.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_empty.pb.obj `if test -f 'google/protobuf/unittest_empty.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_empty.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_empty.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest_import.pb.o: google/protobuf/unittest_import.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_import.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_import.pb.o `test -f 'google/protobuf/unittest_import.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_import.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_import.pb.o `test -f 'google/protobuf/unittest_import.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import.pb.cc' object='protobuf_lazy_descriptor_test-unittest_import.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_import.pb.o `test -f 'google/protobuf/unittest_import.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_import.pb.o `test -f 'google/protobuf/unittest_import.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import.pb.cc
 
 protobuf_lazy_descriptor_test-unittest_import.pb.obj: google/protobuf/unittest_import.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_import.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_import.pb.obj `if test -f 'google/protobuf/unittest_import.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_import.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_import.pb.obj `if test -f 'google/protobuf/unittest_import.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_import.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import.pb.cc' object='protobuf_lazy_descriptor_test-unittest_import.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_import.pb.obj `if test -f 'google/protobuf/unittest_import.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_import.pb.obj `if test -f 'google/protobuf/unittest_import.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest_mset.pb.o: google/protobuf/unittest_mset.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_mset.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.o `test -f 'google/protobuf/unittest_mset.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_mset.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_mset.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.o `test -f 'google/protobuf/unittest_mset.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_mset.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_mset.pb.cc' object='protobuf_lazy_descriptor_test-unittest_mset.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.o `test -f 'google/protobuf/unittest_mset.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_mset.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.o `test -f 'google/protobuf/unittest_mset.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_mset.pb.cc
 
 protobuf_lazy_descriptor_test-unittest_mset.pb.obj: google/protobuf/unittest_mset.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_mset.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.obj `if test -f 'google/protobuf/unittest_mset.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_mset.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_mset.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_mset.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.obj `if test -f 'google/protobuf/unittest_mset.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_mset.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_mset.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_mset.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_mset.pb.cc' object='protobuf_lazy_descriptor_test-unittest_mset.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.obj `if test -f 'google/protobuf/unittest_mset.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_mset.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_mset.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_mset.pb.obj `if test -f 'google/protobuf/unittest_mset.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_mset.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_mset.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o: google/protobuf/unittest_optimize_for.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o `test -f 'google/protobuf/unittest_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_optimize_for.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o `test -f 'google/protobuf/unittest_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_optimize_for.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_optimize_for.pb.cc' object='protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o `test -f 'google/protobuf/unittest_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_optimize_for.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.o `test -f 'google/protobuf/unittest_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_optimize_for.pb.cc
 
 protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj: google/protobuf/unittest_optimize_for.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_optimize_for.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_optimize_for.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_optimize_for.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_optimize_for.pb.cc' object='protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_optimize_for.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_optimize_for.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o: google/protobuf/unittest_embed_optimize_for.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o `test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_embed_optimize_for.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o `test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_embed_optimize_for.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_embed_optimize_for.pb.cc' object='protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o `test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_embed_optimize_for.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.o `test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_embed_optimize_for.pb.cc
 
 protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj: google/protobuf/unittest_embed_optimize_for.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_embed_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_embed_optimize_for.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_embed_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_embed_optimize_for.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_embed_optimize_for.pb.cc' object='protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_embed_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_embed_optimize_for.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_embed_optimize_for.pb.obj `if test -f 'google/protobuf/unittest_embed_optimize_for.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_embed_optimize_for.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_embed_optimize_for.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-unittest_custom_options.pb.o: google/protobuf/unittest_custom_options.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_custom_options.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.o `test -f 'google/protobuf/unittest_custom_options.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_custom_options.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_custom_options.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.o `test -f 'google/protobuf/unittest_custom_options.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_custom_options.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_custom_options.pb.cc' object='protobuf_lazy_descriptor_test-unittest_custom_options.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.o `test -f 'google/protobuf/unittest_custom_options.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_custom_options.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.o `test -f 'google/protobuf/unittest_custom_options.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_custom_options.pb.cc
 
 protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj: google/protobuf/unittest_custom_options.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_custom_options.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_custom_options.pb.cc' object='protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`
+
+protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.o: google/protobuf/unittest_lite_imports_nonlite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.o `test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite_imports_nonlite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite_imports_nonlite.pb.cc' object='protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.o `test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite_imports_nonlite.pb.cc
+
+protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.obj: google/protobuf/unittest_lite_imports_nonlite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Tpo -c -o protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.obj `if test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite_imports_nonlite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite_imports_nonlite.pb.cc' object='protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-unittest_lite_imports_nonlite.pb.obj `if test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite_imports_nonlite.pb.cc'; fi`
 
 protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o: google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Tpo -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o `test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Tpo -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o `test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' object='protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o `test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.o `test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
 
 protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj: google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Tpo -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj `if test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Tpo -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj `if test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; fi`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Tpo $(DEPDIR)/protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' object='protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj `if test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_lazy_descriptor_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_lazy_descriptor_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lazy_descriptor_test-cpp_test_bad_identifiers.pb.obj `if test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; then $(CYGPATH_W) 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc'; fi`
+
+protobuf_lite_test-lite_unittest.o: google/protobuf/lite_unittest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-lite_unittest.o -MD -MP -MF $(DEPDIR)/protobuf_lite_test-lite_unittest.Tpo -c -o protobuf_lite_test-lite_unittest.o `test -f 'google/protobuf/lite_unittest.cc' || echo '$(srcdir)/'`google/protobuf/lite_unittest.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-lite_unittest.Tpo $(DEPDIR)/protobuf_lite_test-lite_unittest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/lite_unittest.cc' object='protobuf_lite_test-lite_unittest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-lite_unittest.o `test -f 'google/protobuf/lite_unittest.cc' || echo '$(srcdir)/'`google/protobuf/lite_unittest.cc
+
+protobuf_lite_test-lite_unittest.obj: google/protobuf/lite_unittest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-lite_unittest.obj -MD -MP -MF $(DEPDIR)/protobuf_lite_test-lite_unittest.Tpo -c -o protobuf_lite_test-lite_unittest.obj `if test -f 'google/protobuf/lite_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/lite_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/lite_unittest.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-lite_unittest.Tpo $(DEPDIR)/protobuf_lite_test-lite_unittest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/lite_unittest.cc' object='protobuf_lite_test-lite_unittest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-lite_unittest.obj `if test -f 'google/protobuf/lite_unittest.cc'; then $(CYGPATH_W) 'google/protobuf/lite_unittest.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/lite_unittest.cc'; fi`
+
+protobuf_lite_test-test_util_lite.o: google/protobuf/test_util_lite.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-test_util_lite.o -MD -MP -MF $(DEPDIR)/protobuf_lite_test-test_util_lite.Tpo -c -o protobuf_lite_test-test_util_lite.o `test -f 'google/protobuf/test_util_lite.cc' || echo '$(srcdir)/'`google/protobuf/test_util_lite.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-test_util_lite.Tpo $(DEPDIR)/protobuf_lite_test-test_util_lite.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/test_util_lite.cc' object='protobuf_lite_test-test_util_lite.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-test_util_lite.o `test -f 'google/protobuf/test_util_lite.cc' || echo '$(srcdir)/'`google/protobuf/test_util_lite.cc
+
+protobuf_lite_test-test_util_lite.obj: google/protobuf/test_util_lite.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-test_util_lite.obj -MD -MP -MF $(DEPDIR)/protobuf_lite_test-test_util_lite.Tpo -c -o protobuf_lite_test-test_util_lite.obj `if test -f 'google/protobuf/test_util_lite.cc'; then $(CYGPATH_W) 'google/protobuf/test_util_lite.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/test_util_lite.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-test_util_lite.Tpo $(DEPDIR)/protobuf_lite_test-test_util_lite.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/test_util_lite.cc' object='protobuf_lite_test-test_util_lite.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-test_util_lite.obj `if test -f 'google/protobuf/test_util_lite.cc'; then $(CYGPATH_W) 'google/protobuf/test_util_lite.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/test_util_lite.cc'; fi`
+
+protobuf_lite_test-unittest_lite.pb.o: google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-unittest_lite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Tpo -c -o protobuf_lite_test-unittest_lite.pb.o `test -f 'google/protobuf/unittest_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Tpo $(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite.pb.cc' object='protobuf_lite_test-unittest_lite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-unittest_lite.pb.o `test -f 'google/protobuf/unittest_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite.pb.cc
+
+protobuf_lite_test-unittest_lite.pb.obj: google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-unittest_lite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Tpo -c -o protobuf_lite_test-unittest_lite.pb.obj `if test -f 'google/protobuf/unittest_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Tpo $(DEPDIR)/protobuf_lite_test-unittest_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite.pb.cc' object='protobuf_lite_test-unittest_lite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-unittest_lite.pb.obj `if test -f 'google/protobuf/unittest_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite.pb.cc'; fi`
+
+protobuf_lite_test-unittest_import_lite.pb.o: google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-unittest_import_lite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Tpo -c -o protobuf_lite_test-unittest_import_lite.pb.o `test -f 'google/protobuf/unittest_import_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Tpo $(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import_lite.pb.cc' object='protobuf_lite_test-unittest_import_lite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-unittest_import_lite.pb.o `test -f 'google/protobuf/unittest_import_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import_lite.pb.cc
+
+protobuf_lite_test-unittest_import_lite.pb.obj: google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_lite_test-unittest_import_lite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Tpo -c -o protobuf_lite_test-unittest_import_lite.pb.obj `if test -f 'google/protobuf/unittest_import_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import_lite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Tpo $(DEPDIR)/protobuf_lite_test-unittest_import_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import_lite.pb.cc' object='protobuf_lite_test-unittest_import_lite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(protobuf_lite_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_lite_test-unittest_import_lite.pb.obj `if test -f 'google/protobuf/unittest_import_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import_lite.pb.cc'; fi`
 
 protobuf_test-common_unittest.o: google/protobuf/stubs/common_unittest.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-common_unittest.o -MD -MP -MF $(DEPDIR)/protobuf_test-common_unittest.Tpo -c -o protobuf_test-common_unittest.o `test -f 'google/protobuf/stubs/common_unittest.cc' || echo '$(srcdir)/'`google/protobuf/stubs/common_unittest.cc
@@ -1794,6 +2020,34 @@ protobuf_test-file.obj: google/protobuf/testing/file.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-file.obj `if test -f 'google/protobuf/testing/file.cc'; then $(CYGPATH_W) 'google/protobuf/testing/file.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/testing/file.cc'; fi`
 
+protobuf_test-unittest_lite.pb.o: google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest_lite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_test-unittest_lite.pb.Tpo -c -o protobuf_test-unittest_lite.pb.o `test -f 'google/protobuf/unittest_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest_lite.pb.Tpo $(DEPDIR)/protobuf_test-unittest_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite.pb.cc' object='protobuf_test-unittest_lite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_lite.pb.o `test -f 'google/protobuf/unittest_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite.pb.cc
+
+protobuf_test-unittest_lite.pb.obj: google/protobuf/unittest_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest_lite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_test-unittest_lite.pb.Tpo -c -o protobuf_test-unittest_lite.pb.obj `if test -f 'google/protobuf/unittest_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest_lite.pb.Tpo $(DEPDIR)/protobuf_test-unittest_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite.pb.cc' object='protobuf_test-unittest_lite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_lite.pb.obj `if test -f 'google/protobuf/unittest_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite.pb.cc'; fi`
+
+protobuf_test-unittest_import_lite.pb.o: google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest_import_lite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_test-unittest_import_lite.pb.Tpo -c -o protobuf_test-unittest_import_lite.pb.o `test -f 'google/protobuf/unittest_import_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest_import_lite.pb.Tpo $(DEPDIR)/protobuf_test-unittest_import_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import_lite.pb.cc' object='protobuf_test-unittest_import_lite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_import_lite.pb.o `test -f 'google/protobuf/unittest_import_lite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_import_lite.pb.cc
+
+protobuf_test-unittest_import_lite.pb.obj: google/protobuf/unittest_import_lite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest_import_lite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_test-unittest_import_lite.pb.Tpo -c -o protobuf_test-unittest_import_lite.pb.obj `if test -f 'google/protobuf/unittest_import_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import_lite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest_import_lite.pb.Tpo $(DEPDIR)/protobuf_test-unittest_import_lite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_import_lite.pb.cc' object='protobuf_test-unittest_import_lite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_import_lite.pb.obj `if test -f 'google/protobuf/unittest_import_lite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_import_lite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_import_lite.pb.cc'; fi`
+
 protobuf_test-unittest.pb.o: google/protobuf/unittest.pb.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest.pb.o -MD -MP -MF $(DEPDIR)/protobuf_test-unittest.pb.Tpo -c -o protobuf_test-unittest.pb.o `test -f 'google/protobuf/unittest.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest.pb.cc
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest.pb.Tpo $(DEPDIR)/protobuf_test-unittest.pb.Po
@@ -1891,6 +2145,20 @@ protobuf_test-unittest_custom_options.pb.obj: google/protobuf/unittest_custom_op
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_custom_options.pb.cc' object='protobuf_test-unittest_custom_options.pb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_custom_options.pb.obj `if test -f 'google/protobuf/unittest_custom_options.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_custom_options.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_custom_options.pb.cc'; fi`
+
+protobuf_test-unittest_lite_imports_nonlite.pb.o: google/protobuf/unittest_lite_imports_nonlite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest_lite_imports_nonlite.pb.o -MD -MP -MF $(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Tpo -c -o protobuf_test-unittest_lite_imports_nonlite.pb.o `test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite_imports_nonlite.pb.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Tpo $(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite_imports_nonlite.pb.cc' object='protobuf_test-unittest_lite_imports_nonlite.pb.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_lite_imports_nonlite.pb.o `test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc' || echo '$(srcdir)/'`google/protobuf/unittest_lite_imports_nonlite.pb.cc
+
+protobuf_test-unittest_lite_imports_nonlite.pb.obj: google/protobuf/unittest_lite_imports_nonlite.pb.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-unittest_lite_imports_nonlite.pb.obj -MD -MP -MF $(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Tpo -c -o protobuf_test-unittest_lite_imports_nonlite.pb.obj `if test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite_imports_nonlite.pb.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Tpo $(DEPDIR)/protobuf_test-unittest_lite_imports_nonlite.pb.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='google/protobuf/unittest_lite_imports_nonlite.pb.cc' object='protobuf_test-unittest_lite_imports_nonlite.pb.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -c -o protobuf_test-unittest_lite_imports_nonlite.pb.obj `if test -f 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; then $(CYGPATH_W) 'google/protobuf/unittest_lite_imports_nonlite.pb.cc'; else $(CYGPATH_W) '$(srcdir)/google/protobuf/unittest_lite_imports_nonlite.pb.cc'; fi`
 
 protobuf_test-cpp_test_bad_identifiers.pb.o: google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(protobuf_test_CPPFLAGS) $(CPPFLAGS) $(protobuf_test_CXXFLAGS) $(CXXFLAGS) -MT protobuf_test-cpp_test_bad_identifiers.pb.o -MD -MP -MF $(DEPDIR)/protobuf_test-cpp_test_bad_identifiers.pb.Tpo -c -o protobuf_test-cpp_test_bad_identifiers.pb.o `test -f 'google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc' || echo '$(srcdir)/'`google/protobuf/compiler/cpp/cpp_test_bad_identifiers.pb.cc

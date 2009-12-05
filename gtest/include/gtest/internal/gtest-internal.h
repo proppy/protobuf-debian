@@ -101,25 +101,21 @@ namespace testing {
 
 // Forward declaration of classes.
 
+class AssertionResult;                 // Result of an assertion.
 class Message;                         // Represents a failure message.
 class Test;                            // Represents a test.
-class TestCase;                        // A collection of related tests.
-class TestPartResult;                  // Result of a test part.
 class TestInfo;                        // Information about a test.
+class TestPartResult;                  // Result of a test part.
 class UnitTest;                        // A collection of test cases.
 class UnitTestEventListenerInterface;  // Listens to Google Test events.
-class AssertionResult;                 // Result of an assertion.
 
 namespace internal {
 
 struct TraceInfo;                      // Information about a trace point.
 class ScopedTrace;                     // Implements scoped trace.
 class TestInfoImpl;                    // Opaque implementation of TestInfo
-class TestResult;                      // Result of a single Test.
 class UnitTestImpl;                    // Opaque implementation of UnitTest
-
-template <typename E> class List;      // A generic list.
-template <typename E> class ListNode;  // A node in a generic list.
+template <typename E> class Vector;    // A generic vector.
 
 // How many times InitGoogleTest() has been called.
 extern int g_init_gtest_count;
@@ -211,13 +207,13 @@ String StreamableToString(const T& streamable);
 // This overload makes sure that all pointers (including
 // those to char or wchar_t) are printed as raw pointers.
 template <typename T>
-inline String FormatValueForFailureMessage(internal::true_type dummy,
+inline String FormatValueForFailureMessage(internal::true_type /*dummy*/,
                                            T* pointer) {
   return StreamableToString(static_cast<const void*>(pointer));
 }
 
 template <typename T>
-inline String FormatValueForFailureMessage(internal::false_type dummy,
+inline String FormatValueForFailureMessage(internal::false_type /*dummy*/,
                                            const T& value) {
   return StreamableToString(value);
 }
@@ -621,7 +617,7 @@ class TypedTestCasePState {
               "REGISTER_TYPED_TEST_CASE_P(%s, ...).\n",
               FormatFileLocation(file, line).c_str(), test_name, case_name);
       fflush(stderr);
-      abort();
+      posix::Abort();
     }
     defined_test_names_.insert(test_name);
     return true;
@@ -749,9 +745,6 @@ class TypeParameterizedTestCase<Fixture, Templates0, Types> {
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
 String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count);
-
-// Returns the number of failed test parts in the given test result object.
-int GetFailedPartCount(const TestResult* result);
 
 // A helper for suppressing warnings on unreachable code in some macros.
 bool AlwaysTrue();

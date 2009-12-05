@@ -184,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\generated_message_util.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\io\gzip_stream.h"
 				>
 			</File>
@@ -201,6 +205,10 @@
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\message.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\google\protobuf\message_lite.h"
 				>
 			</File>
 			<File
@@ -256,7 +264,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\google\protobuf\wire_format_inl.h"
+				RelativePath="..\src\google\protobuf\wire_format_lite.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\google\protobuf\wire_format_lite_inl.h"
 				>
 			</File>
 			<File
@@ -265,6 +277,10 @@
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\io\zero_copy_stream_impl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\google\protobuf\io\zero_copy_stream_impl_lite.h"
 				>
 			</File>
 		</Filter>
@@ -308,7 +324,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\extension_set_heavy.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\generated_message_reflection.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\src\google\protobuf\generated_message_util.cc"
 				>
 			</File>
 			<File
@@ -324,11 +348,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\google\protobuf\stubs\map-util.cc"
+				RelativePath="..\src\google\protobuf\message.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\google\protobuf\message.cc"
+				RelativePath="..\src\google\protobuf\message_lite.cc"
 				>
 			</File>
 			<File
@@ -353,10 +377,6 @@
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\service.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\src\google\protobuf\stubs\stl_util-inl.cc"
 				>
 			</File>
 			<File
@@ -388,11 +408,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\google\protobuf\wire_format_lite.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\src\google\protobuf\io\zero_copy_stream.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\src\google\protobuf\io\zero_copy_stream_impl.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\src\google\protobuf\io\zero_copy_stream_impl_lite.cc"
 				>
 			</File>
 		</Filter>

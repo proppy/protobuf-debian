@@ -129,6 +129,10 @@
 
 namespace testing {
 
+using internal::TestCase;
+using internal::TestProperty;
+using internal::TestResult;
+
 // Constants.
 
 // A test whose test case name or test name matches this filter is
@@ -183,7 +187,7 @@ GTEST_DEFINE_string_(
     "Whether to use colors in the output.  Valid values: yes, no, "
     "and auto.  'auto' means to use colors if the output is "
     "being sent to a terminal and the TERM environment variable "
-    "is set to xterm or xterm-color.");
+    "is set to xterm, xterm-color, xterm-256color, linux or cygwin.");
 
 GTEST_DEFINE_string_(
     filter,
@@ -216,21 +220,33 @@ GTEST_DEFINE_bool_(
     " should display elapsed time in text output.");
 
 GTEST_DEFINE_int32_(
+    random_seed,
+    internal::Int32FromGTestEnv("random_seed", 0),
+    "Random number seed to use when shuffling test orders.  Must be in range "
+    "[1, 99999], or 0 to use a seed based on the current time.");
+
+GTEST_DEFINE_int32_(
     repeat,
     internal::Int32FromGTestEnv("repeat", 1),
     "How many times to repeat each test.  Specify a negative number "
     "for repeating forever.  Useful for shaking out flaky tests.");
+
+GTEST_DEFINE_bool_(
+    show_internal_stack_frames, false,
+    "True iff " GTEST_NAME_ " should include internal stack frames when "
+    "printing test failure stack traces.");
+
+GTEST_DEFINE_bool_(
+    shuffle,
+    internal::BoolFromGTestEnv("shuffle", false),
+    "True iff " GTEST_NAME_
+    " should randomize tests' order on every run.");
 
 GTEST_DEFINE_int32_(
     stack_trace_depth,
         internal::Int32FromGTestEnv("stack_trace_depth", kMaxStackTraceDepth),
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
-
-GTEST_DEFINE_bool_(
-    show_internal_stack_frames, false,
-    "True iff " GTEST_NAME_ " should include internal stack frames when "
-    "printing test failure stack traces.");
 
 GTEST_DEFINE_bool_(
     throw_on_failure,
@@ -256,16 +272,14 @@ static bool g_help_flag = false;
 int g_init_gtest_count = 0;
 static bool GTestIsInitialized() { return g_init_gtest_count != 0; }
 
-// Iterates over a list of TestCases, keeping a running sum of the
+// Iterates over a vector of TestCases, keeping a running sum of the
 // results of calling a given int-returning method on each.
 // Returns the sum.
-static int SumOverTestCaseList(const internal::List<TestCase*>& case_list,
+static int SumOverTestCaseList(const internal::Vector<TestCase*>& case_list,
                                int (TestCase::*method)() const) {
   int sum = 0;
-  for (const internal::ListNode<TestCase*>* node = case_list.Head();
-       node != NULL;
-       node = node->next()) {
-    sum += (node->element()->*method)();
+  for (int i = 0; i < case_list.size(); i++) {
+    sum += (case_list.GetElement(i)->*method)();
   }
   return sum;
 }
@@ -466,40 +480,80 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
 class UnitTestEventListenerInterface {
  public:
   // The d'tor is pure virtual as this is an abstract class.
-  virtual ~UnitTestEventListenerInterface() = 0;
+  virtual ~UnitTestEventListenerInterface() {}
 
   // Called before the unit test starts.
-  virtual void OnUnitTestStart(const UnitTest*) {}
+  virtual void OnUnitTestStart(const UnitTest& unit_test) = 0;
 
   // Called after the unit test ends.
-  virtual void OnUnitTestEnd(const UnitTest*) {}
+  virtual void OnUnitTestEnd(const UnitTest& unit_test) = 0;
 
   // Called before the test case starts.
-  virtual void OnTestCaseStart(const TestCase*) {}
+  virtual void OnTestCaseStart(const TestCase& test_case) = 0;
 
   // Called after the test case ends.
-  virtual void OnTestCaseEnd(const TestCase*) {}
+  virtual void OnTestCaseEnd(const TestCase& test_case) = 0;
 
   // Called before the global set-up starts.
-  virtual void OnGlobalSetUpStart(const UnitTest*) {}
+  virtual void OnGlobalSetUpStart(const UnitTest& unit_test) = 0;
 
   // Called after the global set-up ends.
-  virtual void OnGlobalSetUpEnd(const UnitTest*) {}
+  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test) = 0;
 
   // Called before the global tear-down starts.
-  virtual void OnGlobalTearDownStart(const UnitTest*) {}
+  virtual void OnGlobalTearDownStart(const UnitTest& unit_test) = 0;
 
   // Called after the global tear-down ends.
-  virtual void OnGlobalTearDownEnd(const UnitTest*) {}
+  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test) = 0;
 
   // Called before the test starts.
-  virtual void OnTestStart(const TestInfo*) {}
+  virtual void OnTestStart(const TestInfo& test_info) = 0;
 
   // Called after the test ends.
-  virtual void OnTestEnd(const TestInfo*) {}
+  virtual void OnTestEnd(const TestInfo& test_info) = 0;
 
   // Called after an assertion.
-  virtual void OnNewTestPartResult(const TestPartResult*) {}
+  virtual void OnNewTestPartResult(const TestPartResult& test_part_result) = 0;
+};
+
+// The convenience class for users who need to override just one or two
+// methods and are not concerned that a possible change to a signature of
+// the methods they override will not be caught during the build.
+class EmptyTestEventListener : public UnitTestEventListenerInterface {
+ public:
+  // Called before the unit test starts.
+  virtual void OnUnitTestStart(const UnitTest& /*unit_test*/) {}
+
+  // Called after the unit test ends.
+  virtual void OnUnitTestEnd(const UnitTest& /*unit_test*/) {}
+
+  // Called before the test case starts.
+  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
+
+  // Called after the test case ends.
+  virtual void OnTestCaseEnd(const TestCase& /*test_case&*/) {}
+
+  // Called before the global set-up starts.
+  virtual void OnGlobalSetUpStart(const UnitTest& /*unit_test*/) {}
+
+  // Called after the global set-up ends.
+  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
+
+  // Called before the global tear-down starts.
+  virtual void OnGlobalTearDownStart(const UnitTest& /*unit_test*/) {}
+
+  // Called after the global tear-down ends.
+  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
+
+  // Called before the test starts.
+  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
+
+  // Called after the test ends.
+  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
+
+  // Called after an assertion.
+  virtual void OnNewTestPartResult(const TestPartResult& /*test_part_result*/) {
+  }
 };
 
 // The c'tor sets this object as the test part result reporter used by
@@ -523,7 +577,7 @@ ScopedFakeTestPartResultReporter::ScopedFakeTestPartResultReporter(
 }
 
 void ScopedFakeTestPartResultReporter::Init() {
-  internal::UnitTestImpl* const impl = UnitTest::GetInstance()->impl();
+  internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   if (intercept_mode_ == INTERCEPT_ALL_THREADS) {
     old_reporter_ = impl->GetGlobalTestPartResultReporter();
     impl->SetGlobalTestPartResultReporter(this);
@@ -536,7 +590,7 @@ void ScopedFakeTestPartResultReporter::Init() {
 // The d'tor restores the test part result reporter used by Google Test
 // before.
 ScopedFakeTestPartResultReporter::~ScopedFakeTestPartResultReporter() {
-  internal::UnitTestImpl* const impl = UnitTest::GetInstance()->impl();
+  internal::UnitTestImpl* const impl = internal::GetUnitTestImpl();
   if (intercept_mode_ == INTERCEPT_ALL_THREADS) {
     impl->SetGlobalTestPartResultReporter(old_reporter_);
   } else {
@@ -636,7 +690,7 @@ DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
 void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
   unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->result_printer()->OnNewTestPartResult(&result);
+  unit_test_->result_printer()->OnNewTestPartResult(result);
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
@@ -734,9 +788,10 @@ String UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
   return String("");
 }
 
-static TimeInMillis GetTimeInMillis() {
+// Returns the current time in milliseconds.
+TimeInMillis GetTimeInMillis() {
 #if defined(_WIN32_WCE) || defined(__BORLANDC__)
-  // Difference between 1970-01-01 and 1601-01-01 in miliseconds.
+  // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
   // http://analogous.blogspot.com/2005/04/epoch.html
   const TimeInMillis kJavaEpochToWinFileTimeDelta =
     static_cast<TimeInMillis>(116444736UL) * 100000UL;
@@ -1778,7 +1833,9 @@ String AppendUserMessage(const String& gtest_msg,
 
 // Creates an empty TestResult.
 TestResult::TestResult()
-    : death_test_count_(0),
+    : test_part_results_(new internal::Vector<TestPartResult>),
+      test_properties_(new internal::Vector<TestProperty>),
+      death_test_count_(0),
       elapsed_time_(0) {
 }
 
@@ -1786,9 +1843,28 @@ TestResult::TestResult()
 TestResult::~TestResult() {
 }
 
+// Returns the i-th test part result among all the results. i can
+// range from 0 to total_part_count() - 1. If i is not in that range,
+// aborts the program.
+const TestPartResult& TestResult::GetTestPartResult(int i) const {
+  return test_part_results_->GetElement(i);
+}
+
+// Returns the i-th test property. i can range from 0 to
+// test_property_count() - 1. If i is not in that range, aborts the
+// program.
+const TestProperty& TestResult::GetTestProperty(int i) const {
+  return test_properties_->GetElement(i);
+}
+
+// Clears the test part results.
+void TestResult::ClearTestPartResults() {
+  test_part_results_->Clear();
+}
+
 // Adds a test part result to the list.
 void TestResult::AddTestPartResult(const TestPartResult& test_part_result) {
-  test_part_results_.PushBack(test_part_result);
+  test_part_results_->PushBack(test_part_result);
 }
 
 // Adds a test property to the list. If a property with the same key as the
@@ -1798,21 +1874,21 @@ void TestResult::RecordProperty(const TestProperty& test_property) {
   if (!ValidateTestProperty(test_property)) {
     return;
   }
-  MutexLock lock(&test_properites_mutex_);
-  ListNode<TestProperty>* const node_with_matching_key =
-      test_properties_.FindIf(TestPropertyKeyIs(test_property.key()));
-  if (node_with_matching_key == NULL) {
-    test_properties_.PushBack(test_property);
+  internal::MutexLock lock(&test_properites_mutex_);
+  TestProperty* const property_with_matching_key =
+      test_properties_->FindIf(
+          internal::TestPropertyKeyIs(test_property.key()));
+  if (property_with_matching_key == NULL) {
+    test_properties_->PushBack(test_property);
     return;
   }
-  TestProperty& property_with_matching_key = node_with_matching_key->element();
-  property_with_matching_key.SetValue(test_property.value());
+  property_with_matching_key->SetValue(test_property.value());
 }
 
 // Adds a failure if the key is a reserved attribute of Google Test
 // testcase tags.  Returns true if the property is valid.
 bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
-  String key(test_property.key());
+  internal::String key(test_property.key());
   if (key == "name" || key == "status" || key == "time" || key == "classname") {
     ADD_FAILURE()
         << "Reserved key used in RecordProperty(): "
@@ -1826,30 +1902,19 @@ bool TestResult::ValidateTestProperty(const TestProperty& test_property) {
 
 // Clears the object.
 void TestResult::Clear() {
-  test_part_results_.Clear();
-  test_properties_.Clear();
+  test_part_results_->Clear();
+  test_properties_->Clear();
   death_test_count_ = 0;
   elapsed_time_ = 0;
 }
 
-// Returns true iff the test part passed.
-static bool TestPartPassed(const TestPartResult & result) {
-  return result.passed();
-}
-
-// Gets the number of successful test parts.
-int TestResult::successful_part_count() const {
-  return test_part_results_.CountIf(TestPartPassed);
-}
-
-// Returns true iff the test part failed.
-static bool TestPartFailed(const TestPartResult & result) {
-  return result.failed();
-}
-
-// Gets the number of failed test parts.
-int TestResult::failed_part_count() const {
-  return test_part_results_.CountIf(TestPartFailed);
+// Returns true iff the test failed.
+bool TestResult::Failed() const {
+  for (int i = 0; i < total_part_count(); ++i) {
+    if (GetTestPartResult(i).failed())
+      return true;
+  }
+  return false;
 }
 
 // Returns true iff the test part fatally failed.
@@ -1859,7 +1924,7 @@ static bool TestPartFatallyFailed(const TestPartResult& result) {
 
 // Returns true iff the test fatally failed.
 bool TestResult::HasFatalFailure() const {
-  return test_part_results_.CountIf(TestPartFatallyFailed) > 0;
+  return test_part_results_->CountIf(TestPartFatallyFailed) > 0;
 }
 
 // Returns true iff the test part non-fatally failed.
@@ -1869,13 +1934,18 @@ static bool TestPartNonfatallyFailed(const TestPartResult& result) {
 
 // Returns true iff the test has a non-fatal failure.
 bool TestResult::HasNonfatalFailure() const {
-  return test_part_results_.CountIf(TestPartNonfatallyFailed) > 0;
+  return test_part_results_->CountIf(TestPartNonfatallyFailed) > 0;
 }
 
 // Gets the number of all test parts.  This is the sum of the number
 // of successful test parts and the number of failed test parts.
 int TestResult::total_part_count() const {
-  return test_part_results_.size();
+  return test_part_results_->size();
+}
+
+// Returns the number of the test properties.
+int TestResult::test_property_count() const {
+  return test_properties_->size();
 }
 
 }  // namespace internal
@@ -1918,6 +1988,22 @@ void Test::RecordProperty(const char* key, int value) {
   RecordProperty(key, value_message.GetString().c_str());
 }
 
+namespace internal {
+
+void ReportFailureInUnknownLocation(TestPartResultType result_type,
+                                    const String& message) {
+  // This function is a friend of UnitTest and as such has access to
+  // AddTestPartResult.
+  UnitTest::GetInstance()->AddTestPartResult(
+      result_type,
+      NULL,  // No info about the source file where the exception occurred.
+      -1,    // We have no info on which line caused the exception.
+      message,
+      String());  // No stack trace, either.
+}
+
+}  // namespace internal
+
 #if GTEST_OS_WINDOWS
 // We are on Windows.
 
@@ -1928,15 +2014,8 @@ static void AddExceptionThrownFailure(DWORD exception_code,
   message << "Exception thrown with code 0x" << std::setbase(16) <<
     exception_code << std::setbase(10) << " in " << location << ".";
 
-  UnitTest* const unit_test = UnitTest::GetInstance();
-  unit_test->AddTestPartResult(
-      TPRT_FATAL_FAILURE,
-      static_cast<const char *>(NULL),
-           // We have no info about the source file where the exception
-           // occurred.
-      -1,  // We have no info on which line caused the exception.
-      message.GetString(),
-      internal::String(""));
+  internal::ReportFailureInUnknownLocation(TPRT_FATAL_FAILURE,
+                                           message.GetString());
 }
 
 #endif  // GTEST_OS_WINDOWS
@@ -1952,7 +2031,7 @@ bool Test::HasSameFixtureClass() {
 
   // Info about the first test in the current test case.
   const internal::TestInfoImpl* const first_test_info =
-      test_case->test_info_list().Head()->element()->impl();
+      test_case->test_info_list().GetElement(0)->impl();
   const internal::TypeId first_fixture_id = first_test_info->fixture_class_id();
   const char* const first_test_name = first_test_info->name();
 
@@ -2177,7 +2256,7 @@ bool TestInfo::should_run() const { return impl_->should_run(); }
 bool TestInfo::matches_filter() const { return impl_->matches_filter(); }
 
 // Returns the result of the test.
-const internal::TestResult* TestInfo::result() const { return impl_->result(); }
+const TestResult* TestInfo::result() const { return impl_->result(); }
 
 // Increments the number of death tests encountered in this test so
 // far.
@@ -2214,17 +2293,6 @@ class TestNameIs {
 
 }  // namespace
 
-// Finds and returns a TestInfo with the given name.  If one doesn't
-// exist, returns NULL.
-TestInfo * TestCase::GetTestInfo(const char* test_name) {
-  // Can we find a TestInfo with the given name?
-  internal::ListNode<TestInfo *> * const node = test_info_list_->FindIf(
-      TestNameIs(test_name));
-
-  // Returns the TestInfo found.
-  return node ? node->element() : NULL;
-}
-
 namespace internal {
 
 // This method expands all parameterized tests registered with macros TEST_P
@@ -2252,7 +2320,7 @@ void TestInfoImpl::Run() {
   // start.
   UnitTestEventListenerInterface* const result_printer =
     impl->result_printer();
-  result_printer->OnTestStart(parent_);
+  result_printer->OnTestStart(*parent_);
 
   const TimeInMillis start = GetTimeInMillis();
 
@@ -2295,14 +2363,12 @@ void TestInfoImpl::Run() {
   result_.set_elapsed_time(GetTimeInMillis() - start);
 
   // Notifies the unit test event listener that a test has just finished.
-  result_printer->OnTestEnd(parent_);
+  result_printer->OnTestEnd(*parent_);
 
   // Tells UnitTest to stop associating assertion results to this
   // test.
   impl->set_current_test_info(NULL);
 }
-
-}  // namespace internal
 
 // class TestCase
 
@@ -2346,7 +2412,7 @@ TestCase::TestCase(const char* name, const char* comment,
       tear_down_tc_(tear_down_tc),
       should_run_(false),
       elapsed_time_(0) {
-  test_info_list_ = new internal::List<TestInfo *>;
+  test_info_list_ = new internal::Vector<TestInfo *>;
 }
 
 // Destructor of TestCase.
@@ -2357,6 +2423,12 @@ TestCase::~TestCase() {
   // Then deletes the Test collection.
   delete test_info_list_;
   test_info_list_ = NULL;
+}
+
+// Returns the i-th test among all the tests. i can range from 0 to
+// total_test_count() - 1. If i is not in that range, returns NULL.
+const TestInfo* TestCase::GetTestInfo(int i) const {
+  return test_info_list_->GetElementOr(i, NULL);
 }
 
 // Adds a test to this test case.  Will delete the test upon
@@ -2375,7 +2447,7 @@ void TestCase::Run() {
   UnitTestEventListenerInterface * const result_printer =
       impl->result_printer();
 
-  result_printer->OnTestCaseStart(this);
+  result_printer->OnTestCaseStart(*this);
   impl->os_stack_trace_getter()->UponLeavingGTest();
   set_up_tc_();
 
@@ -2385,7 +2457,7 @@ void TestCase::Run() {
 
   impl->os_stack_trace_getter()->UponLeavingGTest();
   tear_down_tc_();
-  result_printer->OnTestCaseEnd(this);
+  result_printer->OnTestCaseEnd(*this);
   impl->set_current_test_case(NULL);
 }
 
@@ -2394,16 +2466,33 @@ void TestCase::ClearResult() {
   test_info_list_->ForEach(internal::TestInfoImpl::ClearTestResult);
 }
 
-
-// class UnitTestEventListenerInterface
-
-// The virtual d'tor.
-UnitTestEventListenerInterface::~UnitTestEventListenerInterface() {
+// Returns true iff test passed.
+bool TestCase::TestPassed(const TestInfo * test_info) {
+  const internal::TestInfoImpl* const impl = test_info->impl();
+  return impl->should_run() && impl->result()->Passed();
 }
+
+// Returns true iff test failed.
+bool TestCase::TestFailed(const TestInfo * test_info) {
+  const internal::TestInfoImpl* const impl = test_info->impl();
+  return impl->should_run() && impl->result()->Failed();
+}
+
+// Returns true iff test is disabled.
+bool TestCase::TestDisabled(const TestInfo * test_info) {
+  return test_info->impl()->is_disabled();
+}
+
+// Returns true if the given test should run.
+bool TestCase::ShouldRunTest(const TestInfo *test_info) {
+  return test_info->impl()->should_run();
+}
+
+}  // namespace internal
 
 // A result printer that never prints anything.  Used in the child process
 // of an exec-style death test to avoid needless output clutter.
-class NullUnitTestResultPrinter : public UnitTestEventListenerInterface {};
+class NullUnitTestResultPrinter : public EmptyTestEventListener {};
 
 // Formats a countable noun.  Depending on its quantity, either the
 // singular form or the plural form is used. e.g.
@@ -2459,10 +2548,24 @@ static internal::String PrintTestPartResultToString(
 }
 
 // Prints a TestPartResult.
-static void PrintTestPartResult(
-    const TestPartResult& test_part_result) {
-  printf("%s\n", PrintTestPartResultToString(test_part_result).c_str());
+static void PrintTestPartResult(const TestPartResult& test_part_result) {
+  const internal::String& result =
+      PrintTestPartResultToString(test_part_result);
+  printf("%s\n", result.c_str());
   fflush(stdout);
+  // If the test program runs in Visual Studio or a debugger, the
+  // following statements add the test part result message to the Output
+  // window such that the user can double-click on it to jump to the
+  // corresponding source code location; otherwise they do nothing.
+#ifdef _WIN32_WCE
+  // Windows Mobile doesn't support the ANSI version of OutputDebugString,
+  // it works only with UTF16 strings.
+  ::OutputDebugString(internal::String::AnsiToUtf16(result.c_str()));
+  ::OutputDebugString(L"\n");
+#elif GTEST_OS_WINDOWS
+  ::OutputDebugStringA(result.c_str());
+  ::OutputDebugStringA("\n");
+#endif
 }
 
 // class PrettyUnitTestResultPrinter
@@ -2518,6 +2621,8 @@ bool ShouldUseColor(bool stdout_is_tty) {
     const bool term_supports_color =
         String::CStringEquals(term, "xterm") ||
         String::CStringEquals(term, "xterm-color") ||
+        String::CStringEquals(term, "xterm-256color") ||
+        String::CStringEquals(term, "linux") ||
         String::CStringEquals(term, "cygwin");
     return stdout_is_tty && term_supports_color;
 #endif  // GTEST_OS_WINDOWS
@@ -2597,24 +2702,27 @@ class PrettyUnitTestResultPrinter : public UnitTestEventListenerInterface {
 
   // The following methods override what's in the
   // UnitTestEventListenerInterface class.
-  virtual void OnUnitTestStart(const UnitTest * unit_test);
-  virtual void OnGlobalSetUpStart(const UnitTest*);
-  virtual void OnTestCaseStart(const TestCase * test_case);
-  virtual void OnTestCaseEnd(const TestCase * test_case);
-  virtual void OnTestStart(const TestInfo * test_info);
-  virtual void OnNewTestPartResult(const TestPartResult * result);
-  virtual void OnTestEnd(const TestInfo * test_info);
-  virtual void OnGlobalTearDownStart(const UnitTest*);
-  virtual void OnUnitTestEnd(const UnitTest * unit_test);
+  virtual void OnUnitTestStart(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpStart(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestCaseEnd(const TestCase& test_case);
+  virtual void OnTestStart(const TestInfo& test_info);
+  virtual void OnNewTestPartResult(const TestPartResult& result);
+  virtual void OnTestEnd(const TestInfo& test_info);
+  virtual void OnGlobalTearDownStart(const UnitTest& unit_test);
+  virtual void OnGlobalTearDownEnd(const UnitTest& /*unit_test*/) {}
+  virtual void OnUnitTestEnd(const UnitTest& unit_test);
 
  private:
+  static void PrintFailedTests(const UnitTest& unit_test);
+
   internal::String test_case_name_;
 };
 
 // Called before the unit test starts.
-void PrettyUnitTestResultPrinter::OnUnitTestStart(
-    const UnitTest * unit_test) {
-  const char * const filter = GTEST_FLAG(filter).c_str();
+void PrettyUnitTestResultPrinter::OnUnitTestStart(const UnitTest& unit_test) {
+  const char* const filter = GTEST_FLAG(filter).c_str();
 
   // Prints the filter if it's not *.  This reminds the user that some
   // tests may be skipped.
@@ -2630,70 +2738,74 @@ void PrettyUnitTestResultPrinter::OnUnitTestStart(
                   internal::posix::GetEnv(kTestTotalShards));
   }
 
-  const internal::UnitTestImpl* const impl = unit_test->impl();
+  if (GTEST_FLAG(shuffle)) {
+    ColoredPrintf(COLOR_YELLOW,
+                  "Note: Randomizing tests' orders with a seed of %d .\n",
+                  unit_test.random_seed());
+  }
+
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("Running %s from %s.\n",
-         FormatTestCount(impl->test_to_run_count()).c_str(),
-         FormatTestCaseCount(impl->test_case_to_run_count()).c_str());
+         FormatTestCount(unit_test.test_to_run_count()).c_str(),
+         FormatTestCaseCount(unit_test.test_case_to_run_count()).c_str());
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnGlobalSetUpStart(const UnitTest*) {
+void PrettyUnitTestResultPrinter::OnGlobalSetUpStart(
+    const UnitTest& /*unit_test*/) {
   ColoredPrintf(COLOR_GREEN,  "[----------] ");
   printf("Global test environment set-up.\n");
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseStart(
-    const TestCase * test_case) {
-  test_case_name_ = test_case->name();
+void PrettyUnitTestResultPrinter::OnTestCaseStart(const TestCase& test_case) {
+  test_case_name_ = test_case.name();
   const internal::String counts =
-      FormatCountableNoun(test_case->test_to_run_count(), "test", "tests");
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
   printf("%s from %s", counts.c_str(), test_case_name_.c_str());
-  if (test_case->comment()[0] == '\0') {
+  if (test_case.comment()[0] == '\0') {
     printf("\n");
   } else {
-    printf(", where %s\n", test_case->comment());
+    printf(", where %s\n", test_case.comment());
   }
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestCaseEnd(
-    const TestCase * test_case) {
+void PrettyUnitTestResultPrinter::OnTestCaseEnd(const TestCase& test_case) {
   if (!GTEST_FLAG(print_time)) return;
 
-  test_case_name_ = test_case->name();
+  test_case_name_ = test_case.name();
   const internal::String counts =
-      FormatCountableNoun(test_case->test_to_run_count(), "test", "tests");
+      FormatCountableNoun(test_case.test_to_run_count(), "test", "tests");
   ColoredPrintf(COLOR_GREEN, "[----------] ");
   printf("%s from %s (%s ms total)\n\n",
          counts.c_str(), test_case_name_.c_str(),
-         internal::StreamableToString(test_case->elapsed_time()).c_str());
+         internal::StreamableToString(test_case.elapsed_time()).c_str());
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo * test_info) {
+void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
   ColoredPrintf(COLOR_GREEN,  "[ RUN      ] ");
-  PrintTestName(test_case_name_.c_str(), test_info->name());
-  if (test_info->comment()[0] == '\0') {
+  PrintTestName(test_case_name_.c_str(), test_info.name());
+  if (test_info.comment()[0] == '\0') {
     printf("\n");
   } else {
-    printf(", where %s\n", test_info->comment());
+    printf(", where %s\n", test_info.comment());
   }
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo * test_info) {
-  if (test_info->result()->Passed()) {
+void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
+  if (test_info.result()->Passed()) {
     ColoredPrintf(COLOR_GREEN, "[       OK ] ");
   } else {
     ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
   }
-  PrintTestName(test_case_name_.c_str(), test_info->name());
+  PrintTestName(test_case_name_.c_str(), test_info.name());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms)\n", internal::StreamableToString(
-           test_info->result()->elapsed_time()).c_str());
+           test_info.result()->elapsed_time()).c_str());
   } else {
     printf("\n");
   }
@@ -2702,88 +2814,79 @@ void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo * test_info) {
 
 // Called after an assertion failure.
 void PrettyUnitTestResultPrinter::OnNewTestPartResult(
-    const TestPartResult * result) {
+    const TestPartResult& result) {
   // If the test part succeeded, we don't need to do anything.
-  if (result->type() == TPRT_SUCCESS)
+  if (result.type() == TPRT_SUCCESS)
     return;
 
   // Print failure message from the assertion (e.g. expected this and got that).
-  PrintTestPartResult(*result);
+  PrintTestPartResult(result);
   fflush(stdout);
 }
 
-void PrettyUnitTestResultPrinter::OnGlobalTearDownStart(const UnitTest*) {
+void PrettyUnitTestResultPrinter::OnGlobalTearDownStart(
+    const UnitTest& /*unit_test*/) {
   ColoredPrintf(COLOR_GREEN,  "[----------] ");
   printf("Global test environment tear-down\n");
   fflush(stdout);
 }
 
-namespace internal {
-
 // Internal helper for printing the list of failed tests.
-static void PrintFailedTestsPretty(const UnitTestImpl* impl) {
-  const int failed_test_count = impl->failed_test_count();
+void PrettyUnitTestResultPrinter::PrintFailedTests(const UnitTest& unit_test) {
+  const int failed_test_count = unit_test.failed_test_count();
   if (failed_test_count == 0) {
     return;
   }
 
-  for (const internal::ListNode<TestCase*>* node = impl->test_cases()->Head();
-       node != NULL; node = node->next()) {
-    const TestCase* const tc = node->element();
-    if (!tc->should_run() || (tc->failed_test_count() == 0)) {
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i) {
+    const TestCase& test_case = *unit_test.GetTestCase(i);
+    if (!test_case.should_run() || (test_case.failed_test_count() == 0)) {
       continue;
     }
-    for (const internal::ListNode<TestInfo*>* tinode =
-         tc->test_info_list().Head();
-         tinode != NULL; tinode = tinode->next()) {
-      const TestInfo* const ti = tinode->element();
-      if (!tc->ShouldRunTest(ti) || tc->TestPassed(ti)) {
+    for (int j = 0; j < test_case.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_case.GetTestInfo(j);
+      if (!test_info.should_run() || test_info.result()->Passed()) {
         continue;
       }
       ColoredPrintf(COLOR_RED, "[  FAILED  ] ");
-      printf("%s.%s", ti->test_case_name(), ti->name());
-      if (ti->test_case_comment()[0] != '\0' ||
-          ti->comment()[0] != '\0') {
-        printf(", where %s", ti->test_case_comment());
-        if (ti->test_case_comment()[0] != '\0' &&
-            ti->comment()[0] != '\0') {
+      printf("%s.%s", test_case.name(), test_info.name());
+      if (test_case.comment()[0] != '\0' ||
+          test_info.comment()[0] != '\0') {
+        printf(", where %s", test_case.comment());
+        if (test_case.comment()[0] != '\0' &&
+            test_info.comment()[0] != '\0') {
           printf(" and ");
         }
       }
-      printf("%s\n", ti->comment());
+      printf("%s\n", test_info.comment());
     }
   }
 }
 
-}  // namespace internal
-
-void PrettyUnitTestResultPrinter::OnUnitTestEnd(
-    const UnitTest * unit_test) {
-  const internal::UnitTestImpl* const impl = unit_test->impl();
-
+void PrettyUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
   ColoredPrintf(COLOR_GREEN,  "[==========] ");
   printf("%s from %s ran.",
-         FormatTestCount(impl->test_to_run_count()).c_str(),
-         FormatTestCaseCount(impl->test_case_to_run_count()).c_str());
+         FormatTestCount(unit_test.test_to_run_count()).c_str(),
+         FormatTestCaseCount(unit_test.test_case_to_run_count()).c_str());
   if (GTEST_FLAG(print_time)) {
     printf(" (%s ms total)",
-           internal::StreamableToString(impl->elapsed_time()).c_str());
+           internal::StreamableToString(unit_test.elapsed_time()).c_str());
   }
   printf("\n");
   ColoredPrintf(COLOR_GREEN,  "[  PASSED  ] ");
-  printf("%s.\n", FormatTestCount(impl->successful_test_count()).c_str());
+  printf("%s.\n", FormatTestCount(unit_test.successful_test_count()).c_str());
 
-  int num_failures = impl->failed_test_count();
-  if (!impl->Passed()) {
-    const int failed_test_count = impl->failed_test_count();
+  int num_failures = unit_test.failed_test_count();
+  if (!unit_test.Passed()) {
+    const int failed_test_count = unit_test.failed_test_count();
     ColoredPrintf(COLOR_RED,  "[  FAILED  ] ");
     printf("%s, listed below:\n", FormatTestCount(failed_test_count).c_str());
-    internal::PrintFailedTestsPretty(impl);
+    PrintFailedTests(unit_test);
     printf("\n%2d FAILED %s\n", num_failures,
                         num_failures == 1 ? "TEST" : "TESTS");
   }
 
-  int num_disabled = impl->disabled_test_count();
+  int num_disabled = unit_test.disabled_test_count();
   if (num_disabled && !GTEST_FLAG(also_run_disabled_tests)) {
     if (!num_failures) {
       printf("\n");  // Add a spacer if no FAILURE banner is displayed.
@@ -2804,23 +2907,22 @@ void PrettyUnitTestResultPrinter::OnUnitTestEnd(
 // This class forwards events to other event listeners.
 class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
  public:
-  typedef internal::List<UnitTestEventListenerInterface *> Listeners;
-  typedef internal::ListNode<UnitTestEventListenerInterface *> ListenersNode;
+  typedef internal::Vector<UnitTestEventListenerInterface *> Listeners;
   UnitTestEventsRepeater() {}
   virtual ~UnitTestEventsRepeater();
   void AddListener(UnitTestEventListenerInterface *listener);
 
-  virtual void OnUnitTestStart(const UnitTest* unit_test);
-  virtual void OnUnitTestEnd(const UnitTest* unit_test);
-  virtual void OnGlobalSetUpStart(const UnitTest* unit_test);
-  virtual void OnGlobalSetUpEnd(const UnitTest* unit_test);
-  virtual void OnGlobalTearDownStart(const UnitTest* unit_test);
-  virtual void OnGlobalTearDownEnd(const UnitTest* unit_test);
-  virtual void OnTestCaseStart(const TestCase* test_case);
-  virtual void OnTestCaseEnd(const TestCase* test_case);
-  virtual void OnTestStart(const TestInfo* test_info);
-  virtual void OnTestEnd(const TestInfo* test_info);
-  virtual void OnNewTestPartResult(const TestPartResult* result);
+  virtual void OnUnitTestStart(const UnitTest& unit_test);
+  virtual void OnUnitTestEnd(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpStart(const UnitTest& unit_test);
+  virtual void OnGlobalSetUpEnd(const UnitTest& unit_test);
+  virtual void OnGlobalTearDownStart(const UnitTest& unit_test);
+  virtual void OnGlobalTearDownEnd(const UnitTest& unit_test);
+  virtual void OnTestCaseStart(const TestCase& test_case);
+  virtual void OnTestCaseEnd(const TestCase& test_case);
+  virtual void OnTestStart(const TestInfo& test_info);
+  virtual void OnTestEnd(const TestInfo& test_info);
+  virtual void OnNewTestPartResult(const TestPartResult& result);
 
  private:
   Listeners listeners_;
@@ -2829,10 +2931,8 @@ class UnitTestEventsRepeater : public UnitTestEventListenerInterface {
 };
 
 UnitTestEventsRepeater::~UnitTestEventsRepeater() {
-  for (ListenersNode* listener = listeners_.Head();
-       listener != NULL;
-       listener = listener->next()) {
-    delete listener->element();
+  for (int i = 0; i < listeners_.size(); i++) {
+    delete listeners_.GetElement(i);
   }
 }
 
@@ -2844,11 +2944,9 @@ void UnitTestEventsRepeater::AddListener(
 // Since the methods are identical, use a macro to reduce boilerplate.
 // This defines a member that repeats the call to all listeners.
 #define GTEST_REPEATER_METHOD_(Name, Type) \
-void UnitTestEventsRepeater::Name(const Type* parameter) { \
-  for (ListenersNode* listener = listeners_.Head(); \
-       listener != NULL; \
-       listener = listener->next()) { \
-    listener->element()->Name(parameter); \
+void UnitTestEventsRepeater::Name(const Type& parameter) { \
+  for (int i = 0; i < listeners_.size(); i++) { \
+    listeners_.GetElement(i)->Name(parameter); \
   } \
 }
 
@@ -2869,11 +2967,11 @@ GTEST_REPEATER_METHOD_(OnNewTestPartResult, TestPartResult)
 // End PrettyUnitTestResultPrinter
 
 // This class generates an XML output file.
-class XmlUnitTestResultPrinter : public UnitTestEventListenerInterface {
+class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
   explicit XmlUnitTestResultPrinter(const char* output_file);
 
-  virtual void OnUnitTestEnd(const UnitTest* unit_test);
+  virtual void OnUnitTestEnd(const UnitTest& unit_test);
 
  private:
   // Is c a whitespace character that is normalized to a space character
@@ -2907,20 +3005,20 @@ class XmlUnitTestResultPrinter : public UnitTestEventListenerInterface {
   // Prints an XML representation of a TestInfo object.
   static void PrintXmlTestInfo(FILE* out,
                                const char* test_case_name,
-                               const TestInfo* test_info);
+                               const TestInfo& test_info);
 
   // Prints an XML representation of a TestCase object
-  static void PrintXmlTestCase(FILE* out, const TestCase* test_case);
+  static void PrintXmlTestCase(FILE* out, const TestCase& test_case);
 
   // Prints an XML summary of unit_test to output stream out.
-  static void PrintXmlUnitTest(FILE* out, const UnitTest* unit_test);
+  static void PrintXmlUnitTest(FILE* out, const UnitTest& unit_test);
 
   // Produces a string representing the test properties in a result as space
   // delimited XML attributes based on the property key="value" pairs.
   // When the String is not empty, it includes a space at the beginning,
   // to delimit this attribute from prior attributes.
   static internal::String TestPropertiesAsXmlAttributes(
-      const internal::TestResult* result);
+      const TestResult& result);
 
   // The output file.
   const internal::String output_file_;
@@ -2939,7 +3037,7 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
 }
 
 // Called after the unit test ends.
-void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest* unit_test) {
+void XmlUnitTestResultPrinter::OnUnitTestEnd(const UnitTest& unit_test) {
   FILE* xmlout = NULL;
   internal::FilePath output_file(output_file_);
   internal::FilePath output_dir(output_file.RemoveFileName());
@@ -3058,23 +3156,20 @@ const char* FormatTimeInMillisAsSeconds(TimeInMillis ms) {
 // TODO(wan): There is also value in printing properties with the plain printer.
 void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
                                                 const char* test_case_name,
-                                                const TestInfo* test_info) {
-  const internal::TestResult * const result = test_info->result();
-  const internal::List<TestPartResult> &results = result->test_part_results();
+                                                const TestInfo& test_info) {
+  const TestResult& result = *test_info.result();
   fprintf(out,
           "    <testcase name=\"%s\" status=\"%s\" time=\"%s\" "
           "classname=\"%s\"%s",
-          EscapeXmlAttribute(test_info->name()).c_str(),
-          test_info->should_run() ? "run" : "notrun",
-          internal::FormatTimeInMillisAsSeconds(result->elapsed_time()),
+          EscapeXmlAttribute(test_info.name()).c_str(),
+          test_info.should_run() ? "run" : "notrun",
+          internal::FormatTimeInMillisAsSeconds(result.elapsed_time()),
           EscapeXmlAttribute(test_case_name).c_str(),
           TestPropertiesAsXmlAttributes(result).c_str());
 
   int failures = 0;
-  for (const internal::ListNode<TestPartResult>* part_node = results.Head();
-       part_node != NULL;
-       part_node = part_node->next()) {
-    const TestPartResult& part = part_node->element();
+  for (int i = 0; i < result.total_part_count(); ++i) {
+    const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
       const internal::String message =
           internal::String::Format("%s:%d\n%s", part.file_name(),
@@ -3096,60 +3191,49 @@ void XmlUnitTestResultPrinter::PrintXmlTestInfo(FILE* out,
 
 // Prints an XML representation of a TestCase object
 void XmlUnitTestResultPrinter::PrintXmlTestCase(FILE* out,
-                                                const TestCase* test_case) {
+                                                const TestCase& test_case) {
   fprintf(out,
           "  <testsuite name=\"%s\" tests=\"%d\" failures=\"%d\" "
           "disabled=\"%d\" ",
-          EscapeXmlAttribute(test_case->name()).c_str(),
-          test_case->total_test_count(),
-          test_case->failed_test_count(),
-          test_case->disabled_test_count());
+          EscapeXmlAttribute(test_case.name()).c_str(),
+          test_case.total_test_count(),
+          test_case.failed_test_count(),
+          test_case.disabled_test_count());
   fprintf(out,
           "errors=\"0\" time=\"%s\">\n",
-          internal::FormatTimeInMillisAsSeconds(test_case->elapsed_time()));
-  for (const internal::ListNode<TestInfo*>* info_node =
-         test_case->test_info_list().Head();
-       info_node != NULL;
-       info_node = info_node->next()) {
-    PrintXmlTestInfo(out, test_case->name(), info_node->element());
-  }
+          internal::FormatTimeInMillisAsSeconds(test_case.elapsed_time()));
+  for (int i = 0; i < test_case.total_test_count(); ++i)
+    PrintXmlTestInfo(out, test_case.name(), *test_case.GetTestInfo(i));
   fprintf(out, "  </testsuite>\n");
 }
 
 // Prints an XML summary of unit_test to output stream out.
 void XmlUnitTestResultPrinter::PrintXmlUnitTest(FILE* out,
-                                                const UnitTest* unit_test) {
-  const internal::UnitTestImpl* const impl = unit_test->impl();
+                                                const UnitTest& unit_test) {
   fprintf(out, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(out,
           "<testsuites tests=\"%d\" failures=\"%d\" disabled=\"%d\" "
           "errors=\"0\" time=\"%s\" ",
-          impl->total_test_count(),
-          impl->failed_test_count(),
-          impl->disabled_test_count(),
-          internal::FormatTimeInMillisAsSeconds(impl->elapsed_time()));
-  fprintf(out, "name=\"AllTests\">\n");
-  for (const internal::ListNode<TestCase*>* case_node =
-       impl->test_cases()->Head();
-       case_node != NULL;
-       case_node = case_node->next()) {
-    PrintXmlTestCase(out, case_node->element());
+          unit_test.total_test_count(),
+          unit_test.failed_test_count(),
+          unit_test.disabled_test_count(),
+          internal::FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));
+  if (GTEST_FLAG(shuffle)) {
+    fprintf(out, "random_seed=\"%d\" ", unit_test.random_seed());
   }
+  fprintf(out, "name=\"AllTests\">\n");
+  for (int i = 0; i < unit_test.total_test_case_count(); ++i)
+    PrintXmlTestCase(out, *unit_test.GetTestCase(i));
   fprintf(out, "</testsuites>\n");
 }
 
 // Produces a string representing the test properties in a result as space
 // delimited XML attributes based on the property key="value" pairs.
 internal::String XmlUnitTestResultPrinter::TestPropertiesAsXmlAttributes(
-    const internal::TestResult* result) {
-  using internal::TestProperty;
+    const TestResult& result) {
   Message attributes;
-  const internal::List<TestProperty>& properties = result->test_properties();
-  for (const internal::ListNode<TestProperty>* property_node =
-       properties.Head();
-       property_node != NULL;
-       property_node = property_node->next()) {
-    const TestProperty& property = property_node->element();
+  for (int i = 0; i < result.test_property_count(); ++i) {
+    const TestProperty& property = result.GetTestProperty(i);
     attributes << " " << property.key() << "="
         << "\"" << EscapeXmlAttribute(property.value()) << "\"";
   }
@@ -3236,6 +3320,64 @@ UnitTest * UnitTest::GetInstance() {
 #endif  // (_MSC_VER == 1310 && !defined(_DEBUG)) || defined(__BORLANDC__)
 }
 
+// Gets the number of successful test cases.
+int UnitTest::successful_test_case_count() const {
+  return impl()->successful_test_case_count();
+}
+
+// Gets the number of failed test cases.
+int UnitTest::failed_test_case_count() const {
+  return impl()->failed_test_case_count();
+}
+
+// Gets the number of all test cases.
+int UnitTest::total_test_case_count() const {
+  return impl()->total_test_case_count();
+}
+
+// Gets the number of all test cases that contain at least one test
+// that should run.
+int UnitTest::test_case_to_run_count() const {
+  return impl()->test_case_to_run_count();
+}
+
+// Gets the number of successful tests.
+int UnitTest::successful_test_count() const {
+  return impl()->successful_test_count();
+}
+
+// Gets the number of failed tests.
+int UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
+
+// Gets the number of disabled tests.
+int UnitTest::disabled_test_count() const {
+  return impl()->disabled_test_count();
+}
+
+// Gets the number of all tests.
+int UnitTest::total_test_count() const { return impl()->total_test_count(); }
+
+// Gets the number of tests that should run.
+int UnitTest::test_to_run_count() const { return impl()->test_to_run_count(); }
+
+// Gets the elapsed time, in milliseconds.
+internal::TimeInMillis UnitTest::elapsed_time() const {
+  return impl()->elapsed_time();
+}
+
+// Returns true iff the unit test passed (i.e. all test cases passed).
+bool UnitTest::Passed() const { return impl()->Passed(); }
+
+// Returns true iff the unit test failed (i.e. some test case failed
+// or something outside of all tests failed).
+bool UnitTest::Failed() const { return impl()->Failed(); }
+
+// Gets the i-th test case among all the test cases. i can range from 0 to
+// total_test_case_count() - 1. If i is not in that range, returns NULL.
+const TestCase* UnitTest::GetTestCase(int i) const {
+  return impl()->GetTestCase(i);
+}
+
 // Registers and returns a global test environment.  When a test
 // program is run, all global test environments will be set-up in the
 // order they were registered.  After all tests in the program have
@@ -3286,12 +3428,11 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
   if (impl_->gtest_trace_stack()->size() > 0) {
     msg << "\n" << GTEST_NAME_ << " trace:";
 
-    for (internal::ListNode<internal::TraceInfo>* node =
-         impl_->gtest_trace_stack()->Head();
-         node != NULL;
-         node = node->next()) {
-      const internal::TraceInfo& trace = node->element();
-      msg << "\n" << trace.file << ":" << trace.line << ": " << trace.message;
+    for (int i = 0; i < impl_->gtest_trace_stack()->size(); i++) {
+      const internal::TraceInfo& trace =
+          impl_->gtest_trace_stack()->GetElement(i);
+      msg << "\n" << internal::FormatFileLocation(trace.file, trace.line)
+          << " " << trace.message;
     }
   }
 
@@ -3336,7 +3477,7 @@ void UnitTest::AddTestPartResult(TestPartResultType result_type,
 // the supplied value already exists, updates its value instead.
 void UnitTest::RecordPropertyForCurrentTest(const char* key,
                                             const char* value) {
-  const internal::TestProperty test_property(key, value);
+  const TestProperty test_property(key, value);
   impl_->current_test_result()->RecordProperty(test_property);
 }
 
@@ -3363,14 +3504,14 @@ int UnitTest::Run() {
                  SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif  // _WIN32_WCE
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
+#if (defined(_MSC_VER) || defined(__MINGW32__)) && !defined(_WIN32_WCE)
     // Death test children can be terminated with _abort().  On Windows,
     // _abort() can show a dialog with a warning message.  This forces the
     // abort message to go to stderr instead.
     _set_error_mode(_OUT_TO_STDERR);
 #endif
 
-#if _MSC_VER >= 1400
+#if _MSC_VER >= 1400 && !defined(_WIN32_WCE)
     // In the debug version, Visual Studio pops up a separate dialog
     // offering a choice to debug the aborted program. We need to suppress
     // this dialog or it will pop up for every EXPECT/ASSERT_DEATH statement
@@ -3386,7 +3527,7 @@ int UnitTest::Run() {
       _set_abort_behavior(
           0x0,                                    // Clear the following flags:
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
-#endif  // _MSC_VER >= 1400
+#endif
   }
 
   __try {
@@ -3425,6 +3566,9 @@ const TestInfo* UnitTest::current_test_info() const {
   internal::MutexLock lock(&mutex_);
   return impl_->current_test_info();
 }
+
+// Returns the random seed used at the start of the current test run.
+int UnitTest::random_seed() const { return impl_->random_seed(); }
 
 #if GTEST_HAS_PARAM_TEST
 // Returns ParameterizedTestCaseRegistry object used to keep track of
@@ -3485,12 +3629,13 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
 #endif  // GTEST_HAS_PARAM_TEST
-      last_death_test_case_(NULL),
+      last_death_test_case_(-1),
       current_test_case_(NULL),
       current_test_info_(NULL),
       ad_hoc_test_result_(),
       result_printer_(NULL),
       os_stack_trace_getter_(NULL),
+      random_seed_(0),
 #if GTEST_HAS_DEATH_TEST
       elapsed_time_(0),
       internal_run_death_test_flag_(NULL),
@@ -3549,34 +3694,31 @@ TestCase* UnitTestImpl::GetTestCase(const char* test_case_name,
                                     Test::SetUpTestCaseFunc set_up_tc,
                                     Test::TearDownTestCaseFunc tear_down_tc) {
   // Can we find a TestCase with the given name?
-  internal::ListNode<TestCase*>* node = test_cases_.FindIf(
-      TestCaseNameIs(test_case_name));
+  TestCase** test_case = test_cases_.FindIf(TestCaseNameIs(test_case_name));
 
-  if (node == NULL) {
-    // No.  Let's create one.
-    TestCase* const test_case =
+  if (test_case != NULL)
+    return *test_case;
+
+  // No.  Let's create one.
+  TestCase* const new_test_case =
       new TestCase(test_case_name, comment, set_up_tc, tear_down_tc);
 
-    // Is this a death test case?
-    if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),
-                                                 kDeathTestCaseFilter)) {
-      // Yes.  Inserts the test case after the last death test case
-      // defined so far.
-      node = test_cases_.InsertAfter(last_death_test_case_, test_case);
-      last_death_test_case_ = node;
-    } else {
-      // No.  Appends to the end of the list.
-      test_cases_.PushBack(test_case);
-      node = test_cases_.Last();
-    }
+  // Is this a death test case?
+  if (internal::UnitTestOptions::MatchesFilter(String(test_case_name),
+                                               kDeathTestCaseFilter)) {
+    // Yes.  Inserts the test case after the last death test case
+    // defined so far.
+    test_cases_.Insert(new_test_case, ++last_death_test_case_);
+  } else {
+    // No.  Appends to the end of the list.
+    test_cases_.PushBack(new_test_case);
   }
 
-  // Returns the TestCase found.
-  return node->element();
+  return new_test_case;
 }
 
 // Helpers for setting up / tearing down the given environment.  They
-// are for use in the List::ForEach() method.
+// are for use in the Vector::ForEach() method.
 static void SetUpEnvironment(Environment* env) { env->SetUp(); }
 static void TearDownEnvironment(Environment* env) { env->TearDown(); }
 
@@ -3630,12 +3772,15 @@ int UnitTestImpl::RunAllTests() {
                                               ? HONOR_SHARDING_PROTOCOL
                                               : IGNORE_SHARDING_PROTOCOL) > 0;
 
-  // List the tests and exit if the --gtest_list_tests flag was specified.
+  // Lists the tests and exits if the --gtest_list_tests flag was specified.
   if (GTEST_FLAG(list_tests)) {
     // This must be called *after* FilterTests() has been called.
     ListTestsMatchingFilter();
     return 0;
   }
+
+  random_seed_ = GTEST_FLAG(shuffle) ?
+      GetRandomSeedFromFlag(GTEST_FLAG(random_seed)) : 0;
 
   // True iff at least one test has failed.
   bool failed = false;
@@ -3652,16 +3797,16 @@ int UnitTestImpl::RunAllTests() {
 
     // Tells the unit test event listener that the tests are about to
     // start.
-    printer->OnUnitTestStart(parent_);
+    printer->OnUnitTestStart(*parent_);
 
     const TimeInMillis start = GetTimeInMillis();
 
     // Runs each test case if there is at least one test to run.
     if (has_tests_to_run) {
       // Sets up all environments beforehand.
-      printer->OnGlobalSetUpStart(parent_);
+      printer->OnGlobalSetUpStart(*parent_);
       environments_.ForEach(SetUpEnvironment);
-      printer->OnGlobalSetUpEnd(parent_);
+      printer->OnGlobalSetUpEnd(*parent_);
 
       // Runs the tests only if there was no fatal failure during global
       // set-up.
@@ -3670,22 +3815,27 @@ int UnitTestImpl::RunAllTests() {
       }
 
       // Tears down all environments in reverse order afterwards.
-      printer->OnGlobalTearDownStart(parent_);
+      printer->OnGlobalTearDownStart(*parent_);
       environments_in_reverse_order_.ForEach(TearDownEnvironment);
-      printer->OnGlobalTearDownEnd(parent_);
+      printer->OnGlobalTearDownEnd(*parent_);
     }
 
     elapsed_time_ = GetTimeInMillis() - start;
 
     // Tells the unit test event listener that the tests have just
     // finished.
-    printer->OnUnitTestEnd(parent_);
+    printer->OnUnitTestEnd(*parent_);
 
     // Gets the result and clears it.
     if (!Passed()) {
       failed = true;
     }
     ClearResult();
+
+    if (GTEST_FLAG(shuffle)) {
+      // Picks a new random seed for each run.
+      random_seed_ = GetNextRandomSeed(random_seed_);
+    }
   }
 
   // Returns 0 if all tests passed, or 1 other wise.
@@ -3804,19 +3954,13 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   // this shard.
   int num_runnable_tests = 0;
   int num_selected_tests = 0;
-  for (const internal::ListNode<TestCase *> *test_case_node =
-           test_cases_.Head();
-       test_case_node != NULL;
-       test_case_node = test_case_node->next()) {
-    TestCase * const test_case = test_case_node->element();
+  for (int i = 0; i < test_cases_.size(); i++) {
+    TestCase* const test_case = test_cases_.GetElement(i);
     const String &test_case_name = test_case->name();
     test_case->set_should_run(false);
 
-    for (const internal::ListNode<TestInfo *> *test_info_node =
-             test_case->test_info_list().Head();
-         test_info_node != NULL;
-         test_info_node = test_info_node->next()) {
-      TestInfo * const test_info = test_info_node->element();
+    for (int j = 0; j < test_case->test_info_list().size(); j++) {
+      TestInfo* const test_info = test_case->test_info_list().GetElement(j);
       const String test_name(test_info->name());
       // A test is disabled if test case name or test name matches
       // kDisableTestFilter.
@@ -3853,17 +3997,13 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
 
 // Prints the names of the tests matching the user-specified filter flag.
 void UnitTestImpl::ListTestsMatchingFilter() {
-  for (const internal::ListNode<TestCase*>* test_case_node = test_cases_.Head();
-       test_case_node != NULL;
-       test_case_node = test_case_node->next()) {
-    const TestCase* const test_case = test_case_node->element();
+  for (int i = 0; i < test_cases_.size(); i++) {
+    const TestCase* const test_case = test_cases_.GetElement(i);
     bool printed_test_case_name = false;
 
-    for (const internal::ListNode<TestInfo*>* test_info_node =
-         test_case->test_info_list().Head();
-         test_info_node != NULL;
-         test_info_node = test_info_node->next()) {
-      const TestInfo* const test_info = test_info_node->element();
+    for (int j = 0; j < test_case->test_info_list().size(); j++) {
+      const TestInfo* const test_info =
+          test_case->test_info_list().GetElement(j);
       if (test_info->matches_filter()) {
         if (!printed_test_case_name) {
           printed_test_case_name = true;
@@ -3945,7 +4085,7 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
 
 // Returns the TestResult for the test that's currently running, or
 // the TestResult for the ad hoc test if no test is running.
-internal::TestResult* UnitTestImpl::current_test_result() {
+TestResult* UnitTestImpl::current_test_result() {
   return current_test_info_ ?
     current_test_info_->impl()->result() : &ad_hoc_test_result_;
 }
@@ -3989,12 +4129,7 @@ TestInfoImpl::~TestInfoImpl() {
 String GetCurrentOsStackTraceExceptTop(UnitTest* unit_test, int skip_count) {
   // We pass skip_count + 1 to skip this wrapper function in addition
   // to what the user really wants to skip.
-  return unit_test->impl()->CurrentOsStackTraceExceptTop(skip_count + 1);
-}
-
-// Returns the number of failed test parts in the given test result object.
-int GetFailedPartCount(const TestResult* result) {
-  return result->failed_part_count();
+  return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);
 }
 
 // Used by the GTEST_HIDE_UNREACHABLE_CODE_ macro to suppress unreachable
@@ -4162,8 +4297,15 @@ static const char kColorEncodedHelpMessage[] =
 "      matches any substring; ':' separates two patterns.\n"
 "  @G--" GTEST_FLAG_PREFIX_ "also_run_disabled_tests@D\n"
 "      Run all disabled tests too.\n"
+"\n"
+"Test Execution:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "repeat=@Y[COUNT]@D\n"
 "      Run the tests repeatedly; use a negative count to repeat forever.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "shuffle\n"
+"      Randomize tests' orders on every run.  To be implemented.\n"
+"  @G--" GTEST_FLAG_PREFIX_ "random_seed=@Y[NUMBER]@D\n"
+"      Random number seed to use for shuffling test orders (between 1 and\n"
+"      99999, or 0 to use a seed based on the current time).\n"
 "\n"
 "Test Output:\n"
 "  @G--" GTEST_FLAG_PREFIX_ "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
@@ -4232,7 +4374,9 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
         ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
         ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
         ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
+        ParseInt32Flag(arg, kRandomSeedFlag, &GTEST_FLAG(random_seed)) ||
         ParseInt32Flag(arg, kRepeatFlag, &GTEST_FLAG(repeat)) ||
+        ParseBoolFlag(arg, kShuffleFlag, &GTEST_FLAG(shuffle)) ||
         ParseBoolFlag(arg, kThrowOnFailureFlag, &GTEST_FLAG(throw_on_failure))
         ) {
       // Yes.  Shift the remainder of the argv list left by one.  Note

@@ -35,6 +35,7 @@
 
 #if GTEST_OS_MAC
 #include <pthread.h>
+#include <time.h>
 #endif  // GTEST_OS_MAC
 
 #include <gtest/gtest.h>
@@ -90,7 +91,7 @@ void* ThreadFunc(void* data) {
 }
 
 TEST(GetThreadCountTest, ReturnsCorrectValue) {
-  EXPECT_EQ(1, GetThreadCount());
+  EXPECT_EQ(1U, GetThreadCount());
   pthread_mutex_t mutex;
   pthread_attr_t  attr;
   pthread_t       thread_id;
@@ -105,17 +106,30 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
   const int status = pthread_create(&thread_id, &attr, &ThreadFunc, &mutex);
   ASSERT_EQ(0, pthread_attr_destroy(&attr));
   ASSERT_EQ(0, status);
-  EXPECT_EQ(2, GetThreadCount());
+  EXPECT_EQ(2U, GetThreadCount());
   pthread_mutex_unlock(&mutex);
 
   void* dummy;
   ASSERT_EQ(0, pthread_join(thread_id, &dummy));
-  EXPECT_EQ(1, GetThreadCount());
+
+  // MacOS X may not immediately report the updated thread count after
+  // joining a thread, causing flakiness in this test. To counter that, we
+  // wait for up to .5 seconds for the OS to report the correct value.
+  for (int i = 0; i < 5; ++i) {
+    if (GetThreadCount() == 1)
+      break;
+
+    timespec time;
+    time.tv_sec = 0;
+    time.tv_nsec = 100L * 1000 * 1000;  // .1 seconds.
+    nanosleep(&time, NULL);
+  }
+  EXPECT_EQ(1U, GetThreadCount());
   pthread_mutex_destroy(&mutex);
 }
 #else
 TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
-  EXPECT_EQ(0, GetThreadCount());
+  EXPECT_EQ(0U, GetThreadCount());
 }
 #endif  // GTEST_OS_MAC
 
@@ -674,15 +688,11 @@ TEST(RETest, PartialMatchWorks) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-#if GTEST_HAS_STD_STRING
-
 TEST(CaptureStderrTest, CapturesStdErr) {
   CaptureStderr();
   fprintf(stderr, "abc");
-  ASSERT_EQ("abc", GetCapturedStderr());
+  ASSERT_STREQ("abc", GetCapturedStderr().c_str());
 }
-
-#endif  // GTEST_HAS_STD_STRING
 
 }  // namespace internal
 }  // namespace testing
