@@ -25,6 +25,14 @@ ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 else
     CFLAGS += -O2
 endif
+
+# Renesas SH(sh4) need -mieee option.
+# If this option is not effective, NaN test failed.
+ifeq (sh4,$(shell dpkg-architecture -qDEB_HOST_ARCH))
+  CFLAGS += -mieee
+  CXXFLAGS += -mieee
+endif
+
 #ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 #    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
 #    MAKEFLAGS += -j$(NUMJOBS)
