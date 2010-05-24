@@ -1,10 +1,11 @@
 protobuf (2.3.0-2) unstable; urgency=low
 
-  * Fix "FTBFS on armel (test-suite failure)" by disabling optimizations of a
-    troublesome function (idea taken from #580334) (Closes: #572923)
+  * Fix "FTBFS on armel (test-suite failure)" by disabling optimizations
+    of a troublesome function (idea taken from #580334) (Closes: #572923)
+  * Standards version 3.8.4 (no changes needed)
   * Update my address to the @debian.org one
 
- -- Iustin Pop <iustin@debian.org>  Mon, 24 May 2010 17:40:32 +0200
+ -- Iustin Pop <iustin@debian.org>  Mon, 24 May 2010 18:04:17 +0200
 
 protobuf (2.3.0-1) unstable; urgency=low
 
@@ -23,29 +24,29 @@ protobuf (2.2.0a-1) unstable; urgency=low
 
 protobuf (2.2.0a-0.1) unstable; urgency=low
 
-  * Non-maintainer upload 
+  * Non-maintainer upload
   * New upstream release made this evening correction major SONAME
-  * debian/control: Updated major version to 5 		(Closes: #556563)
-  * debian/rules: Updated two links to use libproto*5 
+  * debian/control: Updated major version to 5 (Closes: #556563)
+  * debian/rules: Updated two links to use libproto*5
   * debian/libprotobuf5.shlibs: Added
   * debian/libprotoc5.shlibs: Added
-  
+
  -- Dirk Eddelbuettel <edd@debian.org>  Wed, 18 Nov 2009 21:47:41 -0600
 
 protobuf (2.2.0-0.1) unstable; urgency=low
 
   * Non-maintainer upload coordinated with maintainer
-  * New upstream release				(Closes: #551931)
+  * New upstream release (Closes: #551931)
 
-  * debian/libprotobuf-install: Added 'usr/lib/pkgconfig/*' to have 
-    pkg-config support files installed 
+  * debian/libprotobuf-install: Added 'usr/lib/pkgconfig/*' to have
+    pkg-config support files installed
 
-  * debian/control: Added (= ${binary:Version}) to Depends for -dev 
+  * debian/control: Added (= ${binary:Version}) to Depends for -dev
     packages for tighter link to underlying libraries [lintian warning]
   * debian/control: Updated StandardVersion: to 3.8.3
-  
+
   * debian/control: Major version not incremented as upstream kept it at 4
-  
+
  -- Dirk Eddelbuettel <edd@debian.org>  Sat, 14 Nov 2009 06:44:22 -0600
 
 protobuf (2.1.0-1) unstable; urgency=low
