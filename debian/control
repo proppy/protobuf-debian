@@ -3,7 +3,8 @@ Section: devel
 Priority: extra
 Maintainer: Iustin Pop <iustin@debian.org>
 Uploaders: Robert S. Edmonds <edmonds@debian.org>
-Build-Depends: debhelper (>= 7), python (>= 2.3.5-11), python-setuptools (>= 0.6c8), xmlto, ant, zlib1g-dev
+Build-Depends: debhelper (>= 7), python (>= 2.3.5-11),
+ python-setuptools (>= 0.6c8), xmlto, ant, zlib1g-dev
 Build-Depends-Indep: python-support (>= 0.6), openjdk-6-jdk
 Standards-Version: 3.8.3
 Homepage: http://code.google.com/p/protobuf/
@@ -48,7 +49,8 @@ Description: protocol buffers C++ library (lite version)
 Package: libprotobuf-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotobuf6 (= ${binary:Version}), libprotobuf-lite6 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libprotobuf6 (= ${binary:Version}), libprotobuf-lite6 (= ${binary:Version})
 Description: protocol buffers C++ library (development files)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
@@ -85,7 +87,8 @@ Description: protocol buffers compiler library
 Package: libprotoc-dev
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc6 (= ${binary:Version}), libprotobuf-dev (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libprotoc6 (= ${binary:Version}), libprotobuf-dev (= ${binary:Version})
 Replaces: libprotobuf-dev (<< 2.1.0)
 Conflicts: libprotobuf-dev (<< 2.1.0)
 Description: protocol buffers compiler library (development files)
