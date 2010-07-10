@@ -1,3 +1,11 @@
+protobuf (2.3.0-2.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Build-depends on on default-jdk and set JAVA_HOME to
+    /usr/lib/jvm/default-java (Closes: #587732)
+
+ -- Giuseppe Iuculano <iuculano@debian.org>  Sat, 10 Jul 2010 18:37:19 +0200
+
 protobuf (2.3.0-2) unstable; urgency=low
 
   * Fix "FTBFS on armel (test-suite failure)" by disabling optimizations

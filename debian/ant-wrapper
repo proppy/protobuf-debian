@@ -1,6 +1,6 @@
 #!/bin/sh
 
-JAVA_HOME="/usr/lib/jvm/java-6-openjdk"
+JAVA_HOME="/usr/lib/jvm/default-java"
 
 if [ ! -d "$JAVA_HOME" ]; then
     echo "Can't find java-6-openjdk, please check the build-depends" 1>&2

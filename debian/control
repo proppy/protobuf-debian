@@ -5,7 +5,7 @@ Maintainer: Iustin Pop <iustin@debian.org>
 Uploaders: Robert S. Edmonds <edmonds@debian.org>
 Build-Depends: debhelper (>= 7), python (>= 2.3.5-11),
  python-setuptools (>= 0.6c8), xmlto, ant, zlib1g-dev,
- openjdk-6-jdk, unzip
+ default-jdk, unzip
 Build-Depends-Indep: python-support (>= 0.6)
 Standards-Version: 3.8.4
 Homepage: http://code.google.com/p/protobuf/
