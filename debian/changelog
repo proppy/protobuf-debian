@@ -1,3 +1,12 @@
+protobuf (2.3.0-3) unstable; urgency=low
+
+  * Acknowledge NMU (thanks Giuseppe!)
+  * Update packaging to comply with policy 3.9.1 (.la files are still
+    shipped though)
+  * Updated watch file to account for code.google.com brokeness
+
+ -- Iustin Pop <iustin@debian.org>  Sat, 31 Jul 2010 17:47:24 -0400
+
 protobuf (2.3.0-2.1) unstable; urgency=high
 
   * Non-maintainer upload.
