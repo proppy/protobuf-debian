@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 7), python (>= 2.3.5-11),
  python-setuptools (>= 0.6c8), xmlto, ant, zlib1g-dev,
  default-jdk, unzip
 Build-Depends-Indep: python-support (>= 0.6)
-Standards-Version: 3.8.4
+Standards-Version: 3.9.1
 Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
