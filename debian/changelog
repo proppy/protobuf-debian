@@ -1,3 +1,13 @@
+protobuf (2.3.0-4) unstable; urgency=low
+
+  * Thanks to Peter Palfrader for finding the two bugs below:
+  * Disable setuptools auto-download in case of wrong dependencies, and
+    fix the current dependency version (Closes: #593269)
+  * Fix the python cleanup rule, by always running the individual steps
+    (Closes: #593268)
+
+ -- Iustin Pop <iustin@debian.org>  Wed, 18 Aug 2010 22:54:42 +0200
+
 protobuf (2.3.0-3) unstable; urgency=low
 
   * Acknowledge NMU (thanks Giuseppe!)
