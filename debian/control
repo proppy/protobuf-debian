@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Iustin Pop <iustin@debian.org>
 Uploaders: Robert S. Edmonds <edmonds@debian.org>
 Build-Depends: debhelper (>= 7), python (>= 2.3.5-11),
- python-setuptools (>= 0.6c8), xmlto, ant, zlib1g-dev,
+ python-setuptools (>= 0.6c9), xmlto, ant, zlib1g-dev,
  default-jdk, unzip
 Build-Depends-Indep: python-support (>= 0.6)
 Standards-Version: 3.9.1
