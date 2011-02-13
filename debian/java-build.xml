@@ -12,8 +12,8 @@
     </target>
 
     <target name="generate">
-	<mkdir dir="${generateddir}" />
-	<echo message="${srcdir}" />
+        <mkdir dir="${generateddir}" />
+        <echo message="${srcdir}" />
         <exec executable="${srcdir}/protoc">
             <arg value="--java_out=${generateddir}" />
             <arg value="--proto_path=${srcdir}" />
