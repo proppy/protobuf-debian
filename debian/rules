@@ -33,10 +33,12 @@ ifeq (sh4,$(shell dpkg-architecture -qDEB_HOST_ARCH))
   CXXFLAGS += -mieee
 endif
 
-#ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-#    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-#    MAKEFLAGS += -j$(NUMJOBS)
-#endif
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    PAROPTS = -j$(NUMJOBS)
+else
+    PAROPTS =
+endif
 # end DEB_BUILD_OPTIONS
 
 version=0.0.0
@@ -57,11 +59,11 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp
 
 	# Add here commands to compile the arch part of the package.
-	$(MAKE)
+	$(MAKE) $(PAROPTS)
 
 	# run the test suite
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	$(MAKE) check
+	$(MAKE) $(PAROPTS) check
 endif
 
 	# build the protoc manpage

@@ -3,8 +3,9 @@ protobuf (2.4.0a-1) unstable; urgency=low
   * New upstream version
   * Fix "Missing depends on zlib1g-dev", thanks Fernando Tarlá Cardoso Lemos
     (Closes: #608670)
+  * Re-enable parallel builds, but only for the C++ sources/tests
 
- -- Iustin Pop <iustin@debian.org>  Sun, 13 Feb 2011 23:34:47 +0100
+ -- Iustin Pop <iustin@debian.org>  Sun, 13 Feb 2011 23:58:28 +0100
 
 protobuf (2.3.0-4) unstable; urgency=low
 
