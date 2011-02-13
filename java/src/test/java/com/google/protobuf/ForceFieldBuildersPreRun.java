@@ -28,14 +28,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Author: kenton@google.com (Kenton Varda)
+package com.google.protobuf;
 
-#include <google/protobuf/stubs/hash.h>
+/**
+ * A prerun for a test suite that allows running the full protocol buffer
+ * tests in a mode that disables the optimization for not using
+ * {@link RepeatedFieldBuilder} and {@link SingleFieldBuilder} until they are
+ * requested. This allows us to run all the tests through both code paths
+ * and ensures that both code paths produce identical results.
+ *
+ * @author jonp@google.com (Jon Perlow)
+ */
+public class ForceFieldBuildersPreRun implements Runnable {
 
-namespace google {
-namespace protobuf {
-
-// Nothing needed here right now.
-
-}  // namespace protobuf
-}  // namespace google
+  @Override
+  public void run() {
+    GeneratedMessage.enableAlwaysUseFieldBuildersForTesting();
+  }
+}
