@@ -1,6 +1,8 @@
 protobuf (2.4.0a-1) unstable; urgency=low
 
   * New upstream version
+  * Fix "Missing depends on zlib1g-dev", thanks Fernando Tarlá Cardoso Lemos
+    (Closes: #608670)
 
  -- Iustin Pop <iustin@debian.org>  Sun, 13 Feb 2011 23:34:47 +0100
 
