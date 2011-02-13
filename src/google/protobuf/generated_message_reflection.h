@@ -169,8 +169,7 @@ class LIBPROTOBUF_EXPORT GeneratedMessageReflection : public Reflection {
   const EnumValueDescriptor* GetEnum(const Message& message,
                                      const FieldDescriptor* field) const;
   const Message& GetMessage(const Message& message,
-                            const FieldDescriptor* field,
-                            MessageFactory* factory = NULL) const;
+                            const FieldDescriptor* field) const;
 
   void SetInt32 (Message* message,
                  const FieldDescriptor* field, int32  value) const;
@@ -191,8 +190,7 @@ class LIBPROTOBUF_EXPORT GeneratedMessageReflection : public Reflection {
                  const string& value) const;
   void SetEnum  (Message* message, const FieldDescriptor* field,
                  const EnumValueDescriptor* value) const;
-  Message* MutableMessage(Message* message, const FieldDescriptor* field,
-                          MessageFactory* factory = NULL) const;
+  Message* MutableMessage(Message* message, const FieldDescriptor* field) const;
 
   int32  GetRepeatedInt32 (const Message& message,
                            const FieldDescriptor* field, int index) const;
@@ -264,8 +262,7 @@ class LIBPROTOBUF_EXPORT GeneratedMessageReflection : public Reflection {
   void AddEnum(Message* message,
                const FieldDescriptor* field,
                const EnumValueDescriptor* value) const;
-  Message* AddMessage(Message* message, const FieldDescriptor* field,
-                      MessageFactory* factory = NULL) const;
+  Message* AddMessage(Message* message, const FieldDescriptor* field) const;
 
   const FieldDescriptor* FindKnownExtensionByName(const string& name) const;
   const FieldDescriptor* FindKnownExtensionByNumber(int number) const;
@@ -317,9 +314,9 @@ class LIBPROTOBUF_EXPORT GeneratedMessageReflection : public Reflection {
   inline Type* MutableField(Message* message,
                             const FieldDescriptor* field) const;
   template <typename Type>
-  inline const Type& GetRepeatedField(const Message& message,
-                                      const FieldDescriptor* field,
-                                      int index) const;
+  inline Type GetRepeatedField(const Message& message,
+                               const FieldDescriptor* field,
+                               int index) const;
   template <typename Type>
   inline const Type& GetRepeatedPtrField(const Message& message,
                                          const FieldDescriptor* field,
@@ -334,7 +331,7 @@ class LIBPROTOBUF_EXPORT GeneratedMessageReflection : public Reflection {
                                     int index) const;
   template <typename Type>
   inline void AddField(Message* message,
-                       const FieldDescriptor* field, const Type& value) const;
+                       const FieldDescriptor* field, Type value) const;
   template <typename Type>
   inline Type* AddField(Message* message,
                         const FieldDescriptor* field) const;

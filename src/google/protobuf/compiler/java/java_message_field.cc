@@ -59,7 +59,7 @@ void SetMessageVariables(const FieldDescriptor* descriptor,
   (*variables)["number"] = SimpleItoa(descriptor->number());
   (*variables)["type"] = ClassName(descriptor->message_type());
   (*variables)["group_or_message"] =
-    (GetType(descriptor) == FieldDescriptor::TYPE_GROUP) ?
+    (descriptor->type() == FieldDescriptor::TYPE_GROUP) ?
     "Group" : "Message";
 }
 
@@ -79,7 +79,7 @@ void MessageFieldGenerator::
 GenerateMembers(io::Printer* printer) const {
   printer->Print(variables_,
     "private boolean has$capitalized_name$;\n"
-    "private $type$ $name$_;\n"
+    "private $type$ $name$_ = $type$.getDefaultInstance();\n"
     "public boolean has$capitalized_name$() { return has$capitalized_name$; }\n"
     "public $type$ get$capitalized_name$() { return $name$_; }\n");
 }
@@ -125,11 +125,6 @@ GenerateBuilderMembers(io::Printer* printer) const {
 }
 
 void MessageFieldGenerator::
-GenerateInitializationCode(io::Printer* printer) const {
-  printer->Print(variables_, "$name$_ = $type$.getDefaultInstance();\n");
-}
-
-void MessageFieldGenerator::
 GenerateMergingCode(io::Printer* printer) const {
   printer->Print(variables_,
     "if (other.has$capitalized_name$()) {\n"
@@ -150,7 +145,7 @@ GenerateParsingCode(io::Printer* printer) const {
     "  subBuilder.mergeFrom(get$capitalized_name$());\n"
     "}\n");
 
-  if (GetType(descriptor_) == FieldDescriptor::TYPE_GROUP) {
+  if (descriptor_->type() == FieldDescriptor::TYPE_GROUP) {
     printer->Print(variables_,
       "input.readGroup($number$, subBuilder, extensionRegistry);\n");
   } else {
@@ -267,11 +262,6 @@ GenerateBuilderMembers(io::Printer* printer) const {
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateInitializationCode(io::Printer* printer) const {
-  // Initialized inline.
-}
-
-void RepeatedMessageFieldGenerator::
 GenerateMergingCode(io::Printer* printer) const {
   printer->Print(variables_,
     "if (!other.$name$_.isEmpty()) {\n"
@@ -296,7 +286,7 @@ GenerateParsingCode(io::Printer* printer) const {
   printer->Print(variables_,
     "$type$.Builder subBuilder = $type$.newBuilder();\n");
 
-  if (GetType(descriptor_) == FieldDescriptor::TYPE_GROUP) {
+  if (descriptor_->type() == FieldDescriptor::TYPE_GROUP) {
     printer->Print(variables_,
       "input.readGroup($number$, subBuilder, extensionRegistry);\n");
   } else {

@@ -71,8 +71,7 @@
 
 ;; This mode does not inherit properties from other modes. So, we do not use 
 ;; the usual `c-add-language' function.
-(eval-and-compile
-  (put 'protobuf-mode 'c-mode-prefix "protobuf-"))
+(put 'protobuf-mode 'c-mode-prefix "protobuf-")
 
 ;; The following code uses of the `c-lang-defconst' macro define syntactic
 ;; features of protocol buffer language.  Refer to the documentation in the
@@ -207,8 +206,7 @@ Key bindings:
         abbrev-mode t)
   (use-local-map protobuf-mode-map)
   (c-initialize-cc-mode t)
-  (if (fboundp 'c-make-emacs-variables-local)
-      (c-make-emacs-variables-local))
+  (c-make-emacs-variables-local)
   (c-init-language-vars protobuf-mode)
   (c-common-init 'protobuf-mode)
   (easy-menu-add protobuf-menu)

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,8 +11,7 @@
 		3B7EB1260E5AEE3500C7F239 /* widget.h in Headers */ = {isa = PBXBuildFile; fileRef = 3B7EB1240E5AEE3500C7F239 /* widget.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3B7EB1280E5AEE4600C7F239 /* widget_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3B7EB1270E5AEE4600C7F239 /* widget_test.cc */; };
 		3B7EB1480E5AF3B400C7F239 /* Widget.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D07F2C80486CC7A007CD1D0 /* Widget.framework */; };
-		408BEC281046D72200DEF522 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 408BEC271046D72200DEF522 /* gtest.framework */; };
-		408BEC431046D7B300DEF522 /* libgtest_main.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 408BEC421046D7B300DEF522 /* libgtest_main.a */; };
+		3B7F0C8D0E567CC5009CA236 /* gtest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BA867DC0E561B7C00326077 /* gtest.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,8 +29,7 @@
 		3B7EB1230E5AEE3500C7F239 /* widget.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widget.cc; sourceTree = "<group>"; };
 		3B7EB1240E5AEE3500C7F239 /* widget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = widget.h; sourceTree = "<group>"; };
 		3B7EB1270E5AEE4600C7F239 /* widget_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = widget_test.cc; sourceTree = "<group>"; };
-		408BEC271046D72200DEF522 /* gtest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = gtest.framework; path = /Library/Frameworks/gtest.framework; sourceTree = "<absolute>"; };
-		408BEC421046D7B300DEF522 /* libgtest_main.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest_main.a; path = /Library/Frameworks/gtest.framework/Versions/A/Resources/libgtest_main.a; sourceTree = "<absolute>"; };
+		3BA867DC0E561B7C00326077 /* gtest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = gtest.framework; path = ../../build/Debug/gtest.framework; sourceTree = "<group>"; };
 		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D07F2C80486CC7A007CD1D0 /* Widget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Widget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -42,8 +40,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B7EB1480E5AF3B400C7F239 /* Widget.framework in Frameworks */,
-				408BEC281046D72200DEF522 /* gtest.framework in Frameworks */,
-				408BEC431046D7B300DEF522 /* libgtest_main.a in Frameworks */,
+				3B7F0C8D0E567CC5009CA236 /* gtest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,8 +78,7 @@
 		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				408BEC421046D7B300DEF522 /* libgtest_main.a */,
-				408BEC271046D72200DEF522 /* gtest.framework */,
+				3BA867DC0E561B7C00326077 /* gtest.framework */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -169,7 +165,7 @@
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "WidgetFramework" */;
-			compatibilityVersion = "Xcode 2.4";
+			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 1;
 			mainGroup = 0867D691FE84028FC02AAC07 /* gTestExample */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
@@ -233,6 +229,12 @@
 		3B07BDEC0E3F3F9F00647869 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/externals/googletest/xcode/build/Debug\"",
+					"\"$(SRCROOT)/../../build/Debug\"",
+				);
+				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = WidgetFrameworkTest;
 			};
 			name = Debug;
@@ -240,6 +242,12 @@
 		3B07BDED0E3F3F9F00647869 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/externals/googletest/xcode/build/Debug\"",
+					"\"$(SRCROOT)/../../build/Debug\"",
+				);
+				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = WidgetFrameworkTest;
 			};
 			name = Release;
@@ -252,7 +260,10 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@loader_path/../Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
 				PRODUCT_NAME = Widget;
+				WRAPPER_EXTENSION = framework;
 			};
 			name = Debug;
 		};
@@ -264,23 +275,27 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@loader_path/../Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
 				PRODUCT_NAME = Widget;
+				WRAPPER_EXTENSION = framework;
 			};
 			name = Release;
 		};
 		4FADC24708B4156D00ABE55E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_VERSION = 4.0;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx10.5;
 			};
 			name = Debug;
 		};
 		4FADC24808B4156D00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_VERSION = 4.0;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				SDKROOT = macosx10.5;
 			};
 			name = Release;
 		};

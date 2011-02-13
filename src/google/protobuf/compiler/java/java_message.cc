@@ -127,7 +127,7 @@ static bool HasRequiredFields(
     if (field->is_required()) {
       return true;
     }
-    if (GetJavaType(field) == JAVATYPE_MESSAGE) {
+    if (field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
       if (HasRequiredFields(field->message_type(), already_seen)) {
         return true;
       }
@@ -292,14 +292,9 @@ void MessageGenerator::Generate(io::Printer* printer) {
   printer->Indent();
   printer->Print(
     "// Use $classname$.newBuilder() to construct.\n"
-    "private $classname$() {\n"
-    "  initFields();\n"
-    "}\n"
-    // Used when constructing the default instance, which cannot be initialized
-    // immediately because it may cyclically refer to other default instances.
-    "private $classname$(boolean noInit) {}\n"
+    "private $classname$() {}\n"
     "\n"
-    "private static final $classname$ defaultInstance;\n"
+    "private static final $classname$ defaultInstance = new $classname$();\n"
     "public static $classname$ getDefaultInstance() {\n"
     "  return defaultInstance;\n"
     "}\n"
@@ -349,17 +344,6 @@ void MessageGenerator::Generate(io::Printer* printer) {
     printer->Print("\n");
   }
 
-  // Called by the constructor, except in the case of the default instance,
-  // in which case this is called by static init code later on.
-  printer->Print("private void initFields() {\n");
-  printer->Indent();
-  for (int i = 0; i < descriptor_->field_count(); i++) {
-    field_generators_.get(descriptor_->field(i))
-                     .GenerateInitializationCode(printer);
-  }
-  printer->Outdent();
-  printer->Print("}\n");
-
   if (HasGeneratedMethods(descriptor_)) {
     GenerateIsInitialized(printer);
     GenerateMessageSerializationMethods(printer);
@@ -368,23 +352,25 @@ void MessageGenerator::Generate(io::Printer* printer) {
   GenerateParseFromMethods(printer);
   GenerateBuilder(printer);
 
+  if (HasDescriptorMethods(descriptor_)) {
+    // Force the static initialization code for the file to run, since it may
+    // initialize static variables declared in this class.
+    printer->Print(
+      "\n"
+      "static {\n"
+      "  $file$.getDescriptor();\n"
+      "}\n",
+      "file", ClassName(descriptor_->file()));
+  }
+
   // Force initialization of outer class.  Otherwise, nested extensions may
-  // not be initialized.  Also carefully initialize the default instance in
-  // such a way that it doesn't conflict with other initialization.
+  // not be initialized.
   printer->Print(
     "\n"
     "static {\n"
-    "  defaultInstance = new $classname$(true);\n"
     "  $file$.internalForceInit();\n"
-    "  defaultInstance.initFields();\n"
     "}\n",
-    "file", ClassName(descriptor_->file()),
-    "classname", descriptor_->name());
-
-  printer->Print(
-    "\n"
-    "// @@protoc_insertion_point(class_scope:$full_name$)\n",
-    "full_name", descriptor_->full_name());
+    "file", ClassName(descriptor_->file()));
 
   printer->Outdent();
   printer->Print("}\n\n");
@@ -408,14 +394,6 @@ GenerateMessageSerializationMethods(io::Printer* printer) {
     "public void writeTo(com.google.protobuf.CodedOutputStream output)\n"
     "                    throws java.io.IOException {\n");
   printer->Indent();
-  // writeTo(CodedOutputStream output) might be invoked without
-  // getSerializedSize() ever being called, but we need the memoized
-  // sizes in case this message has packed fields. Rather than emit checks for
-  // each packed field, just call getSerializedSize() up front for all messages.
-  // In most cases, getSerializedSize() will have already been called anyway by
-  // one of the wrapper writeTo() methods, making this call cheap.
-  printer->Print(
-    "getSerializedSize();\n");
 
   if (descriptor_->extension_range_count() > 0) {
     if (descriptor_->options().message_set_wire_format()) {
@@ -543,23 +521,14 @@ GenerateParseFromMethods(io::Printer* printer) {
     "}\n"
     "public static $classname$ parseDelimitedFrom(java.io.InputStream input)\n"
     "    throws java.io.IOException {\n"
-    "  Builder builder = newBuilder();\n"
-    "  if (builder.mergeDelimitedFrom(input)) {\n"
-    "    return builder.buildParsed();\n"
-    "  } else {\n"
-    "    return null;\n"
-    "  }\n"
+    "  return newBuilder().mergeDelimitedFrom(input).buildParsed();\n"
     "}\n"
     "public static $classname$ parseDelimitedFrom(\n"
     "    java.io.InputStream input,\n"
     "    com.google.protobuf.ExtensionRegistryLite extensionRegistry)\n"
     "    throws java.io.IOException {\n"
-    "  Builder builder = newBuilder();\n"
-    "  if (builder.mergeDelimitedFrom(input, extensionRegistry)) {\n"
-    "    return builder.buildParsed();\n"
-    "  } else {\n"
-    "    return null;\n"
-    "  }\n"
+    "  return newBuilder().mergeDelimitedFrom(input, extensionRegistry)\n"
+    "           .buildParsed();\n"
     "}\n"
     "public static $classname$ parseFrom(\n"
     "    com.google.protobuf.CodedInputStream input)\n"
@@ -644,11 +613,6 @@ void MessageGenerator::GenerateBuilder(io::Printer* printer) {
     field_generators_.get(descriptor_->field(i))
                      .GenerateBuilderMembers(printer);
   }
-
-  printer->Print(
-    "\n"
-    "// @@protoc_insertion_point(builder_scope:$full_name$)\n",
-    "full_name", descriptor_->full_name());
 
   printer->Outdent();
   printer->Print("}\n");
@@ -855,7 +819,7 @@ void MessageGenerator::GenerateBuilderParsingMethods(io::Printer* printer) {
   for (int i = 0; i < descriptor_->field_count(); i++) {
     const FieldDescriptor* field = sorted_fields[i];
     uint32 tag = WireFormatLite::MakeTag(field->number(),
-      WireFormat::WireTypeForFieldType(field->type()));
+      WireFormat::WireTypeForField(field));
 
     printer->Print(
       "case $tag$: {\n",
@@ -868,24 +832,6 @@ void MessageGenerator::GenerateBuilderParsingMethods(io::Printer* printer) {
     printer->Print(
       "  break;\n"
       "}\n");
-
-    if (field->is_packable()) {
-      // To make packed = true wire compatible, we generate parsing code from a
-      // packed version of this field regardless of field->options().packed().
-      uint32 packed_tag = WireFormatLite::MakeTag(field->number(),
-        WireFormatLite::WIRETYPE_LENGTH_DELIMITED);
-      printer->Print(
-        "case $tag$: {\n",
-        "tag", SimpleItoa(packed_tag));
-      printer->Indent();
-
-      field_generators_.get(field).GenerateParsingCodeFromPacked(printer);
-
-      printer->Outdent();
-      printer->Print(
-        "  break;\n"
-        "}\n");
-    }
   }
 
   printer->Outdent();
@@ -921,7 +867,7 @@ void MessageGenerator::GenerateIsInitialized(io::Printer* printer) {
   // Now check that all embedded messages are initialized.
   for (int i = 0; i < descriptor_->field_count(); i++) {
     const FieldDescriptor* field = descriptor_->field(i);
-    if (GetJavaType(field) == JAVATYPE_MESSAGE &&
+    if (field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE &&
         HasRequiredFields(field->message_type())) {
       switch (field->label()) {
         case FieldDescriptor::LABEL_REQUIRED:

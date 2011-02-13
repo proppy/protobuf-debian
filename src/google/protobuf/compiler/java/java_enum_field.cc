@@ -62,7 +62,7 @@ void SetEnumVariables(const FieldDescriptor* descriptor,
   (*variables)["default"] = DefaultValue(descriptor);
   (*variables)["tag"] = SimpleItoa(internal::WireFormat::MakeTag(descriptor));
   (*variables)["tag_size"] = SimpleItoa(
-      internal::WireFormat::TagSize(descriptor->number(), GetType(descriptor)));
+      internal::WireFormat::TagSize(descriptor->number(), descriptor->type()));
 }
 
 }  // namespace
@@ -81,7 +81,7 @@ void EnumFieldGenerator::
 GenerateMembers(io::Printer* printer) const {
   printer->Print(variables_,
     "private boolean has$capitalized_name$;\n"
-    "private $type$ $name$_;\n"
+    "private $type$ $name$_ = $default$;\n"
     "public boolean has$capitalized_name$() { return has$capitalized_name$; }\n"
     "public $type$ get$capitalized_name$() { return $name$_; }\n");
 }
@@ -108,11 +108,6 @@ GenerateBuilderMembers(io::Printer* printer) const {
     "  result.$name$_ = $default$;\n"
     "  return this;\n"
     "}\n");
-}
-
-void EnumFieldGenerator::
-GenerateInitializationCode(io::Printer* printer) const {
-  printer->Print(variables_, "$name$_ = $default$;\n");
 }
 
 void EnumFieldGenerator::
@@ -246,11 +241,6 @@ GenerateBuilderMembers(io::Printer* printer) const {
 }
 
 void RepeatedEnumFieldGenerator::
-GenerateInitializationCode(io::Printer* printer) const {
-  // Initialized inline.
-}
-
-void RepeatedEnumFieldGenerator::
 GenerateMergingCode(io::Printer* printer) const {
   printer->Print(variables_,
     "if (!other.$name$_.isEmpty()) {\n"
@@ -272,6 +262,15 @@ GenerateBuildingCode(io::Printer* printer) const {
 
 void RepeatedEnumFieldGenerator::
 GenerateParsingCode(io::Printer* printer) const {
+  // If packed, set up the while loop
+  if (descriptor_->options().packed()) {
+    printer->Print(variables_,
+      "int length = input.readRawVarint32();\n"
+      "int oldLimit = input.pushLimit(length);\n"
+      "while(input.getBytesUntilLimit() > 0) {\n");
+    printer->Indent();
+  }
+
   // Read and store the enum
   printer->Print(variables_,
     "int rawValue = input.readEnum();\n"
@@ -288,24 +287,13 @@ GenerateParsingCode(io::Printer* printer) const {
   printer->Print(variables_,
     "  add$capitalized_name$(value);\n"
     "}\n");
-}
 
-void RepeatedEnumFieldGenerator::
-GenerateParsingCodeFromPacked(io::Printer* printer) const {
-  // Wrap GenerateParsingCode's contents with a while loop.
-
-  printer->Print(variables_,
-    "int length = input.readRawVarint32();\n"
-    "int oldLimit = input.pushLimit(length);\n"
-    "while(input.getBytesUntilLimit() > 0) {\n");
-  printer->Indent();
-
-  GenerateParsingCode(printer);
-
-  printer->Outdent();
-  printer->Print(variables_,
-    "}\n"
-    "input.popLimit(oldLimit);\n");
+  if (descriptor_->options().packed()) {
+    printer->Outdent();
+    printer->Print(variables_,
+      "}\n"
+      "input.popLimit(oldLimit);\n");
+  }
 }
 
 void RepeatedEnumFieldGenerator::

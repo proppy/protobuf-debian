@@ -106,11 +106,7 @@ int FieldSpaceUsed(const FieldDescriptor* field) {
       case FD::CPPTYPE_MESSAGE: return sizeof(RepeatedPtrField<Message>);
 
       case FD::CPPTYPE_STRING:
-        switch (field->options().ctype()) {
-          default:  // TODO(kenton):  Support other string reps.
-          case FieldOptions::STRING:
-            return sizeof(RepeatedPtrField<string>);
-        }
+          return sizeof(RepeatedPtrField<string>);
         break;
     }
   } else {
@@ -126,11 +122,7 @@ int FieldSpaceUsed(const FieldDescriptor* field) {
       case FD::CPPTYPE_MESSAGE: return sizeof(Message*);
 
       case FD::CPPTYPE_STRING:
-        switch (field->options().ctype()) {
-          default:  // TODO(kenton):  Support other string reps.
-          case FieldOptions::STRING:
-            return sizeof(string*);
-        }
+          return sizeof(string*);
         break;
     }
   }
@@ -270,24 +262,19 @@ DynamicMessage::DynamicMessage(const TypeInfo* type_info)
         break;
 
       case FieldDescriptor::CPPTYPE_STRING:
-        switch (field->options().ctype()) {
-          default:  // TODO(kenton):  Support other string reps.
-          case FieldOptions::STRING:
-            if (!field->is_repeated()) {
-              if (is_prototype()) {
-                new(field_ptr) const string*(&field->default_value_string());
-              } else {
-                string* default_value =
-                  *reinterpret_cast<string* const*>(
-                    type_info_->prototype->OffsetToPointer(
-                      type_info_->offsets[i]));
-                new(field_ptr) string*(default_value);
-              }
+          if (!field->is_repeated()) {
+            if (is_prototype()) {
+              new(field_ptr) const string*(&field->default_value_string());
             } else {
-              new(field_ptr) RepeatedPtrField<string>();
+              string* default_value =
+                *reinterpret_cast<string* const*>(
+                  type_info_->prototype->OffsetToPointer(
+                    type_info_->offsets[i]));
+              new(field_ptr) string*(default_value);
             }
-            break;
-        }
+          } else {
+            new(field_ptr) RepeatedPtrField<string>();
+          }
         break;
 
       case FieldDescriptor::CPPTYPE_MESSAGE: {
@@ -342,13 +329,8 @@ DynamicMessage::~DynamicMessage() {
 #undef HANDLE_TYPE
 
         case FieldDescriptor::CPPTYPE_STRING:
-          switch (field->options().ctype()) {
-            default:  // TODO(kenton):  Support other string reps.
-            case FieldOptions::STRING:
-              reinterpret_cast<RepeatedPtrField<string>*>(field_ptr)
-                  ->~RepeatedPtrField<string>();
-              break;
-          }
+            reinterpret_cast<RepeatedPtrField<string>*>(field_ptr)
+                ->~RepeatedPtrField<string>();
           break;
 
         case FieldDescriptor::CPPTYPE_MESSAGE:
@@ -358,16 +340,10 @@ DynamicMessage::~DynamicMessage() {
       }
 
     } else if (field->cpp_type() == FieldDescriptor::CPPTYPE_STRING) {
-      switch (field->options().ctype()) {
-        default:  // TODO(kenton):  Support other string reps.
-        case FieldOptions::STRING: {
-          string* ptr = *reinterpret_cast<string**>(field_ptr);
-          if (ptr != &field->default_value_string()) {
-            delete ptr;
-          }
-          break;
+        string* ptr = *reinterpret_cast<string**>(field_ptr);
+        if (ptr != &field->default_value_string()) {
+          delete ptr;
         }
-      }
     } else if ((field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) &&
                !is_prototype()) {
       Message* message = *reinterpret_cast<Message**>(field_ptr);
@@ -397,7 +373,7 @@ void DynamicMessage::CrossLinkPrototypes() {
       // For singular fields, the field is just a pointer which should
       // point to the prototype.
       *reinterpret_cast<const Message**>(field_ptr) =
-        factory->GetPrototypeNoLock(field->message_type());
+        factory->GetPrototype(field->message_type());
     }
   }
 }
@@ -434,13 +410,11 @@ struct DynamicMessageFactory::PrototypeMap {
 };
 
 DynamicMessageFactory::DynamicMessageFactory()
-  : pool_(NULL), delegate_to_generated_factory_(false),
-    prototypes_(new PrototypeMap) {
+  : pool_(NULL), prototypes_(new PrototypeMap) {
 }
 
 DynamicMessageFactory::DynamicMessageFactory(const DescriptorPool* pool)
-  : pool_(pool), delegate_to_generated_factory_(false),
-    prototypes_(new PrototypeMap) {
+  : pool_(pool), prototypes_(new PrototypeMap) {
 }
 
 DynamicMessageFactory::~DynamicMessageFactory() {
@@ -450,18 +424,8 @@ DynamicMessageFactory::~DynamicMessageFactory() {
   }
 }
 
+
 const Message* DynamicMessageFactory::GetPrototype(const Descriptor* type) {
-  MutexLock lock(&prototypes_mutex_);
-  return GetPrototypeNoLock(type);
-}
-
-const Message* DynamicMessageFactory::GetPrototypeNoLock(
-    const Descriptor* type) {
-  if (delegate_to_generated_factory_ &&
-      type->file()->pool() == DescriptorPool::generated_pool()) {
-    return MessageFactory::generated_factory()->GetPrototype(type);
-  }
-
   const DynamicMessage::TypeInfo** target = &prototypes_->map_[type];
   if (*target != NULL) {
     // Already exists.

@@ -40,11 +40,11 @@
 
 #include <gtest/gtest.h>
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
 #include <windows.h>
 #elif GTEST_OS_WINDOWS
 #include <direct.h>
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // _WIN32_WCE
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is
@@ -130,7 +130,7 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const FilePath executable = GetCurrentExecutableName();
   const char* const exe_str = executable.c_str();
-#if GTEST_OS_WINDOWS
+#if defined(_WIN32_WCE) || GTEST_OS_WINDOWS
   ASSERT_TRUE(_strcmpi("gtest-options_test", exe_str) == 0 ||
               _strcmpi("gtest-options-ex_test", exe_str) == 0 ||
               _strcmpi("gtest_all_test", exe_str) == 0)
@@ -143,7 +143,7 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
               String(exe_str) == "gtest_all_test" ||
               String(exe_str) == "lt-gtest_all_test")
                   << "GetCurrentExecutableName() returns " << exe_str;
-#endif  // GTEST_OS_WINDOWS
+#endif
 }
 
 class XmlOutputChangeDirTest : public Test {

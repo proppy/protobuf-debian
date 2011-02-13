@@ -46,33 +46,33 @@ namespace protobuf {
 
 #ifdef _WIN32
 
-struct ProtobufOnceInternal {
-  ProtobufOnceInternal() {
+struct GoogleOnceInternal {
+  GoogleOnceInternal() {
     InitializeCriticalSection(&critical_section);
   }
-  ~ProtobufOnceInternal() {
+  ~GoogleOnceInternal() {
     DeleteCriticalSection(&critical_section);
   }
   CRITICAL_SECTION critical_section;
 };
 
-ProtobufOnceType::~ProtobufOnceType()
+GoogleOnceType::~GoogleOnceType()
 {
   delete internal_;
   internal_ = NULL;
 }
 
-ProtobufOnceType::ProtobufOnceType() {
+GoogleOnceType::GoogleOnceType() {
   // internal_ may be non-NULL if Init() was already called.
-  if (internal_ == NULL) internal_ = new ProtobufOnceInternal;
+  if (internal_ == NULL) internal_ = new GoogleOnceInternal;
 }
 
-void ProtobufOnceType::Init(void (*init_func)()) {
+void GoogleOnceType::Init(void (*init_func)()) {
   // internal_ may be NULL if we're still in dynamic initialization and the
   // constructor has not been called yet.  As mentioned in once.h, we assume
   // that the program is still single-threaded at this time, and therefore it
   // should be safe to initialize internal_ like so.
-  if (internal_ == NULL) internal_ = new ProtobufOnceInternal;
+  if (internal_ == NULL) internal_ = new GoogleOnceInternal;
 
   EnterCriticalSection(&internal_->critical_section);
   if (!initialized_) {

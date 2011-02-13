@@ -148,7 +148,6 @@ namespace protobuf {
 // Defined in this file.
 class Message;
 class Reflection;
-class MessageFactory;
 
 // Defined in other files.
 class Descriptor;            // descriptor.h
@@ -239,15 +238,13 @@ class LIBPROTOBUF_EXPORT Message : public MessageLite {
   // Reflection object's SpaceUsed() method.
   virtual int SpaceUsed() const;
 
-  // Debugging & Testing----------------------------------------------
+  // Debugging -------------------------------------------------------
 
   // Generates a human readable form of this message, useful for debugging
   // and other purposes.
   string DebugString() const;
   // Like DebugString(), but with less whitespace.
   string ShortDebugString() const;
-  // Like DebugString(), but do not escape UTF-8 byte sequences.
-  string Utf8DebugString() const;
   // Convenience function useful in GDB.  Prints DebugString() to stdout.
   void PrintDebugString() const;
 
@@ -329,7 +326,6 @@ class LIBPROTOBUF_EXPORT Message : public MessageLite {
   // need to implement this method, rather than the GetDescriptor() and
   // GetReflection() wrappers.
   virtual Metadata GetMetadata() const  = 0;
-
 
  private:
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(Message);
@@ -457,10 +453,8 @@ class LIBPROTOBUF_EXPORT Reflection {
                            const FieldDescriptor* field) const = 0;
   virtual const EnumValueDescriptor* GetEnum(
       const Message& message, const FieldDescriptor* field) const = 0;
-  // See MutableMessage() for the meaning of the "factory" parameter.
   virtual const Message& GetMessage(const Message& message,
-                                    const FieldDescriptor* field,
-                                    MessageFactory* factory = NULL) const = 0;
+                                    const FieldDescriptor* field) const = 0;
 
   // Get a string value without copying, if possible.
   //
@@ -505,19 +499,9 @@ class LIBPROTOBUF_EXPORT Reflection {
   virtual void SetEnum  (Message* message,
                          const FieldDescriptor* field,
                          const EnumValueDescriptor* value) const = 0;
-  // Get a mutable pointer to a field with a message type.  If a MessageFactory
-  // is provided, it will be used to construct instances of the sub-message;
-  // otherwise, the default factory is used.  If the field is an extension that
-  // does not live in the same pool as the containing message's descriptor (e.g.
-  // it lives in an overlay pool), then a MessageFactory must be provided.
-  // If you have no idea what that meant, then you probably don't need to worry
-  // about it (don't provide a MessageFactory).  WARNING:  If the
-  // FieldDescriptor is for a compiled-in extension, then
-  // factory->GetPrototype(field->message_type() MUST return an instance of the
-  // compiled-in class for this type, NOT DynamicMessage.
+  // Get a mutable pointer to a field with a message type.
   virtual Message* MutableMessage(Message* message,
-                                  const FieldDescriptor* field,
-                                  MessageFactory* factory = NULL) const = 0;
+                                  const FieldDescriptor* field) const = 0;
 
 
   // Repeated field getters ------------------------------------------
@@ -619,10 +603,8 @@ class LIBPROTOBUF_EXPORT Reflection {
   virtual void AddEnum  (Message* message,
                          const FieldDescriptor* field,
                          const EnumValueDescriptor* value) const = 0;
-  // See MutableMessage() for comments on the "factory" parameter.
   virtual Message* AddMessage(Message* message,
-                              const FieldDescriptor* field,
-                              MessageFactory* factory = NULL) const = 0;
+                              const FieldDescriptor* field) const = 0;
 
 
   // Extensions ------------------------------------------------------

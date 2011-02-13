@@ -93,11 +93,6 @@ string ClassName(const FileDescriptor* descriptor);
 // number constant.
 string FieldConstantName(const FieldDescriptor *field);
 
-// Returns the type of the FieldDescriptor.
-// This does nothing interesting for the open source release, but is used for
-// hacks that improve compatability with version 1 protocol buffers at Google.
-FieldDescriptor::Type GetType(const FieldDescriptor* field);
-
 enum JavaType {
   JAVATYPE_INT,
   JAVATYPE_LONG,
@@ -110,7 +105,11 @@ enum JavaType {
   JAVATYPE_MESSAGE
 };
 
-JavaType GetJavaType(const FieldDescriptor* field);
+JavaType GetJavaType(FieldDescriptor::Type field_type);
+
+inline JavaType GetJavaType(const FieldDescriptor* field) {
+  return GetJavaType(field->type());
+}
 
 // Get the fully-qualified class name for a boxed primitive type, e.g.
 // "java.lang.Integer" for JAVATYPE_INT.  Returns NULL for enum and message
@@ -144,13 +143,6 @@ inline bool HasDescriptorMethods(const EnumDescriptor* descriptor) {
 inline bool HasDescriptorMethods(const FileDescriptor* descriptor) {
   return descriptor->options().optimize_for() !=
            FileOptions::LITE_RUNTIME;
-}
-
-// Should we generate generic services for this file?
-inline bool HasGenericServices(const FileDescriptor *file) {
-  return file->service_count() > 0 &&
-         file->options().optimize_for() != FileOptions::LITE_RUNTIME &&
-         file->options().java_generic_services();
 }
 
 }  // namespace java

@@ -68,7 +68,7 @@ public class TextFormatTest extends TestCase {
   private static String allExtensionsSetText = TestUtil.readTextFromFile(
     "text_format_unittest_extensions_data.txt");
 
-  private static String exoticText =
+  private String exoticText =
     "repeated_int32: -1\n" +
     "repeated_int32: -2147483648\n" +
     "repeated_int64: -1\n" +
@@ -80,13 +80,7 @@ public class TextFormatTest extends TestCase {
     "repeated_double: 123.0\n" +
     "repeated_double: 123.5\n" +
     "repeated_double: 0.125\n" +
-    "repeated_double: .125\n" +
-    "repeated_double: -.125\n" +
     "repeated_double: 1.23E17\n" +
-    "repeated_double: 1.23E+17\n" +
-    "repeated_double: -1.23e-17\n" +
-    "repeated_double: .23e+17\n" +
-    "repeated_double: -.23E17\n" +
     "repeated_double: 1.235E22\n" +
     "repeated_double: 1.235E-18\n" +
     "repeated_double: 123.456789\n" +
@@ -96,10 +90,6 @@ public class TextFormatTest extends TestCase {
     "repeated_string: \"\\000\\001\\a\\b\\f\\n\\r\\t\\v\\\\\\'\\\"" +
       "\\341\\210\\264\"\n" +
     "repeated_bytes: \"\\000\\001\\a\\b\\f\\n\\r\\t\\v\\\\\\'\\\"\\376\"\n";
-
-  private static String canonicalExoticText =
-      exoticText.replace(": .", ": 0.").replace(": -.", ": -0.")   // short-form double
-      .replace("23e", "23E").replace("E+", "E").replace("0.23E17", "2.3E16");
 
   private String messageSetText =
     "[protobuf_unittest.TestMessageSetExtension1] {\n" +
@@ -196,12 +186,12 @@ public class TextFormatTest extends TestCase {
     final FieldDescriptor optionalField =
       TestAllTypes.getDescriptor().findFieldByName("optional_nested_message");
     final Object value = NestedMessage.newBuilder().setBb(42).build();
-
+    
     assertEquals(
       "optional_nested_message {\n  bb: 42\n}\n",
       TextFormat.printFieldToString(optionalField, value));
   }
-
+  
   /**
    * Helper to construct a ByteString from a String containing only 8-bit
    * characters.  The characters are converted directly to bytes, *not*
@@ -241,13 +231,7 @@ public class TextFormatTest extends TestCase {
       .addRepeatedDouble(123)
       .addRepeatedDouble(123.5)
       .addRepeatedDouble(0.125)
-      .addRepeatedDouble(.125)
-      .addRepeatedDouble(-.125)
       .addRepeatedDouble(123e15)
-      .addRepeatedDouble(123e15)
-      .addRepeatedDouble(-1.23e-17)
-      .addRepeatedDouble(.23e17)
-      .addRepeatedDouble(-23e15)
       .addRepeatedDouble(123.5e20)
       .addRepeatedDouble(123.5e-20)
       .addRepeatedDouble(123.456789)
@@ -260,7 +244,7 @@ public class TextFormatTest extends TestCase {
       .addRepeatedBytes(bytes("\0\001\007\b\f\n\r\t\013\\\'\"\u00fe"))
       .build();
 
-    assertEquals(canonicalExoticText, message.toString());
+    assertEquals(exoticText, message.toString());
   }
 
   public void testPrintMessageSet() throws Exception {
@@ -335,7 +319,7 @@ public class TextFormatTest extends TestCase {
 
     // Too lazy to check things individually.  Don't try to debug this
     // if testPrintExotic() is failing.
-    assertEquals(canonicalExoticText, builder.build().toString());
+    assertEquals(exoticText, builder.build().toString());
   }
 
   public void testParseMessageSet() throws Exception {
@@ -648,11 +632,5 @@ public class TextFormatTest extends TestCase {
     TestAllTypes.Builder builder = TestAllTypes.newBuilder();
     TextFormat.merge("optional_string: \"" + longText + "\"", builder);
     assertEquals(longText, builder.getOptionalString());
-  }
-
-  public void testParseAdjacentStringLiterals() throws Exception {
-    TestAllTypes.Builder builder = TestAllTypes.newBuilder();
-    TextFormat.merge("optional_string: \"foo\" 'corge' \"grault\"", builder);
-    assertEquals("foocorgegrault", builder.getOptionalString());
   }
 }

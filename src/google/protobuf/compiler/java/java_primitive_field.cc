@@ -93,7 +93,7 @@ bool IsReferenceType(JavaType type) {
 }
 
 const char* GetCapitalizedType(const FieldDescriptor* field) {
-  switch (GetType(field)) {
+  switch (field->type()) {
     case FieldDescriptor::TYPE_INT32   : return "Int32"   ;
     case FieldDescriptor::TYPE_UINT32  : return "UInt32"  ;
     case FieldDescriptor::TYPE_SINT32  : return "SInt32"  ;
@@ -166,7 +166,7 @@ void SetPrimitiveVariables(const FieldDescriptor* descriptor,
   (*variables)["capitalized_type"] = GetCapitalizedType(descriptor);
   (*variables)["tag"] = SimpleItoa(WireFormat::MakeTag(descriptor));
   (*variables)["tag_size"] = SimpleItoa(
-      WireFormat::TagSize(descriptor->number(), GetType(descriptor)));
+      WireFormat::TagSize(descriptor->number(), descriptor->type()));
   if (IsReferenceType(GetJavaType(descriptor))) {
     (*variables)["null_check"] =
         "  if (value == null) {\n"
@@ -175,7 +175,7 @@ void SetPrimitiveVariables(const FieldDescriptor* descriptor,
   } else {
     (*variables)["null_check"] = "";
   }
-  int fixed_size = FixedSize(GetType(descriptor));
+  int fixed_size = FixedSize(descriptor->type());
   if (fixed_size != -1) {
     (*variables)["fixed_size"] = SimpleItoa(fixed_size);
   }
@@ -218,8 +218,7 @@ GenerateBuilderMembers(io::Printer* printer) const {
     "}\n"
     "public Builder clear$capitalized_name$() {\n"
     "  result.has$capitalized_name$ = false;\n");
-  JavaType type = GetJavaType(descriptor_);
-  if (type == JAVATYPE_STRING || type == JAVATYPE_BYTES) {
+  if (descriptor_->cpp_type() == FieldDescriptor::CPPTYPE_STRING) {
     // The default value is not a simple literal so we want to avoid executing
     // it multiple times.  Instead, get the default out of the default instance.
     printer->Print(variables_,
@@ -231,11 +230,6 @@ GenerateBuilderMembers(io::Printer* printer) const {
   printer->Print(variables_,
     "  return this;\n"
     "}\n");
-}
-
-void PrimitiveFieldGenerator::
-GenerateInitializationCode(io::Printer* printer) const {
-  // Initialized inline.
 }
 
 void PrimitiveFieldGenerator::
@@ -304,7 +298,7 @@ GenerateMembers(io::Printer* printer) const {
   if (descriptor_->options().packed() &&
       HasGeneratedMethods(descriptor_->containing_type())) {
     printer->Print(variables_,
-      "private int $name$MemoizedSerializedSize = -1;\n");
+      "private int $name$MemoizedSerializedSize;\n");
   }
 }
 
@@ -352,11 +346,6 @@ GenerateBuilderMembers(io::Printer* printer) const {
 }
 
 void RepeatedPrimitiveFieldGenerator::
-GenerateInitializationCode(io::Printer* printer) const {
-  // Initialized inline.
-}
-
-void RepeatedPrimitiveFieldGenerator::
 GenerateMergingCode(io::Printer* printer) const {
   printer->Print(variables_,
     "if (!other.$name$_.isEmpty()) {\n"
@@ -378,19 +367,18 @@ GenerateBuildingCode(io::Printer* printer) const {
 
 void RepeatedPrimitiveFieldGenerator::
 GenerateParsingCode(io::Printer* printer) const {
-  printer->Print(variables_,
-    "add$capitalized_name$(input.read$capitalized_type$());\n");
-}
-
-void RepeatedPrimitiveFieldGenerator::
-GenerateParsingCodeFromPacked(io::Printer* printer) const {
-  printer->Print(variables_,
-    "int length = input.readRawVarint32();\n"
-    "int limit = input.pushLimit(length);\n"
-    "while (input.getBytesUntilLimit() > 0) {\n"
-    "  add$capitalized_name$(input.read$capitalized_type$());\n"
-    "}\n"
-    "input.popLimit(limit);\n");
+  if (descriptor_->options().packed()) {
+    printer->Print(variables_,
+      "int length = input.readRawVarint32();\n"
+      "int limit = input.pushLimit(length);\n"
+      "while (input.getBytesUntilLimit() > 0) {\n"
+      "  add$capitalized_name$(input.read$capitalized_type$());\n"
+      "}\n"
+      "input.popLimit(limit);\n");
+  } else {
+    printer->Print(variables_,
+      "add$capitalized_name$(input.read$capitalized_type$());\n");
+  }
 }
 
 void RepeatedPrimitiveFieldGenerator::
@@ -419,7 +407,7 @@ GenerateSerializedSizeCode(io::Printer* printer) const {
     "  int dataSize = 0;\n");
   printer->Indent();
 
-  if (FixedSize(GetType(descriptor_)) == -1) {
+  if (FixedSize(descriptor_->type()) == -1) {
     printer->Print(variables_,
       "for ($type$ element : get$capitalized_name$List()) {\n"
       "  dataSize += com.google.protobuf.CodedOutputStream\n"

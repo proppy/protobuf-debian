@@ -83,7 +83,7 @@ public class LiteTest extends TestCase {
   public void testLiteExtensions() throws Exception {
     // TODO(kenton):  Unlike other features of the lite library, extensions are
     //   implemented completely differently from the regular library.  We
-    //   should probably test them more thoroughly.
+    //   need to test them more thoroughly, once they are fully-implemented.
 
     TestAllExtensionsLite message =
       TestAllExtensionsLite.newBuilder()
@@ -104,8 +104,6 @@ public class LiteTest extends TestCase {
         UnittestLite.optionalInt32ExtensionLite));
     assertEquals(1, message2.getExtensionCount(
         UnittestLite.repeatedStringExtensionLite));
-    assertEquals(1, message2.getExtension(
-        UnittestLite.repeatedStringExtensionLite).size());
     assertEquals("hello", message2.getExtension(
         UnittestLite.repeatedStringExtensionLite, 0));
     assertEquals(TestAllTypesLite.NestedEnum.BAZ, message2.getExtension(

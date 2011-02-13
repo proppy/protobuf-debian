@@ -72,21 +72,14 @@ public abstract class AbstractMessageLite implements MessageLite {
   }
 
   public void writeTo(final OutputStream output) throws IOException {
-    final int bufferSize =
-        CodedOutputStream.computePreferredBufferSize(getSerializedSize());
-    final CodedOutputStream codedOutput =
-        CodedOutputStream.newInstance(output, bufferSize);
+    final CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
     writeTo(codedOutput);
     codedOutput.flush();
   }
 
   public void writeDelimitedTo(final OutputStream output) throws IOException {
-    final int serialized = getSerializedSize();
-    final int bufferSize = CodedOutputStream.computePreferredBufferSize(
-        CodedOutputStream.computeRawVarint32Size(serialized) + serialized);
-    final CodedOutputStream codedOutput =
-        CodedOutputStream.newInstance(output, bufferSize);
-    codedOutput.writeRawVarint32(serialized);
+    final CodedOutputStream codedOutput = CodedOutputStream.newInstance(output);
+    codedOutput.writeRawVarint32(getSerializedSize());
     writeTo(codedOutput);
     codedOutput.flush();
   }
@@ -105,7 +98,13 @@ public abstract class AbstractMessageLite implements MessageLite {
 
     public BuilderType mergeFrom(final CodedInputStream input)
                                  throws IOException {
-      return mergeFrom(input, ExtensionRegistryLite.getEmptyRegistry());
+      // TODO(kenton):  Don't use null here.  Currently we have to because
+      //   using ExtensionRegistry.getEmptyRegistry() would imply a dependency
+      //   on ExtensionRegistry.  However, AbstractMessage overrides this with
+      //   a correct implementation, and lite messages don't yet support
+      //   extensions, so it ends up not mattering for now.  It will matter
+      //   once lite messages support extensions.
+      return mergeFrom(input, null);
     }
 
     // Re-defined here for return type covariance.
@@ -269,24 +268,20 @@ public abstract class AbstractMessageLite implements MessageLite {
       }
     }
 
-    public boolean mergeDelimitedFrom(
+    public BuilderType mergeDelimitedFrom(
         final InputStream input,
         final ExtensionRegistryLite extensionRegistry)
         throws IOException {
-      final int firstByte = input.read();
-      if (firstByte == -1) {
-        return false;
-      }
-      final int size = CodedInputStream.readRawVarint32(firstByte, input);
+      final int size = CodedInputStream.readRawVarint32(input);
       final InputStream limitedInput = new LimitedInputStream(input, size);
-      mergeFrom(limitedInput, extensionRegistry);
-      return true;
+      return mergeFrom(limitedInput, extensionRegistry);
     }
 
-    public boolean mergeDelimitedFrom(final InputStream input)
+    public BuilderType mergeDelimitedFrom(final InputStream input)
         throws IOException {
-      return mergeDelimitedFrom(input,
-          ExtensionRegistryLite.getEmptyRegistry());
+      final int size = CodedInputStream.readRawVarint32(input);
+      final InputStream limitedInput = new LimitedInputStream(input, size);
+      return mergeFrom(limitedInput);
     }
 
     /**

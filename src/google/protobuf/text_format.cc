@@ -54,19 +54,21 @@ namespace protobuf {
 
 string Message::DebugString() const {
   string debug_string;
+  io::StringOutputStream output_stream(&debug_string);
 
-  TextFormat::PrintToString(*this, &debug_string);
+  TextFormat::Print(*this, &output_stream);
 
   return debug_string;
 }
 
 string Message::ShortDebugString() const {
   string debug_string;
+  io::StringOutputStream output_stream(&debug_string);
 
   TextFormat::Printer printer;
   printer.SetSingleLineMode(true);
 
-  printer.PrintToString(*this, &debug_string);
+  printer.Print(*this, &output_stream);
   // Single line mode currently might have an extra space at the end.
   if (debug_string.size() > 0 &&
       debug_string[debug_string.size() - 1] == ' ') {
@@ -76,21 +78,9 @@ string Message::ShortDebugString() const {
   return debug_string;
 }
 
-string Message::Utf8DebugString() const {
-  string debug_string;
-
-  TextFormat::Printer printer;
-  printer.SetUseUtf8StringEscaping(true);
-
-  printer.PrintToString(*this, &debug_string);
-
-  return debug_string;
-}
-
 void Message::PrintDebugString() const {
   printf("%s", DebugString().c_str());
 }
-
 
 // ===========================================================================
 // Internal class for parsing an ASCII representation of a Protocol Message.
@@ -180,23 +170,6 @@ class TextFormat::Parser::ParserImpl {
     }
   }
 
-  void ReportWarning(int line, int col, const string& message) {
-    if (error_collector_ == NULL) {
-      if (line >= 0) {
-        GOOGLE_LOG(WARNING) << "Warning parsing text-format "
-                     << root_message_type_->full_name()
-                     << ": " << (line + 1) << ":"
-                     << (col + 1) << ": " << message;
-      } else {
-        GOOGLE_LOG(WARNING) << "Warning parsing text-format "
-                     << root_message_type_->full_name()
-                     << ": " << message;
-      }
-    } else {
-      error_collector_->AddWarning(line, col, message);
-    }
-  }
-
  private:
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ParserImpl);
 
@@ -205,13 +178,6 @@ class TextFormat::Parser::ParserImpl {
   void ReportError(const string& message) {
     ReportError(tokenizer_.current().line, tokenizer_.current().column,
                 message);
-  }
-
-  // Reports a warning with the given message with information indicating
-  // the position (as derived from the current token).
-  void ReportWarning(const string& message) {
-    ReportWarning(tokenizer_.current().line, tokenizer_.current().column,
-                  message);
   }
 
   // Consumes the specified message with the given starting delimeter.
@@ -302,11 +268,6 @@ class TextFormat::Parser::ParserImpl {
     } else {
       DO(Consume(":"));
       DO(ConsumeFieldValue(message, reflection, field));
-    }
-
-    if (field->options().deprecated()) {
-      ReportWarning("text format contains deprecated field \""
-                    + field_name + "\"");
     }
 
     return true;
@@ -622,10 +583,6 @@ class TextFormat::Parser::ParserImpl {
       parser_->ReportError(line, column, message);
     }
 
-    virtual void AddWarning(int line, int column, const string& message) {
-      parser_->ReportWarning(line, column, message);
-    }
-
    private:
     GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ParserErrorCollector);
     TextFormat::Parser::ParserImpl* parser_;
@@ -687,16 +644,12 @@ class TextFormat::Printer::TextGenerator {
 
   // Print text to the output stream.
   void Print(const string& str) {
-    Print(str.data(), str.size());
+    Print(str.c_str());
   }
 
   // Print text to the output stream.
   void Print(const char* text) {
-    Print(text, strlen(text));
-  }
-
-  // Print text to the output stream.
-  void Print(const char* text, int size) {
+    int size = strlen(text);
     int pos = 0;  // The number of bytes we've written so far.
 
     for (int i = 0; i < size; i++) {
@@ -846,9 +799,7 @@ bool TextFormat::Parser::ParseFieldValueFromString(
 
 TextFormat::Printer::Printer()
   : initial_indent_level_(0),
-    single_line_mode_(false),
-    use_short_repeated_primitives_(false),
-    utf8_string_escaping_(false) {}
+    single_line_mode_(false) {}
 
 TextFormat::Printer::~Printer() {}
 
@@ -925,14 +876,6 @@ void TextFormat::Printer::PrintField(const Message& message,
                                      const Reflection* reflection,
                                      const FieldDescriptor* field,
                                      TextGenerator& generator) {
-  if (use_short_repeated_primitives_ &&
-      field->is_repeated() &&
-      field->cpp_type() != FieldDescriptor::CPPTYPE_STRING &&
-      field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE) {
-    PrintShortRepeatedField(message, reflection, field, generator);
-    return;
-  }
-
   int count = 0;
 
   if (field->is_repeated()) {
@@ -942,7 +885,26 @@ void TextFormat::Printer::PrintField(const Message& message,
   }
 
   for (int j = 0; j < count; ++j) {
-    PrintFieldName(message, reflection, field, generator);
+    if (field->is_extension()) {
+      generator.Print("[");
+      // We special-case MessageSet elements for compatibility with proto1.
+      if (field->containing_type()->options().message_set_wire_format()
+          && field->type() == FieldDescriptor::TYPE_MESSAGE
+          && field->is_optional()
+          && field->extension_scope() == field->message_type()) {
+        generator.Print(field->message_type()->full_name());
+      } else {
+        generator.Print(field->full_name());
+      }
+      generator.Print("]");
+    } else {
+      if (field->type() == FieldDescriptor::TYPE_GROUP) {
+        // Groups must be serialized with their original capitalization.
+        generator.Print(field->message_type()->name());
+      } else {
+        generator.Print(field->name());
+      }
+    }
 
     if (field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
       if (single_line_mode_) {
@@ -964,64 +926,16 @@ void TextFormat::Printer::PrintField(const Message& message,
     PrintFieldValue(message, reflection, field, field_index, generator);
 
     if (field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
-      if (single_line_mode_) {
-        generator.Print("} ");
-      } else {
+      if (!single_line_mode_) {
         generator.Outdent();
-        generator.Print("}\n");
       }
-    } else {
-      if (single_line_mode_) {
-        generator.Print(" ");
-      } else {
-        generator.Print("\n");
-      }
+      generator.Print("}");
     }
-  }
-}
 
-void TextFormat::Printer::PrintShortRepeatedField(const Message& message,
-                                                  const Reflection* reflection,
-                                                  const FieldDescriptor* field,
-                                                  TextGenerator& generator) {
-  // Print primitive repeated field in short form.
-  PrintFieldName(message, reflection, field, generator);
-
-  int size = reflection->FieldSize(message, field);
-  generator.Print(": [");
-  for (int i = 0; i < size; i++) {
-    if (i > 0) generator.Print(", ");
-    PrintFieldValue(message, reflection, field, i, generator);
-  }
-  if (single_line_mode_) {
-    generator.Print("] ");
-  } else {
-    generator.Print("]\n");
-  }
-}
-
-void TextFormat::Printer::PrintFieldName(const Message& message,
-                                         const Reflection* reflection,
-                                         const FieldDescriptor* field,
-                                         TextGenerator& generator) {
-  if (field->is_extension()) {
-    generator.Print("[");
-    // We special-case MessageSet elements for compatibility with proto1.
-    if (field->containing_type()->options().message_set_wire_format()
-        && field->type() == FieldDescriptor::TYPE_MESSAGE
-        && field->is_optional()
-        && field->extension_scope() == field->message_type()) {
-      generator.Print(field->message_type()->full_name());
+    if (single_line_mode_) {
+      generator.Print(" ");
     } else {
-      generator.Print(field->full_name());
-    }
-    generator.Print("]");
-  } else {
-    if (field->type() == FieldDescriptor::TYPE_GROUP) {
-      // Groups must be serialized with their original capitalization.
-      generator.Print(field->message_type()->name());
-    } else {
-      generator.Print(field->name());
+      generator.Print("\n");
     }
   }
 }
@@ -1059,11 +973,7 @@ void TextFormat::Printer::PrintFieldValue(
             reflection->GetStringReference(message, field, &scratch);
 
         generator.Print("\"");
-        if (utf8_string_escaping_) {
-          generator.Print(strings::Utf8SafeCEscape(value));
-        } else {
-          generator.Print(CEscape(value));
-        }
+        generator.Print(CEscape(value));
         generator.Print("\"");
 
         break;

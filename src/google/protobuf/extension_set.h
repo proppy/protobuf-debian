@@ -53,7 +53,6 @@ namespace protobuf {
   class FieldDescriptor;                               // descriptor.h
   class DescriptorPool;                                // descriptor.h
   class MessageLite;                                   // message_lite.h
-  class Message;                                       // message.h
   class MessageFactory;                                // message.h
   class UnknownFieldSet;                               // unknown_field_set.h
   namespace io {
@@ -77,70 +76,6 @@ namespace internal {
 // ExtensionSet::Extension small.
 typedef uint8 FieldType;
 
-// A function which, given an integer value, returns true if the number
-// matches one of the defined values for the corresponding enum type.  This
-// is used with RegisterEnumExtension, below.
-typedef bool EnumValidityFunc(int number);
-
-// Version of the above which takes an argument.  This is needed to deal with
-// extensions that are not compiled in.
-typedef bool EnumValidityFuncWithArg(const void* arg, int number);
-
-// Information about a registered extension.
-struct ExtensionInfo {
-  inline ExtensionInfo() {}
-  inline ExtensionInfo(FieldType type, bool is_repeated, bool is_packed)
-      : type(type), is_repeated(is_repeated), is_packed(is_packed),
-        descriptor(NULL) {}
-
-  FieldType type;
-  bool is_repeated;
-  bool is_packed;
-
-  struct EnumValidityCheck {
-    EnumValidityFuncWithArg* func;
-    const void* arg;
-  };
-
-  union {
-    EnumValidityCheck enum_validity_check;
-    const MessageLite* message_prototype;
-  };
-
-  // The descriptor for this extension, if one exists and is known.  May be
-  // NULL.  Must not be NULL if the descriptor for the extension does not
-  // live in the same pool as the descriptor for the containing type.
-  const FieldDescriptor* descriptor;
-};
-
-// Abstract interface for an object which looks up extension definitions.  Used
-// when parsing.
-class LIBPROTOBUF_EXPORT ExtensionFinder {
- public:
-  virtual ~ExtensionFinder();
-
-  // Find the extension with the given containing type and number.
-  virtual bool Find(int number, ExtensionInfo* output) = 0;
-};
-
-// Implementation of ExtensionFinder which finds extensions defined in .proto
-// files which have been compiled into the binary.
-class LIBPROTOBUF_EXPORT GeneratedExtensionFinder : public ExtensionFinder {
- public:
-  GeneratedExtensionFinder(const MessageLite* containing_type)
-      : containing_type_(containing_type) {}
-  virtual ~GeneratedExtensionFinder() {}
-
-  // Returns true and fills in *output if found, otherwise returns false.
-  virtual bool Find(int number, ExtensionInfo* output);
-
- private:
-  const MessageLite* containing_type_;
-};
-
-// Note:  extension_set_heavy.cc defines DescriptorPoolExtensionFinder for
-// finding extensions from a DescriptorPool.
-
 // This is an internal helper class intended for use within the protocol buffer
 // library and generated classes.  Clients should not use it directly.  Instead,
 // use the generated accessors such as GetExtension() of the class being
@@ -156,6 +91,11 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
  public:
   ExtensionSet();
   ~ExtensionSet();
+
+  // A function which, given an integer value, returns true if the number
+  // matches one of the defined values for the corresponding enum type.  This
+  // is used with RegisterEnumExtension, below.
+  typedef bool EnumValidityFunc(int number);
 
   // These are called at startup by protocol-compiler-generated code to
   // register known extensions.  The registrations are used by ParseField()
@@ -177,7 +117,11 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
   // =================================================================
 
   // Add all fields which are currently present to the given vector.  This
-  // is useful to implement Reflection::ListFields().
+  // is useful to implement Reflection::ListFields().  The FieldDescriptors
+  // are looked up by number from the given pool.
+  //
+  // TODO(kenton): Looking up each field by number is somewhat unfortunate.
+  //   Is there a better way?
   void AppendToList(const Descriptor* containing_type,
                     const DescriptorPool* pool,
                     vector<const FieldDescriptor*>* output) const;
@@ -232,25 +176,21 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
   const MessageLite& GetMessage(int number, const Descriptor* message_type,
                                 MessageFactory* factory) const;
 
-  // |descriptor| may be NULL so long as it is known that the descriptor for
-  // the extension lives in the same pool as the descriptor for the containing
-  // type.
-#define desc const FieldDescriptor* descriptor  // avoid line wrapping
-  void SetInt32 (int number, FieldType type, int32  value, desc);
-  void SetInt64 (int number, FieldType type, int64  value, desc);
-  void SetUInt32(int number, FieldType type, uint32 value, desc);
-  void SetUInt64(int number, FieldType type, uint64 value, desc);
-  void SetFloat (int number, FieldType type, float  value, desc);
-  void SetDouble(int number, FieldType type, double value, desc);
-  void SetBool  (int number, FieldType type, bool   value, desc);
-  void SetEnum  (int number, FieldType type, int    value, desc);
-  void SetString(int number, FieldType type, const string& value, desc);
-  string * MutableString (int number, FieldType type, desc);
+  void SetInt32 (int number, FieldType type, int32  value);
+  void SetInt64 (int number, FieldType type, int64  value);
+  void SetUInt32(int number, FieldType type, uint32 value);
+  void SetUInt64(int number, FieldType type, uint64 value);
+  void SetFloat (int number, FieldType type, float  value);
+  void SetDouble(int number, FieldType type, double value);
+  void SetBool  (int number, FieldType type, bool   value);
+  void SetEnum  (int number, FieldType type, int    value);
+  void SetString(int number, FieldType type, const string& value);
+  string * MutableString (int number, FieldType type);
   MessageLite* MutableMessage(int number, FieldType type,
-                              const MessageLite& prototype, desc);
-  MessageLite* MutableMessage(const FieldDescriptor* decsriptor,
+                              const MessageLite& prototype);
+  MessageLite* MutableMessage(int number, FieldType type,
+                              const Descriptor* message_type,
                               MessageFactory* factory);
-#undef desc
 
   // repeated fields -------------------------------------------------
 
@@ -277,22 +217,21 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
   string * MutableRepeatedString (int number, int index);
   MessageLite* MutableRepeatedMessage(int number, int index);
 
-#define desc const FieldDescriptor* descriptor  // avoid line wrapping
-  void AddInt32 (int number, FieldType type, bool packed, int32  value, desc);
-  void AddInt64 (int number, FieldType type, bool packed, int64  value, desc);
-  void AddUInt32(int number, FieldType type, bool packed, uint32 value, desc);
-  void AddUInt64(int number, FieldType type, bool packed, uint64 value, desc);
-  void AddFloat (int number, FieldType type, bool packed, float  value, desc);
-  void AddDouble(int number, FieldType type, bool packed, double value, desc);
-  void AddBool  (int number, FieldType type, bool packed, bool   value, desc);
-  void AddEnum  (int number, FieldType type, bool packed, int    value, desc);
-  void AddString(int number, FieldType type, const string& value, desc);
-  string * AddString (int number, FieldType type, desc);
+  void AddInt32 (int number, FieldType type, bool packed, int32  value);
+  void AddInt64 (int number, FieldType type, bool packed, int64  value);
+  void AddUInt32(int number, FieldType type, bool packed, uint32 value);
+  void AddUInt64(int number, FieldType type, bool packed, uint64 value);
+  void AddFloat (int number, FieldType type, bool packed, float  value);
+  void AddDouble(int number, FieldType type, bool packed, double value);
+  void AddBool  (int number, FieldType type, bool packed, bool   value);
+  void AddEnum  (int number, FieldType type, bool packed, int    value);
+  void AddString(int number, FieldType type, const string& value);
+  string * AddString (int number, FieldType type);
   MessageLite* AddMessage(int number, FieldType type,
-                          const MessageLite& prototype, desc);
-  MessageLite* AddMessage(const FieldDescriptor* descriptor,
+                          const MessageLite& prototype);
+  MessageLite* AddMessage(int number, FieldType type,
+                          const Descriptor* message_type,
                           MessageFactory* factory);
-#undef desc
 
   void RemoveLast(int number);
   void SwapElements(int number, int index1, int index2);
@@ -318,7 +257,7 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
   // methods of ExtensionSet, this only works for generated message types --
   // it looks up extensions registered using RegisterExtension().
   bool ParseField(uint32 tag, io::CodedInputStream* input,
-                  ExtensionFinder* extension_finder,
+                  const MessageLite* containing_type,
                   FieldSkipper* field_skipper);
 
   // Specific versions for lite or full messages (constructs the appropriate
@@ -326,13 +265,13 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
   bool ParseField(uint32 tag, io::CodedInputStream* input,
                   const MessageLite* containing_type);
   bool ParseField(uint32 tag, io::CodedInputStream* input,
-                  const Message* containing_type,
+                  const MessageLite* containing_type,
                   UnknownFieldSet* unknown_fields);
 
   // Parse an entire message in MessageSet format.  Such messages have no
   // fields, only extensions.
   bool ParseMessageSet(io::CodedInputStream* input,
-                       ExtensionFinder* extension_finder,
+                       const MessageLite* containing_type,
                        FieldSkipper* field_skipper);
 
   // Specific versions for lite or full messages (constructs the appropriate
@@ -340,7 +279,7 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
   bool ParseMessageSet(io::CodedInputStream* input,
                        const MessageLite* containing_type);
   bool ParseMessageSet(io::CodedInputStream* input,
-                       const Message* containing_type,
+                       const MessageLite* containing_type,
                        UnknownFieldSet* unknown_fields);
 
   // Write all extension fields with field numbers in the range
@@ -420,11 +359,6 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
     // For repeated types, this indicates if the [packed=true] option is set.
     bool is_packed;
 
-    // The descriptor for this extension, if one exists and is known.  May be
-    // NULL.  Must not be NULL if the descriptor for the extension does not
-    // live in the same pool as the descriptor for the containing type.
-    const FieldDescriptor* descriptor;
-
     // For packed fields, the size of the packed data is recorded here when
     // ByteSize() is called then used during serialization.
     // TODO(kenton):  Use atomic<int> when C++ supports it.
@@ -434,15 +368,9 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
     void SerializeFieldWithCachedSizes(
         int number,
         io::CodedOutputStream* output) const;
-    uint8* SerializeFieldWithCachedSizesToArray(
-        int number,
-        uint8* target) const;
     void SerializeMessageSetItemWithCachedSizes(
         int number,
         io::CodedOutputStream* output) const;
-    uint8* SerializeMessageSetItemWithCachedSizesToArray(
-        int number,
-        uint8* target) const;
     int ByteSize(int number) const;
     int MessageSetItemByteSize(int number) const;
     void Clear();
@@ -453,15 +381,13 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
 
   // Gets the extension with the given number, creating it if it does not
   // already exist.  Returns true if the extension did not already exist.
-  bool MaybeNewExtension(int number, const FieldDescriptor* descriptor,
-                         Extension** result);
+  bool MaybeNewExtension(int number, Extension** result);
 
   // Parse a single MessageSet item -- called just after the item group start
   // tag has been read.
   bool ParseMessageSetItem(io::CodedInputStream* input,
-                           ExtensionFinder* extension_finder,
+                           const MessageLite* containing_type,
                            FieldSkipper* field_skipper);
-
 
   // Hack:  RepeatedPtrFieldBase declares ExtensionSet as a friend.  This
   //   friendship should automatically extend to ExtensionSet::Extension, but
@@ -486,18 +412,16 @@ class LIBPROTOBUF_EXPORT ExtensionSet {
 
 // These are just for convenience...
 inline void ExtensionSet::SetString(int number, FieldType type,
-                                    const string& value,
-                                    const FieldDescriptor* descriptor) {
-  MutableString(number, type, descriptor)->assign(value);
+                                    const string& value) {
+  MutableString(number, type)->assign(value);
 }
 inline void ExtensionSet::SetRepeatedString(int number, int index,
                                             const string& value) {
   MutableRepeatedString(number, index)->assign(value);
 }
 inline void ExtensionSet::AddString(int number, FieldType type,
-                                    const string& value,
-                                    const FieldDescriptor* descriptor) {
-  AddString(number, type, descriptor)->assign(value);
+                                    const string& value) {
+  AddString(number, type)->assign(value);
 }
 
 // ===================================================================
@@ -578,7 +502,7 @@ template<> inline TYPE PrimitiveTypeTraits<TYPE>::Get(                     \
 }                                                                          \
 template<> inline void PrimitiveTypeTraits<TYPE>::Set(                     \
     int number, FieldType field_type, TYPE value, ExtensionSet* set) {     \
-  set->Set##METHOD(number, field_type, value, NULL);                       \
+  set->Set##METHOD(number, field_type, value);                             \
 }                                                                          \
                                                                            \
 template<> inline TYPE RepeatedPrimitiveTypeTraits<TYPE>::Get(             \
@@ -592,7 +516,7 @@ template<> inline void RepeatedPrimitiveTypeTraits<TYPE>::Set(             \
 template<> inline void RepeatedPrimitiveTypeTraits<TYPE>::Add(             \
     int number, FieldType field_type, bool is_packed,                      \
     TYPE value, ExtensionSet* set) {                                       \
-  set->Add##METHOD(number, field_type, is_packed, value, NULL);            \
+  set->Add##METHOD(number, field_type, is_packed, value);                  \
 }
 
 PROTOBUF_DEFINE_PRIMITIVE_TYPE( int32,  Int32)
@@ -620,11 +544,11 @@ class LIBPROTOBUF_EXPORT StringTypeTraits {
   }
   static inline void Set(int number, FieldType field_type,
                          const string& value, ExtensionSet* set) {
-    set->SetString(number, field_type, value, NULL);
+    set->SetString(number, field_type, value);
   }
   static inline string* Mutable(int number, FieldType field_type,
                                 ExtensionSet* set) {
-    return set->MutableString(number, field_type, NULL);
+    return set->MutableString(number, field_type);
   }
 };
 
@@ -647,11 +571,11 @@ class LIBPROTOBUF_EXPORT RepeatedStringTypeTraits {
   static inline void Add(int number, FieldType field_type,
                          bool /*is_packed*/, const string& value,
                          ExtensionSet* set) {
-    set->AddString(number, field_type, value, NULL);
+    set->AddString(number, field_type, value);
   }
   static inline string* Add(int number, FieldType field_type,
                             ExtensionSet* set) {
-    return set->AddString(number, field_type, NULL);
+    return set->AddString(number, field_type);
   }
 };
 
@@ -672,7 +596,7 @@ class EnumTypeTraits {
   static inline void Set(int number, FieldType field_type,
                          ConstType value, ExtensionSet* set) {
     GOOGLE_DCHECK(IsValid(value));
-    set->SetEnum(number, field_type, value, NULL);
+    set->SetEnum(number, field_type, value);
   }
 };
 
@@ -692,7 +616,7 @@ class RepeatedEnumTypeTraits {
   static inline void Add(int number, FieldType field_type,
                          bool is_packed, ConstType value, ExtensionSet* set) {
     GOOGLE_DCHECK(IsValid(value));
-    set->AddEnum(number, field_type, is_packed, value, NULL);
+    set->AddEnum(number, field_type, is_packed, value);
   }
 };
 
@@ -716,7 +640,7 @@ class MessageTypeTraits {
   static inline MutableType Mutable(int number, FieldType field_type,
                                     ExtensionSet* set) {
     return static_cast<Type*>(
-      set->MutableMessage(number, field_type, Type::default_instance(), NULL));
+        set->MutableMessage(number, field_type, Type::default_instance()));
   }
 };
 
@@ -735,7 +659,7 @@ class RepeatedMessageTypeTraits {
   static inline MutableType Add(int number, FieldType field_type,
                                 ExtensionSet* set) {
     return static_cast<Type*>(
-        set->AddMessage(number, field_type, Type::default_instance(), NULL));
+        set->AddMessage(number, field_type, Type::default_instance()));
   }
 };
 

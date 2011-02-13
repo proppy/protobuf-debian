@@ -77,10 +77,7 @@
 //   GTEST_OS_MAC      - Mac OS X
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_SYMBIAN  - Symbian
-//   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
-//     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
-//     GTEST_OS_WINDOWS_MINGW    - MinGW
-//     GTEST_OS_WINODWS_MOBILE   - Windows Mobile
+//   GTEST_OS_WINDOWS  - Windows
 //   GTEST_OS_ZOS      - z/OS
 //
 // Among the platforms, Cygwin, Linux, Max OS X, and Windows have the
@@ -187,13 +184,6 @@
 #define GTEST_OS_SYMBIAN 1
 #elif defined _WIN32
 #define GTEST_OS_WINDOWS 1
-#ifdef _WIN32_WCE
-#define GTEST_OS_WINDOWS_MOBILE 1
-#elif defined(__MINGW__) || defined(__MINGW32__)
-#define GTEST_OS_WINDOWS_MINGW 1
-#else
-#define GTEST_OS_WINDOWS_DESKTOP 1
-#endif  // _WIN32_WCE
 #elif defined __APPLE__
 #define GTEST_OS_MAC 1
 #elif defined __linux__
@@ -220,10 +210,10 @@
 
 #elif GTEST_OS_WINDOWS
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef _WIN32_WCE
 #include <direct.h>  // NOLINT
 #include <io.h>  // NOLINT
-#endif
+#endif  // !_WIN32_WCE
 
 // <regex.h> is not available on Windows.  Use our own simple regex
 // implementation instead.
@@ -459,9 +449,11 @@
 //      (this is covered by GTEST_HAS_STD_STRING guard).
 //   3. abort() in a VC 7.1 application compiled as GUI in debug config
 //      pops up a dialog window that cannot be suppressed programmatically.
-#if GTEST_HAS_STD_STRING && \
-    (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN || \
-     (GTEST_OS_WINDOWS_DESKTOP && _MSC_VER >= 1400) || GTEST_OS_WINDOWS_MINGW)
+#if GTEST_HAS_STD_STRING && (GTEST_OS_LINUX || \
+                             GTEST_OS_MAC || \
+                             GTEST_OS_CYGWIN || \
+                             (GTEST_OS_WINDOWS && (_MSC_VER >= 1400) && \
+                              !defined(_WIN32_WCE)))
 #define GTEST_HAS_DEATH_TEST 1
 #include <vector>  // NOLINT
 #endif
@@ -577,10 +569,6 @@ typedef ::std::stringstream StrStream;
 typedef ::std::strstream StrStream;
 #endif  // GTEST_HAS_STD_STRING
 
-// A helper for suppressing warnings on constant condition.  It just
-// returns 'condition'.
-bool IsTrue(bool condition);
-
 // Defines scoped_ptr.
 
 // This implementation of scoped_ptr is PARTIAL - it only contains
@@ -603,7 +591,7 @@ class scoped_ptr {
 
   void reset(T* p = NULL) {
     if (p != ptr_) {
-      if (IsTrue(sizeof(T) > 0)) {  // Makes sure T is a complete type.
+      if (sizeof(T) > 0) {  // Makes sure T is a complete type.
         delete ptr_;
       }
       ptr_ = p;
@@ -684,8 +672,7 @@ class RE {
 };
 
 // Defines logging utilities:
-//   GTEST_LOG_(severity) - logs messages at the specified severity level. The
-//                          message itself is streamed into the macro.
+//   GTEST_LOG_()   - logs messages at the specified severity level.
 //   LogToStderr()  - directs all log messages to stderr.
 //   FlushInfoLog() - flushes informational log messages.
 
@@ -696,27 +683,13 @@ enum GTestLogSeverity {
   GTEST_FATAL
 };
 
-// Formats log entry severity, provides a stream object for streaming the
-// log message, and terminates the message with a newline when going out of
-// scope.
-class GTestLog {
- public:
-  GTestLog(GTestLogSeverity severity, const char* file, int line);
+void GTestLog(GTestLogSeverity severity, const char* file,
+              int line, const char* msg);
 
-  // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
-  ~GTestLog();
-
-  ::std::ostream& GetStream() { return ::std::cerr; }
-
- private:
-  const GTestLogSeverity severity_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestLog);
-};
-
-#define GTEST_LOG_(severity) \
-    ::testing::internal::GTestLog(::testing::internal::GTEST_##severity, \
-                                  __FILE__, __LINE__).GetStream()
+#define GTEST_LOG_(severity, msg)\
+    ::testing::internal::GTestLog(\
+        ::testing::internal::GTEST_##severity, __FILE__, __LINE__, \
+        (::testing::Message() << (msg)).GetString().c_str())
 
 inline void LogToStderr() {}
 inline void FlushInfoLog() { fflush(NULL); }
@@ -847,29 +820,29 @@ inline int StrCaseCmp(const char* s1, const char* s2) {
 }
 inline char* StrDup(const char* src) { return strdup(src); }
 #else  // !__BORLANDC__
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
 inline int IsATTY(int /* fd */) { return 0; }
-#else
+#else  // !_WIN32_WCE
 inline int IsATTY(int fd) { return _isatty(fd); }
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // _WIN32_WCE
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return _strdup(src); }
 #endif  // __BORLANDC__
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
 inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
 // Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
 // time and thus not defined there.
-#else
+#else  // !_WIN32_WCE
 inline int FileNo(FILE* file) { return _fileno(file); }
 inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
 inline int RmDir(const char* dir) { return _rmdir(dir); }
 inline bool IsDir(const StatStruct& st) {
   return (_S_IFDIR & st.st_mode) != 0;
 }
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // _WIN32_WCE
 
 #else
 
@@ -903,20 +876,20 @@ inline const char* StrNCpy(char* dest, const char* src, size_t n) {
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef _WIN32_WCE
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
   return fopen(path, mode);
 }
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef _WIN32_WCE
 inline FILE *FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
 inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
 #endif
 inline int FClose(FILE* fp) { return fclose(fp); }
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef _WIN32_WCE
 inline int Read(int fd, void* buf, unsigned int count) {
   return static_cast<int>(read(fd, buf, count));
 }
@@ -927,8 +900,7 @@ inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE
-  // We are on Windows CE, which has no environment variables.
+#ifdef _WIN32_WCE  // We are on Windows CE, which has no environment variables.
   return NULL;
 #elif defined(__BORLANDC__)
   // Environment variables which we programmatically clear will be set to the
@@ -944,14 +916,14 @@ inline const char* GetEnv(const char* name) {
 #pragma warning(pop)  // Restores the warning state.
 #endif
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
 // imitation of standard behaviour.
 void Abort();
 #else
 inline void Abort() { abort(); }
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // _WIN32_WCE
 
 }  // namespace posix
 
@@ -1039,12 +1011,38 @@ typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 //    condition itself, plus additional message streamed into it, if any,
 //    and then it aborts the program. It aborts the program irrespective of
 //    whether it is built in the debug mode or not.
+class GTestCheckProvider {
+ public:
+  GTestCheckProvider(const char* condition, const char* file, int line) {
+    FormatFileLocation(file, line);
+    ::std::cerr << " ERROR: Condition " << condition << " failed. ";
+  }
+  ~GTestCheckProvider() {
+    ::std::cerr << ::std::endl;
+    posix::Abort();
+  }
+  void FormatFileLocation(const char* file, int line) {
+    if (file == NULL)
+      file = "unknown file";
+    if (line < 0) {
+      ::std::cerr << file << ":";
+    } else {
+#if _MSC_VER
+      ::std::cerr << file << "(" << line << "):";
+#else
+      ::std::cerr << file << ":" << line << ":";
+#endif
+    }
+  }
+  ::std::ostream& GetStream() { return ::std::cerr; }
+};
 #define GTEST_CHECK_(condition) \
     GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-    if (::testing::internal::IsTrue(condition)) \
+    if (condition) \
       ; \
     else \
-      GTEST_LOG_(FATAL) << "Condition " #condition " failed. "
+      ::testing::internal::GTestCheckProvider(\
+          #condition, __FILE__, __LINE__).GetStream()
 
 // Macro for referencing flags.
 #define GTEST_FLAG(name) FLAGS_gtest_##name

@@ -150,7 +150,6 @@ class MessageGenerator {
       io::Printer* printer, const Descriptor::ExtensionRange* range,
       bool unbounded);
 
-
   const Descriptor* descriptor_;
   string classname_;
   string dllexport_decl_;

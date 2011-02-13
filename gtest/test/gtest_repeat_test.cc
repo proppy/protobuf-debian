@@ -64,14 +64,14 @@ namespace {
   do {\
     const int expected_val = (expected);\
     const int actual_val = (actual);\
-    if (::testing::internal::IsTrue(expected_val != actual_val)) {\
+    if (expected_val != actual_val) {\
       ::std::cout << "Value of: " #actual "\n"\
                   << "  Actual: " << actual_val << "\n"\
                   << "Expected: " #expected "\n"\
                   << "Which is: " << expected_val << "\n";\
       abort();\
     }\
-  } while(::testing::internal::AlwaysFalse())
+  } while(false)
 
 
 // Used for verifying that global environment set-up and tear-down are
@@ -112,11 +112,13 @@ int g_death_test_count = 0;
 TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
+#if GTEST_HAS_DEATH_TEST
   GTEST_FLAG(death_test_style) = "threadsafe";
-  EXPECT_DEATH_IF_SUPPORTED(abort(), "");
+  EXPECT_DEATH(abort(), "");
 
   GTEST_FLAG(death_test_style) = "fast";
-  EXPECT_DEATH_IF_SUPPORTED(abort(), "");
+  EXPECT_DEATH(abort(), "");
+#endif  // GTEST_HAS_DEATH_TEST
 }
 
 #if GTEST_HAS_PARAM_TEST

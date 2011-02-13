@@ -317,18 +317,14 @@ public interface MessageLite {
      * then the message data.  Use
      * {@link MessageLite#writeDelimitedTo(OutputStream)} to write messages in
      * this format.
-     *
-     * @returns True if successful, or false if the stream is at EOF when the
-     *          method starts.  Any other error (including reaching EOF during
-     *          parsing) will cause an exception to be thrown.
      */
-    boolean mergeDelimitedFrom(InputStream input)
+    Builder mergeDelimitedFrom(InputStream input)
                                throws IOException;
 
     /**
      * Like {@link #mergeDelimitedFrom(InputStream)} but supporting extensions.
      */
-    boolean mergeDelimitedFrom(InputStream input,
+    Builder mergeDelimitedFrom(InputStream input,
                                ExtensionRegistryLite extensionRegistry)
                                throws IOException;
   }

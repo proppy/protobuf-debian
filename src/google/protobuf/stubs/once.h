@@ -38,13 +38,13 @@
 // This is basically a portable version of pthread_once().
 //
 // This header declares three things:
-// * A type called ProtobufOnceType.
+// * A type called GoogleOnceType.
 // * A macro GOOGLE_PROTOBUF_DECLARE_ONCE() which declares a variable of type
-//   ProtobufOnceType.  This is the only legal way to declare such a variable.
+//   GoogleOnceType.  This is the only legal way to declare such a variable.
 //   The macro may only be used at the global scope (you cannot create local
 //   or class member variables of this type).
-// * A function GogoleOnceInit(ProtobufOnceType* once, void (*init_func)()).
-//   This function, when invoked multiple times given the same ProtobufOnceType
+// * A function GogoleOnceInit(GoogleOnceType* once, void (*init_func)()).
+//   This function, when invoked multiple times given the same GoogleOnceType
 //   object, will invoke init_func on the first call only, and will make sure
 //   none of the calls return before that first call to init_func has finished.
 //
@@ -83,21 +83,21 @@ namespace protobuf {
 
 #ifdef _WIN32
 
-struct ProtobufOnceInternal;
+struct GoogleOnceInternal;
 
-struct LIBPROTOBUF_EXPORT ProtobufOnceType {
-  ProtobufOnceType();
-  ~ProtobufOnceType();
+struct LIBPROTOBUF_EXPORT GoogleOnceType {
+  GoogleOnceType();
+  ~GoogleOnceType();
   void Init(void (*init_func)());
 
   volatile bool initialized_;
-  ProtobufOnceInternal* internal_;
+  GoogleOnceInternal* internal_;
 };
 
 #define GOOGLE_PROTOBUF_DECLARE_ONCE(NAME)                    \
-  ::google::protobuf::ProtobufOnceType NAME
+  ::google::protobuf::GoogleOnceType NAME
 
-inline void GoogleOnceInit(ProtobufOnceType* once, void (*init_func)()) {
+inline void GoogleOnceInit(GoogleOnceType* once, void (*init_func)()) {
   // Note:  Double-checked locking is safe on x86.
   if (!once->initialized_) {
     once->Init(init_func);
@@ -106,12 +106,12 @@ inline void GoogleOnceInit(ProtobufOnceType* once, void (*init_func)()) {
 
 #else
 
-typedef pthread_once_t ProtobufOnceType;
+typedef pthread_once_t GoogleOnceType;
 
 #define GOOGLE_PROTOBUF_DECLARE_ONCE(NAME)                    \
   pthread_once_t NAME = PTHREAD_ONCE_INIT
 
-inline void GoogleOnceInit(ProtobufOnceType* once, void (*init_func)()) {
+inline void GoogleOnceInit(GoogleOnceType* once, void (*init_func)()) {
   pthread_once(once, init_func);
 }
 

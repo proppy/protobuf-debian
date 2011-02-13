@@ -50,17 +50,17 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
 #include <windows.h>  // NOLINT
 #elif GTEST_OS_WINDOWS
 #include <direct.h>  // NOLINT
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // _WIN32_WCE
 
 namespace testing {
 namespace internal {
 namespace {
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
 // TODO(wan@google.com): Move these to the POSIX adapter section in
 // gtest-port.h.
 
@@ -81,7 +81,9 @@ int _rmdir(const char* path) {
   return ret;
 }
 
-#else
+#endif  // _WIN32_WCE
+
+#ifndef _WIN32_WCE
 
 TEST(GetCurrentDirTest, ReturnsCurrentDir) {
   const FilePath original_dir = FilePath::GetCurrentDir();
@@ -101,7 +103,7 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
 #endif
 }
 
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif  // _WIN32_WCE
 
 TEST(IsEmptyTest, ReturnsTrueForEmptyPath) {
   EXPECT_TRUE(FilePath("").IsEmpty());
@@ -154,7 +156,7 @@ TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileName) {
 
 // RemoveFileName "" -> "./"
 TEST(RemoveFileNameTest, EmptyName) {
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
   // On Windows CE, we use the root as the current directory.
   EXPECT_STREQ(GTEST_PATH_SEP_,
       FilePath("").RemoveFileName().c_str());
@@ -342,12 +344,12 @@ TEST(DirectoryTest, RootOfWrongDriveDoesNotExists) {
 }
 #endif  // GTEST_OS_WINDOWS
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef _WIN32_WCE
 // Windows CE _does_ consider an empty directory to exist.
 TEST(DirectoryTest, EmptyPathDirectoryDoesNotExist) {
   EXPECT_FALSE(FilePath("").DirectoryExists());
 }
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // ! _WIN32_WCE
 
 TEST(DirectoryTest, CurrentDirectoryExists) {
 #if GTEST_OS_WINDOWS  // We are on Windows.
@@ -447,8 +449,9 @@ class DirectoryCreationTest : public Test {
   }
 
   String TempDir() const {
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef _WIN32_WCE
     return String("\\temp\\");
+
 #elif GTEST_OS_WINDOWS
     const char* temp_dir = posix::GetEnv("TEMP");
     if (temp_dir == NULL || temp_dir[0] == '\0')
@@ -459,7 +462,7 @@ class DirectoryCreationTest : public Test {
       return String::Format("%s\\", temp_dir);
 #else
     return String("/tmp/");
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif
   }
 
   void CreateTextFile(const char* filename) {

@@ -34,9 +34,8 @@
 //
 // Recursive descent FTW.
 
-#include <float.h>
 #include <google/protobuf/stubs/hash.h>
-#include <limits>
+#include <float.h>
 
 
 #include <google/protobuf/compiler/parser.h>
@@ -205,14 +204,6 @@ bool Parser::ConsumeNumber(double* output, const char* error) {
       // We still return true because we did, in fact, parse a number.
     }
     *output = value;
-    input_->Next();
-    return true;
-  } else if (LookingAt("inf")) {
-    *output = numeric_limits<double>::infinity();
-    input_->Next();
-    return true;
-  } else if (LookingAt("nan")) {
-    *output = numeric_limits<double>::quiet_NaN();
     input_->Next();
     return true;
   } else {

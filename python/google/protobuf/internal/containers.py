@@ -54,7 +54,8 @@ class BaseContainer(object):
     Args:
       message_listener: A MessageListener implementation.
         The RepeatedScalarFieldContainer will call this object's
-        Modified() method when it is modified.
+        TransitionToNonempty() method when it transitions from being empty to
+        being nonempty.
     """
     self._message_listener = message_listener
     self._values = []
@@ -72,9 +73,6 @@ class BaseContainer(object):
     # The concrete classes should define __eq__.
     return not self == other
 
-  def __repr__(self):
-    return repr(self._values)
-
 
 class RepeatedScalarFieldContainer(BaseContainer):
 
@@ -88,7 +86,8 @@ class RepeatedScalarFieldContainer(BaseContainer):
     Args:
       message_listener: A MessageListener implementation.
         The RepeatedScalarFieldContainer will call this object's
-        Modified() method when it is modified.
+        TransitionToNonempty() method when it transitions from being empty to
+        being nonempty.
       type_checker: A type_checkers.ValueChecker instance to run on elements
         inserted into this container.
     """
@@ -97,47 +96,44 @@ class RepeatedScalarFieldContainer(BaseContainer):
 
   def append(self, value):
     """Appends an item to the list. Similar to list.append()."""
-    self._type_checker.CheckValue(value)
-    self._values.append(value)
-    if not self._message_listener.dirty:
-      self._message_listener.Modified()
+    self.insert(len(self._values), value)
 
   def insert(self, key, value):
     """Inserts the item at the specified position. Similar to list.insert()."""
     self._type_checker.CheckValue(value)
     self._values.insert(key, value)
-    if not self._message_listener.dirty:
-      self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
+    if len(self._values) == 1:
+      self._message_listener.TransitionToNonempty()
 
   def extend(self, elem_seq):
     """Extends by appending the given sequence. Similar to list.extend()."""
     if not elem_seq:
       return
 
+    orig_empty = len(self._values) == 0
     new_values = []
     for elem in elem_seq:
       self._type_checker.CheckValue(elem)
       new_values.append(elem)
     self._values.extend(new_values)
-    self._message_listener.Modified()
-
-  def MergeFrom(self, other):
-    """Appends the contents of another repeated field of the same type to this
-    one. We do not check the types of the individual fields.
-    """
-    self._values.extend(other._values)
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
+    if orig_empty:
+      self._message_listener.TransitionToNonempty()
 
   def remove(self, elem):
     """Removes an item from the list. Similar to list.remove()."""
     self._values.remove(elem)
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
 
   def __setitem__(self, key, value):
     """Sets the item on the specified position."""
+    # No need to call TransitionToNonempty(), since if we're able to
+    # set the element at this index, we were already nonempty before
+    # this method was called.
+    self._message_listener.ByteSizeDirty()
     self._type_checker.CheckValue(value)
     self._values[key] = value
-    self._message_listener.Modified()
 
   def __getslice__(self, start, stop):
     """Retrieves the subset of items from between the specified indices."""
@@ -150,17 +146,17 @@ class RepeatedScalarFieldContainer(BaseContainer):
       self._type_checker.CheckValue(value)
       new_values.append(value)
     self._values[start:stop] = new_values
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
 
   def __delitem__(self, key):
     """Deletes the item at the specified position."""
     del self._values[key]
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
 
   def __delslice__(self, start, stop):
     """Deletes the subset of items from between the specified indices."""
     del self._values[start:stop]
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
 
   def __eq__(self, other):
     """Compares the current instance with another one."""
@@ -190,7 +186,8 @@ class RepeatedCompositeFieldContainer(BaseContainer):
     Args:
       message_listener: A MessageListener implementation.
         The RepeatedCompositeFieldContainer will call this object's
-        Modified() method when it is modified.
+        TransitionToNonempty() method when it transitions from being empty to
+        being nonempty.
       message_descriptor: A Descriptor instance describing the protocol type
         that should be present in this container.  We'll use the
         _concrete_class field of this descriptor when the client calls add().
@@ -202,23 +199,9 @@ class RepeatedCompositeFieldContainer(BaseContainer):
     new_element = self._message_descriptor._concrete_class()
     new_element._SetListener(self._message_listener)
     self._values.append(new_element)
-    if not self._message_listener.dirty:
-      self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
+    self._message_listener.TransitionToNonempty()
     return new_element
-
-  def MergeFrom(self, other):
-    """Appends the contents of another repeated field of the same type to this
-    one, copying each individual message.
-    """
-    message_class = self._message_descriptor._concrete_class
-    listener = self._message_listener
-    values = self._values
-    for message in other._values:
-      new_element = message_class()
-      new_element._SetListener(listener)
-      new_element.MergeFrom(message)
-      values.append(new_element)
-    listener.Modified()
 
   def __getslice__(self, start, stop):
     """Retrieves the subset of items from between the specified indices."""
@@ -227,12 +210,12 @@ class RepeatedCompositeFieldContainer(BaseContainer):
   def __delitem__(self, key):
     """Deletes the item at the specified position."""
     del self._values[key]
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
 
   def __delslice__(self, start, stop):
     """Deletes the subset of items from between the specified indices."""
     del self._values[start:stop]
-    self._message_listener.Modified()
+    self._message_listener.ByteSizeDirty()
 
   def __eq__(self, other):
     """Compares the current instance with another one."""

@@ -308,10 +308,11 @@ GenerateClassDefinition(io::Printer* printer) {
   } else {
     vars["dllexport"] = dllexport_decl_ + " ";
   }
-  vars["superclass"] = SuperClassName(descriptor_);
+  vars["superclass"] = HasDescriptorMethods(descriptor_->file()) ?
+                       "Message" : "MessageLite";
 
   printer->Print(vars,
-    "class $dllexport$$classname$ : public $superclass$ {\n"
+    "class $dllexport$$classname$ : public ::google::protobuf::$superclass$ {\n"
     " public:\n");
   printer->Indent();
 
@@ -348,10 +349,6 @@ GenerateClassDefinition(io::Printer* printer) {
 
   printer->Print(vars,
     "static const $classname$& default_instance();\n"
-    "\n");
-
-
-  printer->Print(vars,
     "void Swap($classname$* other);\n"
     "\n"
     "// implements Message ----------------------------------------------\n"
@@ -390,7 +387,7 @@ GenerateClassDefinition(io::Printer* printer) {
     "private:\n"
     "void SharedCtor();\n"
     "void SharedDtor();\n"
-    "void SetCachedSize(int size) const;\n"
+    "void SetCachedSize(int size) const { _cached_size_ = size; }\n"
     "public:\n"
     "\n");
 
@@ -438,11 +435,6 @@ GenerateClassDefinition(io::Printer* printer) {
   for (int i = 0; i < descriptor_->extension_count(); i++) {
     extension_generators_[i]->GenerateDeclaration(printer);
   }
-
-
-  printer->Print(
-    "// @@protoc_insertion_point(class_scope:$full_name$)\n",
-    "full_name", descriptor_->full_name());
 
   // Generate private members for fields.
   printer->Outdent();
@@ -631,7 +623,6 @@ GenerateDefaultInstanceAllocator(io::Printer* printer) {
   for (int i = 0; i < descriptor_->nested_type_count(); i++) {
     nested_generators_[i]->GenerateDefaultInstanceAllocator(printer);
   }
-
 }
 
 void MessageGenerator::
@@ -760,7 +751,6 @@ GenerateClassMethods(io::Printer* printer) {
       "classname", classname_,
       "type_name", descriptor_->full_name());
   }
-
 }
 
 void MessageGenerator::
@@ -843,16 +833,12 @@ GenerateSharedDestructorCode(io::Printer* printer) {
 
 void MessageGenerator::
 GenerateStructors(io::Printer* printer) {
-  string superclass = SuperClassName(descriptor_);
-
   // Generate the default constructor.
   printer->Print(
-    "$classname$::$classname$()\n"
-    "  : $superclass$() {\n"
+    "$classname$::$classname$() {\n"
     "  SharedCtor();\n"
     "}\n",
-    "classname", classname_,
-    "superclass", superclass);
+    "classname", classname_);
 
   printer->Print(
     "\n"
@@ -873,7 +859,7 @@ GenerateStructors(io::Printer* printer) {
       printer->Print(
           "  $name$_ = const_cast< $type$*>(&$type$::default_instance());\n",
           "name", FieldName(field),
-          "type", FieldMessageTypeName(field));
+          "type", ClassName(field->message_type(), true));
     }
   }
   printer->Print(
@@ -882,14 +868,12 @@ GenerateStructors(io::Printer* printer) {
 
   // Generate the copy constructor.
   printer->Print(
-    "$classname$::$classname$(const $classname$& from)\n"
-    "  : $superclass$() {\n"
+    "$classname$::$classname$(const $classname$& from) {\n"
     "  SharedCtor();\n"
     "  MergeFrom(from);\n"
     "}\n"
     "\n",
-    "classname", classname_,
-    "superclass", superclass);
+    "classname", classname_);
 
   // Generate the shared constructor code.
   GenerateSharedConstructorCode(printer);
@@ -904,15 +888,6 @@ GenerateStructors(io::Printer* printer) {
 
   // Generate the shared destructor code.
   GenerateSharedDestructorCode(printer);
-
-  // Generate SetCachedSize.
-  printer->Print(
-    "void $classname$::SetCachedSize(int size) const {\n"
-    "  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();\n"
-    "  _cached_size_ = size;\n"
-    "  GOOGLE_SAFE_CONCURRENT_WRITES_END();\n"
-    "}\n",
-    "classname", classname_);
 
   // Only generate this member if it's not disabled.
   if (HasDescriptorMethods(descriptor_->file()) &&
@@ -942,7 +917,6 @@ GenerateStructors(io::Printer* printer) {
     "classname", classname_,
     "adddescriptorsname",
     GlobalAddDescriptorsName(descriptor_->file()->name()));
-
 }
 
 void MessageGenerator::
@@ -1256,15 +1230,12 @@ GenerateMergeFromCodedStream(io::Printer* printer) {
       PrintFieldComment(printer, field);
 
       printer->Print(
-        "case $number$: {\n",
-        "number", SimpleItoa(field->number()));
-      printer->Indent();
-      const FieldGenerator& field_generator = field_generators_.get(field);
-
-      // Emit code to parse the common, expected case.
-      printer->Print(
-        "if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==\n"
-        "    ::google::protobuf::internal::WireFormatLite::WIRETYPE_$wiretype$) {\n",
+        "case $number$: {\n"
+        "  if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) !=\n"
+        "      ::google::protobuf::internal::WireFormatLite::WIRETYPE_$wiretype$) {\n"
+        "    goto handle_uninterpreted;\n"
+        "  }\n",
+        "number", SimpleItoa(field->number()),
         "wiretype", kWireTypeNames[WireFormat::WireTypeForField(field)]);
 
       if (i > 0 || (field->is_repeated() && !field->options().packed())) {
@@ -1274,38 +1245,8 @@ GenerateMergeFromCodedStream(io::Printer* printer) {
       }
 
       printer->Indent();
-      if (field->options().packed()) {
-        field_generator.GenerateMergeFromCodedStreamWithPacking(printer);
-      } else {
-        field_generator.GenerateMergeFromCodedStream(printer);
-      }
-      printer->Outdent();
 
-      // Emit code to parse unexpectedly packed or unpacked values.
-      if (field->is_packable() && field->options().packed()) {
-        printer->Print(
-          "} else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)\n"
-          "           == ::google::protobuf::internal::WireFormatLite::\n"
-          "              WIRETYPE_$wiretype$) {\n",
-          "wiretype",
-          kWireTypeNames[WireFormat::WireTypeForFieldType(field->type())]);
-        printer->Indent();
-        field_generator.GenerateMergeFromCodedStream(printer);
-        printer->Outdent();
-      } else if (field->is_packable() && !field->options().packed()) {
-        printer->Print(
-          "} else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)\n"
-          "           == ::google::protobuf::internal::WireFormatLite::\n"
-          "              WIRETYPE_LENGTH_DELIMITED) {\n");
-        printer->Indent();
-        field_generator.GenerateMergeFromCodedStreamWithPacking(printer);
-        printer->Outdent();
-      }
-
-      printer->Print(
-        "} else {\n"
-        "  goto handle_uninterpreted;\n"
-        "}\n");
+      field_generators_.get(field).GenerateMergeFromCodedStream(printer);
 
       // switch() is slow since it can't be predicted well.  Insert some if()s
       // here that attempt to predict the next tag.
@@ -1486,6 +1427,18 @@ GenerateSerializeWithCachedSizes(io::Printer* printer) {
     "classname", classname_);
   printer->Indent();
 
+  if (HasFastArraySerialization(descriptor_->file())) {
+    printer->Print(
+      "::google::protobuf::uint8* raw_buffer = "
+        "output->GetDirectBufferForNBytesAndAdvance(_cached_size_);\n"
+      "if (raw_buffer != NULL) {\n"
+      "  $classname$::SerializeWithCachedSizesToArray(raw_buffer);\n"
+      "  return;\n"
+      "}\n"
+      "\n",
+      "classname", classname_);
+  }
+
   GenerateSerializeWithCachedSizesBody(printer, false);
 
   printer->Outdent();
@@ -1595,9 +1548,7 @@ GenerateByteSize(io::Printer* printer) {
         "      ComputeUnknownMessageSetItemsSize(unknown_fields());\n");
     }
     printer->Print(
-      "  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();\n"
       "  _cached_size_ = total_size;\n"
-      "  GOOGLE_SAFE_CONCURRENT_WRITES_END();\n"
       "  return total_size;\n"
       "}\n");
     return;
@@ -1689,9 +1640,7 @@ GenerateByteSize(io::Printer* printer) {
   // exact same value, it works on all common processors.  In a future version
   // of C++, _cached_size_ should be made into an atomic<int>.
   printer->Print(
-    "GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();\n"
     "_cached_size_ = total_size;\n"
-    "GOOGLE_SAFE_CONCURRENT_WRITES_END();\n"
     "return total_size;\n");
 
   printer->Outdent();
@@ -1762,7 +1711,6 @@ GenerateIsInitialized(io::Printer* printer) {
     "  return true;\n"
     "}\n");
 }
-
 
 }  // namespace cpp
 }  // namespace compiler

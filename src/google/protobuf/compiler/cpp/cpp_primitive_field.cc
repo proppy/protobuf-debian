@@ -84,14 +84,10 @@ void SetPrimitiveVariables(const FieldDescriptor* descriptor,
   SetCommonFieldVariables(descriptor, variables);
   (*variables)["type"] = PrimitiveTypeName(descriptor->cpp_type());
   (*variables)["default"] = DefaultValue(descriptor);
-  (*variables)["tag"] = SimpleItoa(internal::WireFormat::MakeTag(descriptor));
   int fixed_size = FixedSize(descriptor->type());
   if (fixed_size != -1) {
     (*variables)["fixed_size"] = SimpleItoa(fixed_size);
   }
-  (*variables)["wire_format_field_type"] =
-      "::google::protobuf::internal::WireFormatLite::" + FieldDescriptorProto_Type_Name(
-          static_cast<FieldDescriptorProto_Type>(descriptor->type()));
 }
 
 }  // namespace
@@ -153,9 +149,8 @@ GenerateConstructorCode(io::Printer* printer) const {
 void PrimitiveFieldGenerator::
 GenerateMergeFromCodedStream(io::Printer* printer) const {
   printer->Print(variables_,
-    "DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<\n"
-    "         $type$, $wire_format_field_type$>(\n"
-    "       input, &$name$_)));\n"
+    "DO_(::google::protobuf::internal::WireFormatLite::Read$declared_type$(\n"
+    "      input, &$name$_));\n"
     "_set_bit($index$);\n");
 }
 
@@ -193,14 +188,6 @@ RepeatedPrimitiveFieldGenerator::
 RepeatedPrimitiveFieldGenerator(const FieldDescriptor* descriptor)
   : descriptor_(descriptor) {
   SetPrimitiveVariables(descriptor, &variables_);
-
-  if (descriptor->options().packed()) {
-    variables_["packed_reader"] = "ReadPackedPrimitive";
-    variables_["repeated_reader"] = "ReadRepeatedPrimitiveNoInline";
-  } else {
-    variables_["packed_reader"] = "ReadPackedPrimitiveNoInline";
-    variables_["repeated_reader"] = "ReadRepeatedPrimitive";
-  }
 }
 
 RepeatedPrimitiveFieldGenerator::~RepeatedPrimitiveFieldGenerator() {}
@@ -218,28 +205,16 @@ GeneratePrivateMembers(io::Printer* printer) const {
 void RepeatedPrimitiveFieldGenerator::
 GenerateAccessorDeclarations(io::Printer* printer) const {
   printer->Print(variables_,
+    "inline const ::google::protobuf::RepeatedField< $type$ >& $name$() const\n"
+    "    $deprecation$;\n"
+    "inline ::google::protobuf::RepeatedField< $type$ >* mutable_$name$()$deprecation$;\n"
     "inline $type$ $name$(int index) const$deprecation$;\n"
     "inline void set_$name$(int index, $type$ value)$deprecation$;\n"
     "inline void add_$name$($type$ value)$deprecation$;\n");
-  printer->Print(variables_,
-    "inline const ::google::protobuf::RepeatedField< $type$ >&\n"
-    "    $name$() const$deprecation$;\n"
-    "inline ::google::protobuf::RepeatedField< $type$ >*\n"
-    "    mutable_$name$()$deprecation$;\n");
 }
 
 void RepeatedPrimitiveFieldGenerator::
 GenerateInlineAccessorDefinitions(io::Printer* printer) const {
-  printer->Print(variables_,
-    "inline $type$ $classname$::$name$(int index) const {\n"
-    "  return $name$_.Get(index);\n"
-    "}\n"
-    "inline void $classname$::set_$name$(int index, $type$ value) {\n"
-    "  $name$_.Set(index, value);\n"
-    "}\n"
-    "inline void $classname$::add_$name$($type$ value) {\n"
-    "  $name$_.Add(value);\n"
-    "}\n");
   printer->Print(variables_,
     "inline const ::google::protobuf::RepeatedField< $type$ >&\n"
     "$classname$::$name$() const {\n"
@@ -248,6 +223,15 @@ GenerateInlineAccessorDefinitions(io::Printer* printer) const {
     "inline ::google::protobuf::RepeatedField< $type$ >*\n"
     "$classname$::mutable_$name$() {\n"
     "  return &$name$_;\n"
+    "}\n"
+    "inline $type$ $classname$::$name$(int index) const {\n"
+    "  return $name$_.Get(index);\n"
+    "}\n"
+    "inline void $classname$::set_$name$(int index, $type$ value) {\n"
+    "  $name$_.Set(index, value);\n"
+    "}\n"
+    "inline void $classname$::add_$name$($type$ value) {\n"
+    "  $name$_.Add(value);\n"
     "}\n");
 }
 
@@ -273,18 +257,30 @@ GenerateConstructorCode(io::Printer* printer) const {
 
 void RepeatedPrimitiveFieldGenerator::
 GenerateMergeFromCodedStream(io::Printer* printer) const {
-  printer->Print(variables_,
-    "DO_((::google::protobuf::internal::WireFormatLite::$repeated_reader$<\n"
-    "         $type$, $wire_format_field_type$>(\n"
-    "       $tag_size$, $tag$, input, this->mutable_$name$())));\n");
-}
-
-void RepeatedPrimitiveFieldGenerator::
-GenerateMergeFromCodedStreamWithPacking(io::Printer* printer) const {
-  printer->Print(variables_,
-    "DO_((::google::protobuf::internal::WireFormatLite::$packed_reader$<\n"
-    "         $type$, $wire_format_field_type$>(\n"
-    "       input, this->mutable_$name$())));\n");
+  if (descriptor_->options().packed()) {
+    printer->Print("{\n");
+    printer->Indent();
+    printer->Print(variables_,
+      "::google::protobuf::uint32 length;\n"
+      "DO_(input->ReadVarint32(&length));\n"
+      "::google::protobuf::io::CodedInputStream::Limit limit =\n"
+      "    input->PushLimit(length);\n"
+      "while (input->BytesUntilLimit() > 0) {\n"
+      "  $type$ value;\n"
+      "  DO_(::google::protobuf::internal::WireFormatLite::Read$declared_type$(\n"
+      "        input, &value));\n"
+      "  add_$name$(value);\n"
+      "}\n"
+      "input->PopLimit(limit);\n");
+    printer->Outdent();
+    printer->Print("}\n");
+  } else {
+    printer->Print(variables_,
+      "$type$ value;\n"
+      "DO_(::google::protobuf::internal::WireFormatLite::Read$declared_type$(\n"
+      "      input, &value));\n"
+      "add_$name$(value);\n");
+  }
 }
 
 void RepeatedPrimitiveFieldGenerator::

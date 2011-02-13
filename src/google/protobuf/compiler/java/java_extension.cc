@@ -112,20 +112,16 @@ void ExtensionGenerator::Generate(io::Printer* printer) {
     "public static final int $constant_name$ = $number$;\n");
   if (descriptor_->is_repeated()) {
     printer->Print(vars,
-      "public static final\n"
+      "public static\n"
       "  com.google.protobuf.GeneratedMessage$lite$.GeneratedExtension<\n"
       "    $containing_type$,\n"
-      "    java.util.List<$type$>> $name$ =\n"
-      "      com.google.protobuf.GeneratedMessage$lite$\n"
-      "        .newGeneratedExtension();\n");
+      "    java.util.List<$type$>> $name$;\n");
   } else {
     printer->Print(vars,
-      "public static final\n"
+      "public static\n"
       "  com.google.protobuf.GeneratedMessage$lite$.GeneratedExtension<\n"
       "    $containing_type$,\n"
-      "    $type$> $name$ =\n"
-      "      com.google.protobuf.GeneratedMessage$lite$\n"
-      "        .newGeneratedExtension();\n");
+      "    $type$> $name$;\n");
   }
 }
 
@@ -137,7 +133,7 @@ void ExtensionGenerator::GenerateInitializationCode(io::Printer* printer) {
   vars["extendee"] = ClassName(descriptor_->containing_type());
   vars["default"] = descriptor_->is_repeated() ? "" : DefaultValue(descriptor_);
   vars["number"] = SimpleItoa(descriptor_->number());
-  vars["type_constant"] = TypeName(GetType(descriptor_));
+  vars["type_constant"] = TypeName(descriptor_->type());
   vars["packed"] = descriptor_->options().packed() ? "true" : "false";
   vars["enum_map"] = "null";
   vars["prototype"] = "null";
@@ -161,29 +157,43 @@ void ExtensionGenerator::GenerateInitializationCode(io::Printer* printer) {
   }
 
   if (HasDescriptorMethods(descriptor_->file())) {
-    printer->Print(vars,
-      "$scope$.$name$.internalInit(\n"
-      "    $scope$.getDescriptor().getExtensions().get($index$),\n"
-      "    $type$.class);\n");
+    if (descriptor_->is_repeated()) {
+      printer->Print(vars,
+        "$scope$.$name$ =\n"
+        "  com.google.protobuf.GeneratedMessage\n"
+        "    .newRepeatedGeneratedExtension(\n"
+        "      $scope$.getDescriptor().getExtensions().get($index$),\n"
+        "      $type$.class);\n");
+    } else {
+      printer->Print(vars,
+        "$scope$.$name$ =\n"
+        "  com.google.protobuf.GeneratedMessage.newGeneratedExtension(\n"
+        "    $scope$.getDescriptor().getExtensions().get($index$),\n"
+        "    $type$.class);\n");
+    }
   } else {
     if (descriptor_->is_repeated()) {
       printer->Print(vars,
-        "$scope$.$name$.internalInitRepeated(\n"
-        "    $extendee$.getDefaultInstance(),\n"
-        "    $prototype$,\n"
-        "    $enum_map$,\n"
-        "    $number$,\n"
-        "    com.google.protobuf.WireFormat.FieldType.$type_constant$,\n"
-        "    $packed$);\n");
+        "$scope$.$name$ =\n"
+        "  com.google.protobuf.GeneratedMessageLite\n"
+        "    .newRepeatedGeneratedExtension(\n"
+        "      $extendee$.getDefaultInstance(),\n"
+        "      $prototype$,\n"
+        "      $enum_map$,\n"
+        "      $number$,\n"
+        "      com.google.protobuf.WireFormat.FieldType.$type_constant$,\n"
+        "      $packed$);\n");
     } else {
       printer->Print(vars,
-        "$scope$.$name$.internalInitSingular(\n"
-        "    $extendee$.getDefaultInstance(),\n"
-        "    $default$,\n"
-        "    $prototype$,\n"
-        "    $enum_map$,\n"
-        "    $number$,\n"
-        "    com.google.protobuf.WireFormat.FieldType.$type_constant$);\n");
+        "$scope$.$name$ =\n"
+        "  com.google.protobuf.GeneratedMessageLite\n"
+        "    .newGeneratedExtension(\n"
+        "      $extendee$.getDefaultInstance(),\n"
+        "      $default$,\n"
+        "      $prototype$,\n"
+        "      $enum_map$,\n"
+        "      $number$,\n"
+        "      com.google.protobuf.WireFormat.FieldType.$type_constant$);\n");
     }
   }
 }
@@ -198,4 +208,5 @@ void ExtensionGenerator::GenerateRegistrationCode(io::Printer* printer) {
 }  // namespace java
 }  // namespace compiler
 }  // namespace protobuf
+
 }  // namespace google

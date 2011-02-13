@@ -3948,9 +3948,6 @@ TEST_F(DatabaseBackedPoolTest, DoesntFallbackOnWrongType) {
   EXPECT_EQ(0, call_counter.call_count_);
 }
 
-// ===================================================================
-
-
 }  // namespace descriptor_unittest
 }  // namespace protobuf
 }  // namespace google
