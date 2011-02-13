@@ -12,7 +12,7 @@ Homepage: http://code.google.com/p/protobuf/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/protobuf.git
 Vcs-Git: git://git.debian.org/git/collab-maint/protobuf.git
 
-Package: libprotobuf6
+Package: libprotobuf7
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: protocol buffers C++ library
@@ -29,7 +29,7 @@ Description: protocol buffers C++ library
  .
  This package contains the runtime library needed for C++ applications.
 
-Package: libprotobuf-lite6
+Package: libprotobuf-lite7
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: protocol buffers C++ library (lite version)
@@ -51,7 +51,7 @@ Package: libprotobuf-dev
 Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends},
- libprotobuf6 (= ${binary:Version}), libprotobuf-lite6 (= ${binary:Version})
+ libprotobuf7 (= ${binary:Version}), libprotobuf-lite7 (= ${binary:Version})
 Description: protocol buffers C++ library (development files)
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
@@ -67,7 +67,7 @@ Description: protocol buffers C++ library (development files)
  This package contains the development headers and static libraries needed for
  writing C++ applications.
 
-Package: libprotoc6
+Package: libprotoc7
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: protocol buffers compiler library
@@ -89,7 +89,7 @@ Package: libprotoc-dev
 Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends},
- libprotoc6 (= ${binary:Version}), libprotobuf-dev (= ${binary:Version})
+ libprotoc7 (= ${binary:Version}), libprotobuf-dev (= ${binary:Version})
 Replaces: libprotobuf-dev (<< 2.1.0)
 Breaks: libprotobuf-dev (<< 2.1.0)
 Description: protocol buffers compiler library (development files)
@@ -109,7 +109,7 @@ Description: protocol buffers compiler library (development files)
 
 Package: protobuf-compiler
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc6 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libprotoc7 (= ${binary:Version})
 Description: compiler for protocol buffer definition files
  Protocol buffers are a flexible, efficient, automated mechanism for
  serializing structured data - similar to XML, but smaller, faster, and
