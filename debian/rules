@@ -66,6 +66,19 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	$(MAKE) $(PAROPTS) check
 endif
 
+	# python bindings
+	cd python && \
+	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python setup.py build
+
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	# run tests via pure-python
+	cd python && \
+	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python setup.py test
+	# run tests via the CPP implementation
+	cd python && \
+	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python setup.py test
+endif
+
 	# build the protoc manpage
 	xmlto man debian/protoc.xml
 
@@ -73,13 +86,6 @@ endif
 
 build-indep: build-indep-stamp
 build-indep-stamp: build-arch-stamp
-
-	# python bindings
-	cd python && python setup.py build
-
-ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	cd python && python setup.py test
-endif
 
 	# java bindings
 	# this code mimics mvn package. This should be changed when maven is supported by debian.
@@ -114,13 +120,6 @@ install-indep: build-indep
 	dh_prep -i
 	dh_installdirs -i
 
-	# python bindings
-	cd python && \
-		python setup.py install --no-compile \
-			--root=$(CURDIR)/debian/python-protobuf ; \
-		find $(CURDIR)/debian/python-protobuf -name 'protobuf-*-nspkg.pth' -print0 | \
-			xargs -r0 rm -f
-
 	dh_install -i
 
 
@@ -145,6 +144,16 @@ install-arch: build-arch
 	# remove compiler headers from libprotobuf-dev
 	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/include/google/protobuf/compiler
 
+	# python bindings
+	cd python && PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp \
+	  python setup.py install --no-compile \
+	    --root=$(CURDIR)/debian/python-protobuf ; \
+	  find $(CURDIR)/debian/python-protobuf \
+	    -name 'protobuf-*-nspkg.pth' -print0 | \
+	  xargs -r0 rm -f
+	# cleanup RPATH from built bindings
+	find $(CURDIR)/debian/python-protobuf -name '*.so' -print0 | \
+	  xargs -r0 chrpath -d
 
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
@@ -160,9 +169,7 @@ binary-common:
 	dh_strip
 	dh_compress
 	dh_fixperms
-ifeq ($(DH_OPTIONS),-i)
 	dh_pysupport
-endif
 	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
