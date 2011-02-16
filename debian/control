@@ -147,6 +147,10 @@ Description: Python bindings for protocol buffers
  need the protoc tool (in the protobuf-compiler package) to compile your
  definition to Python classes, and then the modules in this package will allow
  you to use those classes in your programs.
+ .
+ This package contains both the traditional Python-based
+ implementation and the new C++-based one, and you can select at
+ runtime between the two.
 
 Package: libprotobuf-java
 Architecture: all

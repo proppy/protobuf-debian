@@ -4,8 +4,9 @@ protobuf (2.4.0a-1) unstable; urgency=low
   * Fix "Missing depends on zlib1g-dev", thanks Fernando Tarlá Cardoso Lemos
     (Closes: #608670)
   * Re-enable parallel builds, but only for the C++ sources/tests
+  * Enable the C++-based implementation for the Python bindings
 
- -- Iustin Pop <iustin@debian.org>  Sun, 13 Feb 2011 23:58:28 +0100
+ -- Iustin Pop <iustin@debian.org>  Wed, 16 Feb 2011 21:24:42 +0100
 
 protobuf (2.3.0-4) unstable; urgency=low
 
