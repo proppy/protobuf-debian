@@ -1,6 +1,6 @@
-protobuf (2.4.0a-1) unstable; urgency=low
+protobuf (2.4.0a-1) experimental; urgency=low
 
-  * New upstream version
+  * New upstream version, uploading to experimental due to Python changes
   * Fix "Missing depends on zlib1g-dev", thanks Fernando Tarlá Cardoso Lemos
     (Closes: #608670)
   * Re-enable parallel builds, but only for the C++ sources/tests
