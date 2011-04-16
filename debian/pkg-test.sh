@@ -12,7 +12,7 @@ test -f protobuf-compiler_*.deb || \
 
 echo "*** Installing dependencies (hardcoded list)"
 
-apt-get install -y openjdk-6-jdk python python-support pkg-config zlibg1-dev
+apt-get install -y openjdk-6-jdk python python-support pkg-config zlib1g-dev
 
 echo "*** Installing packages"
 
