@@ -112,6 +112,7 @@ clean:
 	$(SHELL) /usr/bin/ant -f debian/java-build.xml clean || true
 
 	dh_clean
+	mh_clean
 
 install: install-indep install-arch
 install-indep: build-indep
@@ -121,7 +122,7 @@ install-indep: build-indep
 	dh_installdirs -i
 
 	dh_install -i
-
+	mh_install
 
 install-arch: build-arch
 	dh_testdir
