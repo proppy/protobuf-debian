@@ -89,7 +89,7 @@ build-indep-stamp: build-arch-stamp
 
 	# java bindings
 	# this code mimics mvn package. This should be changed when maven is supported by debian.
-	$(SHELL) ./debian/ant-wrapper -f debian/java-build.xml jar
+	$(SHELL) /usr/bin/ant -f debian/java-build.xml jar
 
 	touch $@
 
@@ -109,7 +109,7 @@ clean:
 	rm -rf python/protobuf.egg-info
 
 	# Java bindings cleanups
-	$(SHELL) ./debian/ant-wrapper -f debian/java-build.xml clean || true
+	$(SHELL) /usr/bin/ant -f debian/java-build.xml clean || true
 
 	dh_clean
 
