@@ -146,6 +146,9 @@ install-arch: build-arch
 	# remove compiler headers from libprotobuf-dev
 	rm -rf $(CURDIR)/debian/libprotobuf-dev/usr/include/google/protobuf/compiler
 
+	# remove .la files, as no other library depends on us
+	find $(CURDIR)/debian -name '*.la' -print0|xargs -r0 rm -f
+
 	# python bindings
 	cd python && PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp \
 	  python setup.py install --no-compile \
