@@ -20,7 +20,7 @@ dpkg -i *.deb
 
 cd /usr/share/doc/protobuf-compiler/examples
 
-export CLASSPATH=/usr/share/java/protobuf.jar
+export CLASSPATH=/usr/share/java/protobuf-java.jar
 
 echo "*** Building example programs"
 
