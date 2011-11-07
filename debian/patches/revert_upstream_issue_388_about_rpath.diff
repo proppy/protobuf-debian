@@ -1,3 +1,7 @@
+Description: workaround issue 271 upstream
+Author: Thomas Koch <thomas@koch.ro
+Bug: http://code.google.com/p/protobuf/issues/detail?id=271
+Last-Update: 2011-11-07
 --- a/python/README.txt
 +++ b/python/README.txt
 @@ -63,9 +63,9 @@
