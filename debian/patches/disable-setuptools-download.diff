@@ -8,7 +8,7 @@ Forwarded: not-needed
 Last-Update: 2010-08-18
 --- a/python/ez_setup.py
 +++ b/python/ez_setup.py
-@@ -91,9 +91,10 @@
+@@ -99,9 +99,10 @@
      """
      was_imported = 'pkg_resources' in sys.modules or 'setuptools' in sys.modules
      def do_download():
