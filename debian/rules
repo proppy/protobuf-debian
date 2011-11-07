@@ -76,6 +76,7 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python setup.py test
 	# run tests via the CPP implementation
 	cd python && \
+	  LD_LIBRARY_PATH="../src/.libs:$LD_LIBRARY_PATH" \
 	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python setup.py test
 endif
 

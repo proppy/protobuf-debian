@@ -40,13 +40,3 @@
  
    setup(name = 'protobuf',
          version = '2.4.1',
---- a/debian/rules
-+++ b/debian/rules
-@@ -76,6 +76,7 @@
- 	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python setup.py test
- 	# run tests via the CPP implementation
- 	cd python && \
-+      LD_LIBRARY_PATH="../src/.libs:$LD_LIBRARY_PATH" \
- 	  PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python setup.py test
- endif
- 
