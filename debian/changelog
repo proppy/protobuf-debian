@@ -10,8 +10,9 @@ protobuf (2.4.1-1) unstable; urgency=low
   * Update section based on override disparities
   * Imported Upstream version 2.4.1
   * Modify debian/rules directly not via patches
+  * Drop .la files per ReleaseGoals/LAFileRemoval
 
- -- Iustin Pop <iustin@debian.org>  Tue, 08 Nov 2011 07:20:46 +0900
+ -- Iustin Pop <iustin@debian.org>  Tue, 08 Nov 2011 07:56:58 +0900
 
 protobuf (2.4.0a-2) unstable; urgency=low
 
