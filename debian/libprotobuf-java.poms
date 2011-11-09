@@ -1,1 +1,1 @@
-java/pom.xml --artifact=java/target/protobuf.jar --java-lib
+java/pom.xml --artifact=java/target/protobuf.jar --java-lib --no-parent
