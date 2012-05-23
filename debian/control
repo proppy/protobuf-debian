@@ -1,6 +1,6 @@
 Source: protobuf
 Section: devel
-Priority: extra
+Priority: optional
 Maintainer: Iustin Pop <iustin@debian.org>
 Uploaders: Robert S. Edmonds <edmonds@debian.org>
 Build-Depends: dpkg-dev (>=1.16.1~), debhelper (>= 7),
