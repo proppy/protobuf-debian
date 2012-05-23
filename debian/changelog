@@ -1,9 +1,21 @@
-protobuf (2.4.1-1.1) unstable; urgency=low
+protobuf (2.4.1-2) unstable; urgency=low
 
-  * Non maintainer upload
+  [ Matthias Klose ]
   * Work around build failure with GCC 4.7. Closes: #672094.
 
- -- Matthias Klose <doko@debian.org>  Mon, 21 May 2012 01:37:11 +0000
+  [ Jakub Adam ]
+  * Install libprotobuf-java without reference to parent POM
+    (Closes: #648672)
+
+  [ Iustin Pop ]
+  * libprotobuf-java:
+    - remove dependency on default-jre (Closes: #653115)
+    - revert the jar name change introduced in 2.4.1, due to the use of
+      maven helper (Closes: #648850)
+  * Bump priority of packages from extra to optional (Closes: #664744)
+  * Enable hardening flags (Closes: #673675)
+
+ -- Iustin Pop <iustin@debian.org>  Thu, 24 May 2012 01:27:26 +0200
 
 protobuf (2.4.1-1) unstable; urgency=low
 
