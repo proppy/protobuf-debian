@@ -16,8 +16,11 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
-CFLAGS ?= $(shell dpkg-buildflags --get CFLAGS) -Wall
-CXXFLAGS ?= $(shell dpkg-buildflags --get CXXFLAGS) -Wall -fpermissive
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+CFLAGS += -Wall
+CXXFLAGS += -Wall -fpermissive
 
 # Renesas SH(sh4) need -mieee option.
 # If this option is not effective, NaN test failed.
@@ -41,7 +44,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" dh_auto_configure
+	dh_auto_configure
 	touch configure-stamp
 
 

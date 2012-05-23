@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Iustin Pop <iustin@debian.org>
 Uploaders: Robert S. Edmonds <edmonds@debian.org>
-Build-Depends: debhelper (>= 7),
+Build-Depends: dpkg-dev (>=1.16.1~), debhelper (>= 7),
  python (>= 2.3.5-11), python-dev (>= 2.3.5-11),
  python-setuptools (>= 0.6c9), xmlto, ant, zlib1g-dev,
  default-jdk, unzip, python-support (>= 0.6), chrpath,
