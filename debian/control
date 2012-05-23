@@ -159,7 +159,7 @@ Description: Python bindings for protocol buffers
 
 Package: libprotobuf-java
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, default-jre | java5-runtime
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: protobuf-compiler
 Section: java
 Description: Java bindings for protocol buffers
