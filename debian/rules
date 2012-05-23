@@ -16,15 +16,8 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
-# DEB_BUILD_OPTIONS handling - is this really needed since dpkg-dev 1.14.17?
-# note that the strip option is handled directly by dh_strip
-CFLAGS = -Wall -g
-
-ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
-    CFLAGS += -O0
-else
-    CFLAGS += -O2
-endif
+CFLAGS ?= $(shell dpkg-buildflags --get CFLAGS) -Wall
+CXXFLAGS ?= $(shell dpkg-buildflags --get CXXFLAGS) -Wall -fpermissive
 
 # Renesas SH(sh4) need -mieee option.
 # If this option is not effective, NaN test failed.
@@ -48,7 +41,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	dh_auto_configure
+	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" dh_auto_configure
 	touch configure-stamp
 
 

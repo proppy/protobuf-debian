@@ -1,3 +1,10 @@
+protobuf (2.4.1-1.1) unstable; urgency=low
+
+  * Non maintainer upload
+  * Work around build failure with GCC 4.7. Closes: #672094.
+
+ -- Matthias Klose <doko@debian.org>  Mon, 21 May 2012 01:37:11 +0000
+
 protobuf (2.4.1-1) unstable; urgency=low
 
   [ Thomas Koch ]
