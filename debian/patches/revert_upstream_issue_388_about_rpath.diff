@@ -4,7 +4,7 @@ Bug: http://code.google.com/p/protobuf/issues/detail?id=271
 Last-Update: 2011-11-07
 --- a/python/README.txt
 +++ b/python/README.txt
-@@ -63,9 +63,9 @@
+@@ -64,9 +64,9 @@
       $ python setup.py install
  
     This step may require superuser privileges.
@@ -17,7 +17,7 @@ Last-Update: 2011-11-07
  
  Usage
  =====
-@@ -83,10 +83,7 @@
+@@ -84,10 +84,7 @@
  The C++ implementation for Python messages is built as a Python extension to
  improve the overall protobuf Python performance.
  
@@ -31,7 +31,7 @@ Last-Update: 2011-11-07
  
 --- a/python/setup.py
 +++ b/python/setup.py
-@@ -114,8 +114,10 @@
+@@ -152,8 +152,10 @@
          [ "google/protobuf/pyext/python_descriptor.cc",
            "google/protobuf/pyext/python_protobuf.cc",
            "google/protobuf/pyext/python-proto2.cc" ],
@@ -43,4 +43,4 @@ Last-Update: 2011-11-07
 +        library_dirs = [ "../src/.libs" ]))
  
    setup(name = 'protobuf',
-         version = '2.4.1',
+         version = '2.5.0',

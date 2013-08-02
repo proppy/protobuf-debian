@@ -3,7 +3,7 @@ Description: disable optimization of a given function on arm (bug in gcc
 Author: Iustin Pop <iustin@debian.org>
 --- a/src/google/protobuf/wire_format_lite.h
 +++ b/src/google/protobuf/wire_format_lite.h
-@@ -222,7 +222,11 @@
+@@ -220,7 +220,11 @@
    static uint32 ZigZagEncode32(int32 n);
    static int32  ZigZagDecode32(uint32 n);
    static uint64 ZigZagEncode64(int64 n);
